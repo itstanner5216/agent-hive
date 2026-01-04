@@ -1,0 +1,12 @@
+{
+  "name": "agent-hive",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Context-Driven Development for AI coding assistants",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "dev": "npm run dev --workspaces"
+  },
+  "license": "MIT"
+}

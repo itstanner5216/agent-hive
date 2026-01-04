@@ -1,0 +1,40 @@
+{
+  "name": "vscode-hive",
+  "displayName": "Hive",
+  "description": "Context-Driven Development UI",
+  "version": "0.1.0",
+  "engines": { "vscode": "^1.80.0" },
+  "categories": ["Other"],
+  "activationEvents": ["workspaceContains:.hive"],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [{
+        "id": "hive",
+        "title": "Hive",
+        "icon": "resources/icons/hive.svg"
+      }]
+    },
+    "views": {
+      "hive": [{
+        "id": "hive.features",
+        "name": "Features"
+      }]
+    },
+    "commands": [
+      { "command": "hive.newFeature", "title": "Hive: New Feature" },
+      { "command": "hive.refresh", "title": "Hive: Refresh" },
+      { "command": "hive.openInOpenCode", "title": "Open in OpenCode" },
+      { "command": "hive.openInClaude", "title": "Open in Claude Code" },
+      { "command": "hive.viewReport", "title": "View Report" }
+    ]
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "typescript": "^5.0.0"
+  }
+}

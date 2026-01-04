@@ -1,0 +1,10 @@
+---
+name: step-log
+trigger: on todo complete
+---
+
+Log progress for current step.
+
+Write ONE line: "[todo] - [brief summary]"
+
+Use `hive_step_update` with summary parameter.

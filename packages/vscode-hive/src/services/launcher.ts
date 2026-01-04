@@ -121,57 +121,29 @@ export class Launcher {
     terminal.show()
   }
 
-  private createOpencodeSession(title: string, prompt: string): Promise<string | null> {
+  private async createOpencodeSession(title: string, prompt: string): Promise<string | null> {
     return new Promise((resolve) => {
-      const args = ['run', '--title', title, '--format', 'json', prompt]
-      const proc = spawn('opencode', args, { cwd: this.workspaceRoot })
-      let resolved = false
-
-      const cleanup = (sessionId: string | null) => {
-        if (resolved) return
-        resolved = true
-        proc.kill()
-        resolve(sessionId)
-      }
-
-      const SESSION_TIMEOUT_MS = 30000
-      const timeout = setTimeout(() => {
-        console.error('opencode session creation timed out')
-        cleanup(null)
-      }, SESSION_TIMEOUT_MS)
-
-      proc.stdout.on('data', (data) => {
-        const lines = data.toString().split('\n')
-        for (const line of lines) {
-          if (!line.trim()) continue
-          try {
-            const event = JSON.parse(line)
-            if (event.type === 'session.created' || event.session?.id) {
-              clearTimeout(timeout)
-              cleanup(event.session?.id || event.id)
-              return
-            }
-          } catch {
-            continue
-          }
+      const scriptPath = path.join(__dirname, '..', '..', 'scripts', 'create-session.mjs')
+      const proc = spawn('node', [scriptPath, title, prompt], { cwd: this.workspaceRoot })
+      
+      let stdout = ''
+      let stderr = ''
+      
+      proc.stdout.on('data', (data) => { stdout += data.toString() })
+      proc.stderr.on('data', (data) => { stderr += data.toString() })
+      
+      proc.on('close', (code) => {
+        if (code === 0 && stdout.trim()) {
+          resolve(stdout.trim())
+        } else {
+          console.error('create-session failed:', stderr)
+          resolve(null)
         }
       })
-
-      proc.stderr.on('data', (data) => {
-        console.error('opencode stderr:', data.toString())
-      })
-
-      proc.on('close', () => {
-        clearTimeout(timeout)
-        if (!resolved) {
-          cleanup(null)
-        }
-      })
-
+      
       proc.on('error', (err) => {
-        console.error('opencode run failed:', err)
-        clearTimeout(timeout)
-        cleanup(null)
+        console.error('create-session spawn error:', err)
+        resolve(null)
       })
     })
   }

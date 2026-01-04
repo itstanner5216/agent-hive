@@ -36,16 +36,31 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.activate = activate;
 exports.deactivate = deactivate;
 const vscode = __importStar(require("vscode"));
+const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
 const services_1 = require("./services");
 const providers_1 = require("./providers");
+function findHiveRoot(startPath) {
+    let current = startPath;
+    while (current !== path.dirname(current)) {
+        if (fs.existsSync(path.join(current, '.hive'))) {
+            return current;
+        }
+        current = path.dirname(current);
+    }
+    return null;
+}
 function activate(context) {
-    const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    if (!workspaceFolder)
+        return;
+    const workspaceRoot = findHiveRoot(workspaceFolder);
     if (!workspaceRoot)
         return;
     const hiveService = new services_1.HiveService(workspaceRoot);
     if (!hiveService.exists())
         return;
-    const launcher = new services_1.Launcher();
+    const launcher = new services_1.Launcher(workspaceRoot);
     const sidebarProvider = new providers_1.HiveSidebarProvider(hiveService);
     vscode.window.registerTreeDataProvider('hive.features', sidebarProvider);
     const panelProvider = new providers_1.HivePanelProvider(context.extensionUri, hiveService);
@@ -64,16 +79,15 @@ function activate(context) {
             terminal.sendText(`opencode --command "/hive new ${name}"`);
             terminal.show();
         }
-    }), vscode.commands.registerCommand('hive.openInOpenCode', (feature, step) => {
-        const steps = hiveService.getSteps(feature);
-        const stepData = steps.find(s => `${s.order}-${s.name}` === step);
-        const sessionId = stepData?.sessions.opencode?.sessionId;
-        launcher.open('opencode', feature, step, sessionId);
-    }), vscode.commands.registerCommand('hive.openInClaude', (feature, step) => {
-        const steps = hiveService.getSteps(feature);
-        const stepData = steps.find(s => `${s.order}-${s.name}` === step);
-        const sessionId = stepData?.sessions.claude?.sessionId;
-        launcher.open('claude', feature, step, sessionId);
+    }), vscode.commands.registerCommand('hive.openStepInOpenCode', (featureName, stepName, sessionId) => {
+        launcher.openStep('opencode', featureName, stepName, sessionId);
+    }), vscode.commands.registerCommand('hive.createSession', async (item) => {
+        if (item?.featureName && item?.stepFolder) {
+            await launcher.createSession(item.featureName, item.stepFolder);
+            sidebarProvider.refresh();
+        }
+    }), vscode.commands.registerCommand('hive.openFeatureInOpenCode', (featureName) => {
+        launcher.openFeature('opencode', featureName);
     }), vscode.commands.registerCommand('hive.viewReport', (feature) => {
         const report = hiveService.getReport(feature);
         if (report) {
@@ -83,11 +97,21 @@ function activate(context) {
         else {
             vscode.window.showInformationMessage('No report generated yet');
         }
-    }), vscode.commands.registerCommand('hive.openFolder', (feature, folder) => {
-        const folderPath = vscode.Uri.file(`${workspaceRoot}/.hive/features/${feature}/${folder}`);
-        vscode.commands.executeCommand('revealInExplorer', folderPath);
     }), vscode.commands.registerCommand('hive.showFeature', (featureName) => {
         panelProvider.showFeature(featureName);
+    }), vscode.commands.registerCommand('hive.openInOpenCode', (item) => {
+        if (item?.featureName && item?.stepFolder) {
+            launcher.openStep('opencode', item.featureName, item.stepFolder, item.sessionId);
+        }
+    }), vscode.commands.registerCommand('hive.openFile', (filePath) => {
+        if (filePath) {
+            vscode.workspace.openTextDocument(filePath)
+                .then(doc => vscode.window.showTextDocument(doc));
+        }
+    }), vscode.commands.registerCommand('hive.viewFeatureDetails', (item) => {
+        if (item?.featureName) {
+            panelProvider.showFeature(item.featureName);
+        }
     }));
 }
 function deactivate() { }

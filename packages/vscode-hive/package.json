@@ -5,45 +5,107 @@
   "version": "0.2.0",
   "publisher": "tctinh",
   "license": "CC-BY-NC-4.0",
-  "engines": { "vscode": "^1.80.0" },
-  "categories": ["Other"],
-  "activationEvents": ["workspaceContains:.hive"],
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "workspaceContains:.hive"
+  ],
   "main": "./dist/extension.js",
-  
   "contributes": {
     "viewsContainers": {
-      "activitybar": [{
-        "id": "hive",
-        "title": "Hive",
-        "icon": "resources/icons/hive.svg"
-      }]
+      "activitybar": [
+        {
+          "id": "hive",
+          "title": "Hive",
+          "icon": "resources/icons/hive.svg"
+        }
+      ]
     },
     "views": {
-      "hive": [{
-        "id": "hive.features",
-        "name": "Features"
-      }]
+      "hive": [
+        {
+          "id": "hive.features",
+          "name": "Features"
+        }
+      ]
     },
     "commands": [
-      { "command": "hive.newFeature", "title": "Hive: New Feature", "icon": "$(add)" },
-      { "command": "hive.refresh", "title": "Hive: Refresh", "icon": "$(refresh)" },
-      { "command": "hive.openInOpenCode", "title": "Open in OpenCode", "icon": "$(terminal)" },
-      { "command": "hive.createSession", "title": "Create Session", "icon": "$(add)" },
-      { "command": "hive.viewReport", "title": "View Report", "icon": "$(book)" },
-      { "command": "hive.openFile", "title": "Open File" },
-      { "command": "hive.viewFeatureDetails", "title": "View Details", "icon": "$(info)" }
+      {
+        "command": "hive.newFeature",
+        "title": "Hive: New Feature",
+        "icon": "$(add)"
+      },
+      {
+        "command": "hive.refresh",
+        "title": "Hive: Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "hive.openInOpenCode",
+        "title": "Open in OpenCode",
+        "icon": "$(terminal)"
+      },
+      {
+        "command": "hive.createSession",
+        "title": "Create Session",
+        "icon": "$(add)"
+      },
+      {
+        "command": "hive.viewReport",
+        "title": "View Report",
+        "icon": "$(book)"
+      },
+      {
+        "command": "hive.openFile",
+        "title": "Open File"
+      },
+      {
+        "command": "hive.viewFeatureDetails",
+        "title": "View Details",
+        "icon": "$(info)"
+      }
     ],
     "menus": {
       "view/title": [
-        { "command": "hive.newFeature", "when": "view == hive.features", "group": "navigation" },
-        { "command": "hive.refresh", "when": "view == hive.features", "group": "navigation" }
+        {
+          "command": "hive.newFeature",
+          "when": "view == hive.features",
+          "group": "navigation"
+        },
+        {
+          "command": "hive.refresh",
+          "when": "view == hive.features",
+          "group": "navigation"
+        }
       ],
       "view/item/context": [
-        { "command": "hive.viewFeatureDetails", "when": "viewItem == feature", "group": "inline" },
-        { "command": "hive.openInOpenCode", "when": "viewItem == step", "group": "inline" },
-        { "command": "hive.createSession", "when": "viewItem == stepNoSession", "group": "inline" },
-        { "command": "hive.viewReport", "when": "viewItem == feature" },
-        { "command": "hive.openFile", "when": "viewItem == file" }
+        {
+          "command": "hive.viewFeatureDetails",
+          "when": "viewItem == feature",
+          "group": "inline"
+        },
+        {
+          "command": "hive.openInOpenCode",
+          "when": "viewItem == step",
+          "group": "inline"
+        },
+        {
+          "command": "hive.createSession",
+          "when": "viewItem == stepNoSession",
+          "group": "inline"
+        },
+        {
+          "command": "hive.viewReport",
+          "when": "viewItem == feature"
+        },
+        {
+          "command": "hive.openFile",
+          "when": "viewItem == file"
+        }
       ]
     }
   },
@@ -54,5 +116,8 @@
   "devDependencies": {
     "@types/vscode": "^1.80.0",
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@opencode-ai/sdk": "^1.1.1"
   }
 }

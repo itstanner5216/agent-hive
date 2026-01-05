@@ -10,6 +10,7 @@ import { createWorktreeService, type WorktreeService, type DiffResult } from "./
 interface ExecutionInfo {
   worktreeBranch: string;
   worktreePath: string;
+  baseCommit: string;
   appliedAt?: string;
   canRevert: boolean;
 }
@@ -721,6 +722,7 @@ function createStepExecuteTool(directory: string, worktreeService: WorktreeServi
       status.execution = {
         worktreeBranch: worktree.branch,
         worktreePath: worktree.path,
+        baseCommit: worktree.commit,
         canRevert: false,
       };
       await writeJson(statusPath, status);
@@ -791,7 +793,7 @@ function createStepCompleteTool(directory: string, worktreeService: WorktreeServ
         status.execution.appliedAt = new Date().toISOString();
         status.execution.canRevert = true;
       }
-      await writeJson(statusPath, status);
+      await writeJson(statusPath, { ...status });
 
       return JSON.stringify({
         success: true,
@@ -1011,8 +1013,8 @@ ${completedSummaries}
 
 ### Instructions
 1. Execute ONLY this task
-2. When complete, call: hive_step_update(stepFolder: "${step.folder}", status: "done", summary: "...", sessionId: "<your-session-id>")
-3. If blocked, call with status: "blocked" and explain why
+2. When complete, call: hive_step_complete(stepFolder: "${step.folder}", summary: "...")
+3. If blocked, call: hive_step_update(stepFolder: "${step.folder}", status: "blocked", summary: "explain why")
 `,
       }));
       
@@ -1118,7 +1120,7 @@ When you need to modify an existing plan:
 
 1. Call \`hive_pickup(stepFolder?)\` - returns spec with context, marks in_progress
 2. Execute the task
-3. Call \`hive_step_update(stepFolder, status: "done", summary: "...")\`
+3. Call \`hive_step_complete(stepFolder, summary: "...")\` - generates diff and applies changes
 
 ---
 
@@ -1127,7 +1129,7 @@ When you need to modify an existing plan:
 - Steps with same \`order\` value run in parallel batches
 - Use \`background_task(agent: "general")\` for parallel dispatch
 - Each subagent receives: spec + requirements + decisions + prior summaries
-- Subagents MUST call \`hive_step_update\` when done
+- Subagents MUST call \`hive_step_complete\` when done (generates output.diff for revert)
 
 ---
 
@@ -1437,7 +1439,7 @@ const plugin: Plugin = async (ctx) => {
       done: {
         description: "Mark current step as complete",
         async run(args: string) {
-          return `Mark current in_progress step as done using hive_step_update with summary: "${args.trim() || "Completed"}"`;
+          return `Mark current in_progress step as done using hive_step_complete with summary: "${args.trim() || "Completed"}"`;
         },
       },
       report: {

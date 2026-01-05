@@ -199,6 +199,11 @@ class SessionTreeItem extends vscode.TreeItem {
     if (session.summary) {
       this.tooltip = session.summary
     }
+    this.command = {
+      command: 'hive.openSession',
+      title: 'Open in OpenCode',
+      arguments: [{ session }]
+    }
   }
 
   private parseAgentType(): string | undefined {

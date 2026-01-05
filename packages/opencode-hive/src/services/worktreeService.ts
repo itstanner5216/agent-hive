@@ -108,12 +108,26 @@ export class WorktreeService {
     }
   }
 
-  async getDiff(feature: string, step: string, baseBranch?: string): Promise<DiffResult> {
+  async getDiff(feature: string, step: string, baseCommit?: string): Promise<DiffResult> {
     const worktreePath = this.getWorktreePath(feature, step);
-    const base = baseBranch || "HEAD~1";
+    const statusPath = path.join(this.config.hiveDir, "features", feature, "steps", step, "status.json");
+    
+    let base = baseCommit;
+    if (!base) {
+      try {
+        const status = JSON.parse(await fs.readFile(statusPath, "utf-8"));
+        base = status.execution?.baseCommit;
+      } catch {}
+    }
+    
+    if (!base) {
+      base = "HEAD~1";
+    }
+    
     const worktreeGit = this.getGit(worktreePath);
 
     try {
+      await worktreeGit.raw(["add", "-A"]);
       const diffContent = await worktreeGit.diff([`${base}...HEAD`]);
       const stat = await worktreeGit.diff([`${base}...HEAD`, "--stat"]);
       const statLines = stat.split("\n").filter((l) => l.trim());

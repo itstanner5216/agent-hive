@@ -91,39 +91,5 @@ export function createFeatureTools(projectRoot: string) {
         };
       },
     },
-
-    hive_status: {
-      description: 'Get overview of active feature',
-      parameters: z.object({
-        _placeholder: z.boolean().describe('Placeholder. Always pass true.'),
-        name: z.string().optional(),
-      }),
-      execute: async ({ name }: { name?: string }) => {
-        const feature = name || featureService.getActive();
-        if (!feature) {
-          return { error: 'No active feature. Create one with hive_feature_create.' };
-        }
-        const info = featureService.getInfo(feature);
-        if (!info) {
-          return { error: `Feature '${name}' not found` };
-        }
-
-        const tasksByStatus = {
-          pending: info.tasks.filter((t: TaskInfo) => t.status === 'pending').length,
-          in_progress: info.tasks.filter((t: TaskInfo) => t.status === 'in_progress').length,
-          done: info.tasks.filter((t: TaskInfo) => t.status === 'done').length,
-          cancelled: info.tasks.filter((t: TaskInfo) => t.status === 'cancelled').length,
-        };
-
-        return {
-          feature: info.name,
-          status: info.status,
-          hasPlan: info.hasPlan,
-          commentCount: info.commentCount,
-          tasks: info.tasks,
-          taskSummary: tasksByStatus,
-        };
-      },
-    },
   };
 }

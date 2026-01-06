@@ -48,6 +48,20 @@ export class WorktreeService {
     return path.join(this.getWorktreesDir(), feature, step);
   }
 
+  private async getStepStatusPath(feature: string, step: string): Promise<string> {
+    const featurePath = path.join(this.config.hiveDir, "features", feature);
+    
+    // Check v2 structure first (tasks/)
+    const tasksPath = path.join(featurePath, "tasks", step, "status.json");
+    try {
+      await fs.access(tasksPath);
+      return tasksPath;
+    } catch {}
+    
+    // Fall back to v1 structure (execution/)
+    return path.join(featurePath, "execution", step, "status.json");
+  }
+
   private getBranchName(feature: string, step: string): string {
     return `hive/${feature}/${step}`;
   }
@@ -110,7 +124,7 @@ export class WorktreeService {
 
   async getDiff(feature: string, step: string, baseCommit?: string): Promise<DiffResult> {
     const worktreePath = this.getWorktreePath(feature, step);
-    const statusPath = path.join(this.config.hiveDir, "features", feature, "steps", step, "status.json");
+    const statusPath = await this.getStepStatusPath(feature, step);
     
     let base = baseCommit;
     if (!base) {

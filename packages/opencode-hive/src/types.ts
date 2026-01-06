@@ -1,137 +1,63 @@
-export interface ExecutionInfo {
-  worktreeBranch: string;
-  worktreePath: string;
-  baseCommit: string;
-  appliedAt?: string;
-  canRevert: boolean;
-}
+export type FeatureStatusType = 'planning' | 'approved' | 'executing' | 'completed';
 
-export interface SessionInfo {
-  sessionId: string;
-  lastActive: string;
-}
-
-export type StepStatusType = "pending" | "in_progress" | "done" | "blocked" | "reverted" | "failed" | "cancelled";
-
-export type TaskStatusType = StepStatusType;
-
-export interface StepStatus {
+export interface FeatureJson {
   name: string;
-  order: number;
-  status: StepStatusType;
+  status: FeatureStatusType;
+  ticket?: string;
+  sessionId?: string;
+  createdAt: string;
+  approvedAt?: string;
+  completedAt?: string;
+}
+
+export type TaskStatusType = 'pending' | 'in_progress' | 'done' | 'cancelled';
+export type TaskOrigin = 'plan' | 'manual';
+
+export interface TaskStatus {
+  status: TaskStatusType;
+  origin: TaskOrigin;
+  summary?: string;
   startedAt?: string;
   completedAt?: string;
-  summary?: string;
-  sessionId?: string;
-  sessionTitle?: string;
-  execution?: ExecutionInfo | null;
-  sessions?: {
-    opencode?: SessionInfo;
-  };
 }
 
-export type PlanStatusType = "draft" | "review" | "approved" | "locked";
-
-export interface PlanMetadata {
-  version: number;
-  status: PlanStatusType;
-  generatedAt: string;
-  lastUpdatedAt: string;
-  approvedAt: string | null;
-  approvedBy: "user" | null;
-}
-
-export interface PlanTask {
+export interface PlanComment {
   id: string;
-  order: number;
+  line: number;
+  body: string;
+  author: string;
+  timestamp: string;
+}
+
+export interface CommentsJson {
+  threads: PlanComment[];
+}
+
+export interface PlanReadResult {
+  content: string;
+  status: FeatureStatusType;
+  comments: PlanComment[];
+}
+
+export interface TasksSyncResult {
+  created: string[];
+  removed: string[];
+  kept: string[];
+  manual: string[];
+}
+
+export interface TaskInfo {
+  folder: string;
   name: string;
   status: TaskStatusType;
-  spec: string;
-  dependencies?: string[];
+  origin: TaskOrigin;
+  summary?: string;
 }
 
-export interface PlanDecision {
-  title: string;
-  file: string;
-  loggedAt?: string;
-}
-
-export interface PlanJson {
-  version: number;
-  status: PlanStatusType;
-  createdAt: string;
-  updatedAt: string;
-  summary: string;
-  tasks: PlanTask[];
-  decisions: PlanDecision[];
-}
-
-export interface FeatureStatus {
+export interface FeatureInfo {
   name: string;
-  createdAt: string;
-  status: "active" | "completed" | "archived";
-  plan?: PlanMetadata;
-}
-
-export interface ReportJson {
-  feature: string;
-  status: string;
-  steps: Array<{
-    folder: string;
-    name: string;
-    order: number;
-    status: string;
-    summary?: string;
-    execution?: ExecutionInfo | null;
-  }>;
-  decisions: string[];
-  generatedAt: string;
-}
-
-export interface StepWithFolder extends StepStatus {
-  folder: string;
-  spec?: string;
-}
-
-export interface BatchInfo {
-  order: number;
-  parallel: boolean;
-  steps: Array<{
-    folder: string;
-    name: string;
-    status: StepStatusType;
-  }>;
-}
-
-export interface FeatureListItem {
-  name: string;
-  status: string;
-  isActive: boolean;
-  stepsCount: number;
-  doneCount: number;
-}
-
-export interface StatusResponse {
-  feature: string;
-  featureStatus: string;
-  totalSteps: number;
-  completed: number;
-  batches: BatchInfo[];
-  nextPending?: string;
-  inProgress: string[];
-}
-
-export interface HiveDirectoryConfig {
-  directory: string;
-  hivePath: string;
-  featuresPath: string;
-}
-
-export interface StepExecutionContext {
-  featureName: string;
-  stepFolder: string;
-  stepName: string;
-  order: number;
-  worktreePath?: string;
-  branch?: string;
+  status: FeatureStatusType;
+  tasks: TaskInfo[];
+  hasPlan: boolean;
+  commentCount: number;
 }

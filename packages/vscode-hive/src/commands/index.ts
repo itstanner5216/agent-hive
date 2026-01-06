@@ -1,1 +1,0 @@
-export { viewDiff } from './viewDiff'

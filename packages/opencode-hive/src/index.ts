@@ -1,252 +1,316 @@
+import * as path from 'path';
 import { tool, type Plugin } from "@opencode-ai/plugin";
-import { createWorktreeService } from "./services/worktreeService.js";
+import { WorktreeService } from "./services/worktreeService.js";
 import { FeatureService } from "./services/featureService.js";
-import { StepService } from "./services/stepService.js";
-import { DecisionService } from "./services/decisionService.js";
-import { StatusService } from "./services/statusService.js";
-
-import { createFeatureCreateTool, createFeatureListTool, createFeatureSwitchTool, createFeatureCompleteTool } from "./tools/featureTools.js";
-import { createStepCreateTool, createStepReadTool, createStepUpdateTool, createStepDeleteTool, createStepListTool } from "./tools/stepTools.js";
-import { createDecisionLogTool, createDecisionListTool } from "./tools/decisionTools.js";
-import { createExecStartTool, createExecCompleteTool, createExecAbortTool, createExecRevertTool } from "./tools/execTools.js";
-import { createStatusTool } from "./tools/queryTools.js";
 import { PlanService } from "./services/planService.js";
-import { CommentService } from "./services/commentService.js";
-import { createPlanGenerateTool } from "./tools/planTools.js";
-import { createPlanReadTool, createPlanUpdateTool, createPlanApproveTool, createPlanLockTool } from "./tools/planManagementTools.js";
+import { TaskService } from "./services/taskService.js";
 
 const HIVE_SYSTEM_PROMPT = `
-## Hive - Feature Development & Execution System
+## Hive - Feature Development System
 
-You have hive tools for planning, tracking, and executing feature development.
+Plan-first development: Write plan → User reviews → Approve → Execute tasks
 
-### Available Tools (20 Core Tools)
+### Tools (13 total)
 
-#### Feature Domain (5 tools)
-| Tool | Purpose |
-|------|---------|
-| hive_feature_create | Create new feature, set as active |
-| hive_feature_list | List all features |
-| hive_feature_switch | Change active feature |
-| hive_feature_complete | Mark as completed (immutable) |
-| hive_status | Show active feature + all details |
+| Domain | Tools |
+|--------|-------|
+| Feature | hive_feature_create, hive_feature_list, hive_feature_switch, hive_feature_complete, hive_status |
+| Plan | hive_plan_write, hive_plan_read, hive_plan_approve |
+| Task | hive_tasks_sync, hive_task_create, hive_task_update |
+| Exec | hive_exec_start, hive_exec_complete, hive_exec_abort |
 
-#### Step Domain (5 tools)
-| Tool | Purpose |
-|------|---------|
-| hive_step_create | Create step |
-| hive_step_read | Read step details |
-| hive_step_update | Update spec/order/status/summary |
-| hive_step_delete | Delete step |
-| hive_step_list | List all steps |
+### Workflow
 
-#### Decision Domain (2 tools)
-| Tool | Purpose |
-|------|---------|
-| hive_decision_log | Log decision |
-| hive_decision_list | List all with full content |
+1. \`hive_feature_create(name)\` - Create feature
+2. \`hive_plan_write(content)\` - Write plan.md
+3. User adds comments in VSCode → \`hive_plan_read\` to see them
+4. Revise plan → User approves
+5. \`hive_tasks_sync()\` - Generate tasks from plan
+6. \`hive_exec_start(task)\` → work → \`hive_exec_complete(task, summary)\`
 
-#### Plan Domain (4 tools)
-| Tool | Purpose |
-|------|---------|
-| hive_plan_generate | Generate plan.md from steps/decisions |
-| hive_plan_read | Read plan content and comments |
-| hive_plan_update | Update plan with comment responses |
-| hive_plan_approve | Approve plan for execution |
+### Plan Format
 
-#### Execution Domain (4 tools)
-| Tool | Purpose |
-|------|---------|
-| hive_exec_start | Create worktree, begin work (requires approved plan) |
-| hive_exec_complete | Apply changes, mark done |
-| hive_exec_abort | Abandon worktree, reset step |
-| hive_exec_revert | Revert completed step |
+\`\`\`markdown
+# Feature Name
 
----
+## Overview
+What we're building and why.
 
-### Workflow: Planning
+## Tasks
 
-1. Call \`hive_feature_create(name, ticket)\` to start
-2. Call \`hive_decision_log(title, content)\` for each design choice
-3. Call \`hive_step_create(name, order, spec)\` for each step
-4. Call \`hive_plan_generate\` to create plan.md
-5. Wait for user approval before execution
+### 1. Task Name
+Description of what to do.
 
-### Workflow: Plan Revision (when user requests revision)
+### 2. Another Task
+Description.
+\`\`\`
 
-1. Call \`hive_plan_read(includeComments: true)\`
-2. For each unresolved comment:
-   - Read any cited files with \`@cite:\` references
-   - Determine appropriate action:
-     - \`addressed\`: Made the requested change
-     - \`rejected\`: Explain why change wasn't made
-     - \`deferred\`: Will address in future step
-3. Generate updated plan content addressing feedback
-4. Call \`hive_plan_update\` with new content and comment responses
-5. Inform user: "Plan updated to version {N}. Please review."
-
-### Comment Response Format
-
-When responding to comments, be specific:
-- ✅ "Updated file paths to use existing src/lib/auth/"
-- ✅ "Removed step 01-password-utils, will import from src/utils/crypto.ts"
-- ❌ "Fixed" (too vague)
-- ❌ "Will do" (no action specified)
-
-### Workflow: Execution
-
-1. Ensure plan is approved (status = 'approved')
-2. Call \`hive_exec_start(stepFolder)\` to create worktree
-3. Work in the returned worktree path
-4. Call \`hive_exec_complete(stepFolder, summary)\` to finish
-
-### Workflow: Recovery
-
-- Abandon: \`hive_exec_abort(stepFolder)\` - discard work
-- Revert: \`hive_exec_revert(stepFolder)\` - undo completed changes
-
-### Parallelism Rules
-
-- Steps with same \`order\` value run in parallel batches
-- Check \`hive_status\` batches to see parallelization
-
----
-
-### Feature Lifecycle
-
-PLANNING → REVIEW → APPROVED → EXECUTION → COMPLETED (immutable)
-
-Plan must be approved before execution can begin.
-Once completed, features are read-only. Create a new feature for changes.
+\`hive_tasks_sync\` parses \`### N. Task Name\` headers.
 `;
 
-const getHiveContextForCompaction = async (
-  featureService: FeatureService,
-  stepService: StepService
-): Promise<string> => {
-  const activeFeature = await featureService.getActiveFeature();
-  if (!activeFeature) {
-    return "";
-  }
-
-  const { name, feature } = activeFeature;
-  const steps = await stepService.list(name);
-  const inProgress = steps.filter(s => s.status === "in_progress");
-  const pending = steps.filter(s => s.status === "pending");
-  const completed = steps.filter(s => s.status === "done");
-
-  let context = `## Hive Feature Context (PRESERVE THIS)\n\n`;
-  context += `**Active Feature**: ${name} (${feature.status})\n`;
-  context += `**Progress**: ${completed.length}/${steps.length} steps completed\n\n`;
-
-  if (inProgress.length > 0) {
-    context += `**Currently In Progress**:\n`;
-    for (const step of inProgress) {
-      context += `- ${step.folder}: ${step.name}\n`;
-      if (step.execution?.worktreePath) {
-        context += `  Worktree: ${step.execution.worktreePath}\n`;
-      }
-    }
-    context += `\n`;
-  }
-
-  if (pending.length > 0) {
-    context += `**Next Pending Steps**:\n`;
-    for (const step of pending.slice(0, 3)) {
-      context += `- ${step.folder}: ${step.name} (order ${step.order})\n`;
-    }
-    if (pending.length > 3) {
-      context += `- ... and ${pending.length - 3} more\n`;
-    }
-    context += `\n`;
-  }
-
-  context += `**IMPORTANT**: Call \`hive_status\` to see full feature state before continuing work.\n`;
-
-  return context;
+type ToolContext = {
+  sessionID: string;
+  messageID: string;
+  agent: string;
+  abort: AbortSignal;
 };
 
 const plugin: Plugin = async (ctx) => {
   const { directory } = ctx;
 
-  const worktreeService = createWorktreeService(directory);
   const featureService = new FeatureService(directory);
-  const stepService = new StepService(directory, featureService);
-  const decisionService = new DecisionService(directory, featureService);
+  const planService = new PlanService(directory);
+  const taskService = new TaskService(directory);
+  const worktreeService = new WorktreeService({
+    baseDir: directory,
+    hiveDir: path.join(directory, '.hive'),
+  });
 
-  (featureService as any).stepService = stepService;
-  (featureService as any).decisionService = decisionService;
-
-  const statusService = new StatusService(featureService, stepService, decisionService);
-  const planService = new PlanService(directory, featureService);
-  const commentService = new CommentService(directory);
+  const captureSession = (toolContext: unknown) => {
+    const activeFeature = featureService.getActive();
+    if (!activeFeature) return;
+    
+    const ctx = toolContext as ToolContext;
+    if (ctx?.sessionID) {
+      const currentSession = featureService.getSession(activeFeature);
+      if (currentSession !== ctx.sessionID) {
+        featureService.setSession(activeFeature, ctx.sessionID);
+      }
+    }
+  };
 
   return {
     "experimental.chat.system.transform": async (_input: unknown, output: { system: string[] }) => {
       output.system.push(HIVE_SYSTEM_PROMPT);
 
-      const activeFeature = await featureService.getActiveFeature();
+      const activeFeature = featureService.getActive();
       if (activeFeature) {
-        const { name, feature } = activeFeature;
-        const steps = await stepService.list(name);
-        const inProgress = steps.filter(s => s.status === "in_progress");
-        const pending = steps.filter(s => s.status === "pending");
-        const completed = steps.filter(s => s.status === "done");
+        const info = featureService.getInfo(activeFeature);
+        if (info) {
+          let statusHint = `\n### Current Hive Status\n`;
+          statusHint += `**Active Feature**: ${info.name} (${info.status})\n`;
+          statusHint += `**Progress**: ${info.tasks.filter(t => t.status === 'done').length}/${info.tasks.length} tasks\n`;
 
-        let statusHint = `\n### Current Hive Status\n`;
-        statusHint += `**Active Feature**: ${name} (${feature.status})\n`;
-        statusHint += `**Progress**: ${completed.length}/${steps.length} steps\n`;
+          if (info.commentCount > 0) {
+            statusHint += `**Comments**: ${info.commentCount} unresolved - address with hive_plan_read\n`;
+          }
 
-        if (inProgress.length > 0) {
-          statusHint += `**In Progress**: ${inProgress.map(s => s.folder).join(", ")}\n`;
-          statusHint += `\n⚠️ Steps are in progress. Complete them with \`hive_exec_complete\` or abort with \`hive_exec_abort\`.\n`;
-        } else if (pending.length > 0) {
-          statusHint += `**Next Step**: ${pending[0].folder}\n`;
+          output.system.push(statusHint);
         }
-
-        output.system.push(statusHint);
-      } else {
-        output.system.push(`\n### No Active Hive Feature\nFor multi-step tasks, consider using \`hive_feature_create\` to track progress.\n`);
-      }
-    },
-
-    "experimental.session.compacting": async (
-      _input: unknown,
-      output: { context: string[]; prompt?: string }
-    ) => {
-      const hiveContext = await getHiveContextForCompaction(featureService, stepService);
-      if (hiveContext) {
-        output.context.push(hiveContext);
       }
     },
 
     tool: {
-      hive_feature_create: createFeatureCreateTool(featureService),
-      hive_feature_list: createFeatureListTool(featureService),
-      hive_feature_switch: createFeatureSwitchTool(featureService),
-      hive_feature_complete: createFeatureCompleteTool(featureService),
+      hive_feature_create: tool({
+        description: 'Create a new feature and set it as active',
+        args: {
+          name: tool.schema.string().describe('Feature name'),
+          ticket: tool.schema.string().optional().describe('Ticket reference'),
+        },
+        async execute({ name, ticket }) {
+          const feature = featureService.create(name, ticket);
+          return `Feature "${name}" created. Status: ${feature.status}. Write a plan with hive_plan_write.`;
+        },
+      }),
 
-      hive_step_create: createStepCreateTool(stepService, featureService, decisionService),
-      hive_step_read: createStepReadTool(stepService, featureService),
-      hive_step_update: createStepUpdateTool(stepService, featureService),
-      hive_step_delete: createStepDeleteTool(stepService, featureService),
-      hive_step_list: createStepListTool(stepService, featureService),
+      hive_feature_list: tool({
+        description: 'List all features',
+        args: {},
+        async execute() {
+          const features = featureService.list();
+          const active = featureService.getActive();
+          if (features.length === 0) return "No features found.";
+          const list = features.map(f => {
+            const info = featureService.getInfo(f);
+            return `${f === active ? '* ' : '  '}${f} (${info?.status || 'unknown'})`;
+          });
+          return list.join('\n');
+        },
+      }),
 
-      hive_decision_log: createDecisionLogTool(decisionService, featureService),
-      hive_decision_list: createDecisionListTool(decisionService, featureService),
+      hive_feature_switch: tool({
+        description: 'Switch to a different feature',
+        args: { name: tool.schema.string().describe('Feature name') },
+        async execute({ name }) {
+          featureService.setActive(name);
+          return `Switched to feature "${name}"`;
+        },
+      }),
 
-      hive_exec_start: createExecStartTool(worktreeService, stepService, featureService, directory, planService, commentService),
-      hive_exec_complete: createExecCompleteTool(worktreeService, stepService, featureService, directory),
-      hive_exec_abort: createExecAbortTool(worktreeService, stepService, featureService, directory),
-      hive_exec_revert: createExecRevertTool(worktreeService, stepService, featureService, directory),
+      hive_feature_complete: tool({
+        description: 'Mark feature as completed (irreversible)',
+        args: { name: tool.schema.string().optional().describe('Feature name (defaults to active)') },
+        async execute({ name }) {
+          const feature = name || featureService.getActive();
+          if (!feature) return "Error: No active feature";
+          featureService.complete(feature);
+          return `Feature "${feature}" marked as completed`;
+        },
+      }),
 
-      hive_status: createStatusTool(featureService, stepService, decisionService),
+      hive_status: tool({
+        description: 'Get overview of active feature',
+        args: { name: tool.schema.string().optional().describe('Feature name (defaults to active)') },
+        async execute({ name }) {
+          const feature = name || featureService.getActive();
+          if (!feature) return "Error: No active feature";
+          const info = featureService.getInfo(feature);
+          if (!info) return `Error: Feature "${feature}" not found`;
+          return JSON.stringify(info, null, 2);
+        },
+      }),
 
-      hive_plan_generate: createPlanGenerateTool(planService, featureService, stepService, decisionService),
-      hive_plan_read: createPlanReadTool(planService, featureService),
-      hive_plan_update: createPlanUpdateTool(planService, featureService),
-      hive_plan_approve: createPlanApproveTool(planService, featureService),
-      hive_plan_lock: createPlanLockTool(planService, featureService),
+      hive_plan_write: tool({
+        description: 'Write plan.md (clears existing comments)',
+        args: { content: tool.schema.string().describe('Plan markdown content') },
+        async execute({ content }, toolContext) {
+          captureSession(toolContext);
+          const feature = featureService.getActive();
+          if (!feature) return "Error: No active feature";
+          const planPath = planService.write(feature, content);
+          return `Plan written to ${planPath}. Comments cleared for fresh review.`;
+        },
+      }),
+
+      hive_plan_read: tool({
+        description: 'Read plan.md and user comments',
+        args: {},
+        async execute(_args, toolContext) {
+          captureSession(toolContext);
+          const feature = featureService.getActive();
+          if (!feature) return "Error: No active feature";
+          const result = planService.read(feature);
+          if (!result) return "Error: No plan.md found";
+          return JSON.stringify(result, null, 2);
+        },
+      }),
+
+      hive_plan_approve: tool({
+        description: 'Approve plan for execution',
+        args: {},
+        async execute(_args, toolContext) {
+          captureSession(toolContext);
+          const feature = featureService.getActive();
+          if (!feature) return "Error: No active feature";
+          const comments = planService.getComments(feature);
+          if (comments.length > 0) {
+            return `Error: Cannot approve - ${comments.length} unresolved comment(s). Address them first.`;
+          }
+          planService.approve(feature);
+          return "Plan approved. Run hive_tasks_sync to generate tasks.";
+        },
+      }),
+
+      hive_tasks_sync: tool({
+        description: 'Generate tasks from approved plan',
+        args: {},
+        async execute() {
+          const feature = featureService.getActive();
+          if (!feature) return "Error: No active feature";
+          const featureData = featureService.get(feature);
+          if (!featureData || featureData.status === 'planning') {
+            return "Error: Plan must be approved first";
+          }
+          const result = taskService.sync(feature);
+          if (featureData.status === 'approved') {
+            featureService.updateStatus(feature, 'executing');
+          }
+          return `Tasks synced: ${result.created.length} created, ${result.removed.length} removed, ${result.kept.length} kept`;
+        },
+      }),
+
+      hive_task_create: tool({
+        description: 'Create manual task (not from plan)',
+        args: {
+          name: tool.schema.string().describe('Task name'),
+          order: tool.schema.number().optional().describe('Task order'),
+        },
+        async execute({ name, order }) {
+          const feature = featureService.getActive();
+          if (!feature) return "Error: No active feature";
+          const folder = taskService.create(feature, name, order);
+          return `Manual task created: ${folder}`;
+        },
+      }),
+
+      hive_task_update: tool({
+        description: 'Update task status or summary',
+        args: {
+          task: tool.schema.string().describe('Task folder name'),
+          status: tool.schema.string().optional().describe('New status: pending, in_progress, done, cancelled'),
+          summary: tool.schema.string().optional().describe('Summary of work'),
+        },
+        async execute({ task, status, summary }) {
+          const feature = featureService.getActive();
+          if (!feature) return "Error: No active feature";
+          const updated = taskService.update(feature, task, {
+            status: status as any,
+            summary,
+          });
+          return `Task "${task}" updated: status=${updated.status}`;
+        },
+      }),
+
+      hive_exec_start: tool({
+        description: 'Create worktree and begin work on task',
+        args: { task: tool.schema.string().describe('Task folder name') },
+        async execute({ task }) {
+          const feature = featureService.getActive();
+          if (!feature) return "Error: No active feature";
+
+          const taskInfo = taskService.get(feature, task);
+          if (!taskInfo) return `Error: Task "${task}" not found`;
+          if (taskInfo.status === 'done') return "Error: Task already completed";
+
+          const worktree = await worktreeService.create(feature, task);
+          taskService.update(feature, task, { status: 'in_progress' });
+
+          return `Worktree created at ${worktree.path}\nBranch: ${worktree.branch}`;
+        },
+      }),
+
+      hive_exec_complete: tool({
+        description: 'Complete task: apply changes, write report',
+        args: {
+          task: tool.schema.string().describe('Task folder name'),
+          summary: tool.schema.string().describe('Summary of what was done'),
+        },
+        async execute({ task, summary }) {
+          const feature = featureService.getActive();
+          if (!feature) return "Error: No active feature";
+
+          const taskInfo = taskService.get(feature, task);
+          if (!taskInfo) return `Error: Task "${task}" not found`;
+          if (taskInfo.status !== 'in_progress') return "Error: Task not in progress";
+
+          const diff = await worktreeService.getDiff(feature, task);
+          if (diff?.hasDiff) {
+            await worktreeService.applyDiff(feature, task);
+          }
+
+          const report = `# ${task}\n\n## Summary\n\n${summary}\n`;
+          taskService.writeReport(feature, task, report);
+          taskService.update(feature, task, { status: 'done', summary });
+
+          await worktreeService.remove(feature, task);
+
+          return `Task "${task}" completed. Changes applied.`;
+        },
+      }),
+
+      hive_exec_abort: tool({
+        description: 'Abort task: discard changes, reset status',
+        args: { task: tool.schema.string().describe('Task folder name') },
+        async execute({ task }) {
+          const feature = featureService.getActive();
+          if (!feature) return "Error: No active feature";
+
+          await worktreeService.remove(feature, task);
+          taskService.update(feature, task, { status: 'pending' });
+
+          return `Task "${task}" aborted. Status reset to pending.`;
+        },
+      }),
     },
 
     command: {
@@ -255,7 +319,7 @@ const plugin: Plugin = async (ctx) => {
         async run(args: string) {
           const name = args.trim();
           if (!name) return "Usage: /hive <feature-name>";
-          return `Create feature "${name}" using hive_feature_create tool. Ask for the problem description.`;
+          return `Create feature "${name}" using hive_feature_create tool.`;
         },
       },
     },

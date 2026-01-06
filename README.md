@@ -125,78 +125,91 @@ You: Clear visibility into everything ✅
 
 ---
 
-## Real Example: What "Hiving" Looks Like
+## Real Example: Building a React Todo App with Login
 
-Here's an actual feature we built using Hive — preparing this repo for release:
+Let's walk through hiving a real feature. You want to build a todo app with authentication.
+
+### Step 1: Start the Conversation
 
 ```
-.hive/
-└── features/
-    └── release-preparation/
-        ├── feature.json          # Feature metadata & session tracking
-        ├── plan.md               # The approved plan (15 tasks)
-        ├── comments.json         # Review comments from VS Code
-        └── tasks/
-            ├── 01-prepare-icon-asset/
-            │   ├── status.json   # done, timestamps, summary
-            │   └── report.md     # What was actually done
-            ├── 02-update-packagejson-for-opencode-hive/
-            │   ├── status.json
-            │   └── report.md
-            ...
-            └── 15-create-releasingmd/
-                ├── status.json
-                └── report.md
+You: "Hive a plan for a React todo app with login"
 ```
 
-### Task Status Example
+That's it. The agent creates a structured plan:
 
-```json
-{
-  "status": "done",
-  "origin": "plan",
-  "startedAt": "2026-01-06T16:40:13.161Z",
-  "completedAt": "2026-01-06T16:41:04.350Z",
-  "summary": "Copied PNG icon to packages/vscode-hive/icon.png and packages/opencode-hive/icon.png"
-}
+```markdown
+# React Todo App with Login
+
+## Overview
+Build a todo application with user authentication, 
+persistent storage, and a clean UI.
+
+## Tasks
+
+### 1. Setup project and dependencies
+Create React app with TypeScript, install auth and state libraries.
+
+### 2. Build authentication flow
+Login/signup pages, JWT handling, protected routes.
+
+### 3. Create todo components
+TodoList, TodoItem, AddTodo with proper state management.
+
+### 4. Add API integration
+Connect to backend, handle CRUD operations, sync state.
+
+### 5. Polish UI and error handling
+Loading states, error messages, responsive design.
 ```
 
-**15 tasks executed. Full audit trail. Clean merges. Documentation generated automatically.**
+### Step 2: Review in VS Code
+
+Open VS Code. The Hive sidebar shows your plan. You can:
+- Read through each task
+- Add comments ("Let's use Zustand instead of Redux")
+- Approve when ready
+
+### Step 3: Execute
+
+```
+You: "Hive execute todo-app"
+```
+
+The agent works through each task. If you have subagents, they each get their own isolated worktree — no conflicts, full tracking.
+
+### Step 4: Ship
+
+When done, you have:
+- **Working code** — The todo app with login
+- **Clean git history** — Each task merged cleanly
+- **Full audit trail** — What was done, when, by which agent
+
+```
+.hive/features/todo-app/
+├── plan.md              # Your approved plan
+└── tasks/
+    ├── 01-setup-project/
+    │   └── report.md    # "Created React app, installed zustand, react-router"
+    ├── 02-build-auth/
+    │   └── report.md    # "Built login/signup with JWT, added ProtectedRoute"
+    └── ...
+```
+
+**That's hiving.** Natural conversation → structured execution → documented result.
 
 ---
 
-## Two Ways to Use Hive
+## How to Hive
 
-### 1. Automatic Mode (Recommended)
-Just work normally. Hive kicks in when it detects planning.
-
-```
-You: "I need to refactor the auth system"
-Agent: [Plans automatically captured by Hive]
-       Here's my plan:
-       1. Extract auth logic to service
-       2. Add token refresh
-       3. Update API routes
-You: "Looks good, let's do it"
-Agent: [Executes with full tracking]
-```
-
-### 2. Explicit Mode
-When you want more control:
+Just use the `hive` keyword in your conversation:
 
 ```
-hive_feature_create("auth-refactor")    # Start a feature
-hive_plan_write(plan)                    # Write the plan
-hive_plan_approve()                      # Approve it
-hive_exec_start("01-extract-service")   # Execute task
-hive_exec_complete(task, summary)        # Complete with summary
+"Hive a plan for user authentication"
+"Hive execute auth-feature"
+"Hive status"
 ```
 
-Or just say:
-```
-"Hive a plan for auth refactor"
-"Hive execute auth-refactor"
-```
+The agent handles everything. You review and approve in VS Code.
 
 ---
 
@@ -280,30 +293,36 @@ When you're done, you have:
 
 ## Quick Start
 
-### 1. Install
+### 1. Add to OpenCode
+
+Add `opencode-hive` to your `opencode.json`:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": [
+    "opencode-hive"
+  ]
+}
+```
+
+OpenCode handles the rest — no manual npm install needed.
+
+### 2. Install VS Code Extension
 
 ```bash
-# OpenCode plugin
-npm install opencode-hive
-
-# VS Code extension
 code --install-extension tctinh.vscode-hive
 ```
 
-### 2. Just Start Coding
+Or search "Hive" in VS Code Extensions.
 
-```
-You: "Let's build a user dashboard"
-Agent: [Hive automatically activates]
-       I'll create a plan for the user dashboard...
-```
-
-Or be explicit:
+### 3. Start Hiving
 
 ```
 You: "Hive a plan for user dashboard"
-You: "Hive execute dashboard-feature"
 ```
+
+That's it. You're hiving.
 
 ---
 

@@ -109,3 +109,15 @@ export interface PlanComment {
   status?: 'unresolved' | 'addressed' | 'rejected' | 'deferred'
   response?: string
 }
+
+export interface FeatureDetail {
+  feature: Feature
+  planStatus: PlanStatusType | null
+  steps: {
+    inProgress: Step[]
+    completed: Step[]
+    pending: Step[]
+  }
+  unresolvedComments: PlanComment[]
+  decisions: Decision[]
+}

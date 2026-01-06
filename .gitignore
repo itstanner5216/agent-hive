@@ -21,6 +21,5 @@ npm-debug.log*
 .env
 .env.local
 
-# Hive runtime data (keep structure, ignore data)
-.hive/active-feature.txt
-.hive/features/*/
+# Hive runtime data
+.hive/

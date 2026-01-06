@@ -1,85 +1,74 @@
-import { tool } from "@opencode-ai/plugin";
-import type { StepWithFolder, BatchInfo, PlanJson } from "../types.js";
-import { FeatureService } from "../services/featureService.js";
-import { StepService } from "../services/stepService.js";
-import { DecisionService, type Decision } from "../services/decisionService.js";
-import { PlanService } from "../services/planService.js";
-import { getFeaturePath, getProblemPath } from "../utils/paths.js";
-import { readFile } from "../utils/json.js";
+import { z } from 'zod';
+import { PlanService } from '../services/planService.js';
+import { FeatureService } from '../services/featureService.js';
 
-function getStatusIcon(status: string): string {
-  return status === "draft" ? "🔄" : status === "approved" ? "✅" : "🔒";
-}
+export function createPlanTools(projectRoot: string) {
+  const planService = new PlanService(projectRoot);
+  const featureService = new FeatureService(projectRoot);
 
-function extractFilesFromSpec(spec: string): string[] {
-  const files: string[] = [];
-  const patterns = [
-    /`([^`]+\.[a-z]{2,4})`/gi,
-    /(?:^|\s)([\w./]+\.[a-z]{2,4})(?:\s|$|,)/gim,
-  ];
-  
-  for (const pattern of patterns) {
-    let match;
-    while ((match = pattern.exec(spec)) !== null) {
-      const file = match[1];
-      if (file && !files.includes(file) && !file.startsWith("http")) {
-        files.push(file);
-      }
-    }
-  }
-  
-  return files.slice(0, 5);
-}
-
-function extractDescriptionFromSpec(spec: string): string {
-  const lines = spec.split("\n");
-  
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (trimmed && !trimmed.startsWith("#") && !trimmed.startsWith("-") && !trimmed.startsWith("```")) {
-      return trimmed.slice(0, 100) + (trimmed.length > 100 ? "..." : "");
-    }
-  }
-  
-  return "(no description)";
-}
-
-export function createPlanGenerateTool(
-  planService: PlanService,
-  featureService: FeatureService,
-  stepService: StepService,
-  decisionService: DecisionService
-) {
-  return tool({
-    description: "Generate plan.md from steps and decisions for the active feature",
-    args: {
-      featureName: tool.schema.string().optional().describe("Feature name (defaults to active)"),
-    },
-    async execute({ featureName }) {
-      const name = featureName || await featureService.assertActive();
-      
-      const feature = await featureService.get(name);
-      if (!feature) {
-        throw new Error(`Feature "${name}" not found`);
-      }
-
-      let summary = `Implement ${name}`;
-      try {
-        const featurePath = getFeaturePath(planService["directory"], name);
-        const problemContent = await readFile(getProblemPath(featurePath));
-        if (problemContent) {
-          summary = problemContent.split("\n").find(l => l.trim()) || summary;
+  return {
+    hive_plan_write: {
+      description: 'Create or update the plan.md for the active feature. Clears any existing comments (new plan = fresh review).',
+      parameters: z.object({
+        content: z.string().describe('The markdown content for the plan'),
+        featureName: z.string().optional().describe('Feature name (defaults to active feature)'),
+      }),
+      execute: async ({ content, featureName }: { content: string; featureName?: string }) => {
+        const feature = featureName || featureService.getActive();
+        if (!feature) {
+          return { error: 'No active feature. Create one with hive_feature_create first.' };
         }
-      } catch {}
 
-      const planJson = await planService.generatePlanJson(name, summary);
-      const markdown = planService.planJsonToMarkdown(planJson);
-
-      return JSON.stringify({
-        path: planService.getJsonPlanPath(name),
-        version: planJson.version,
-        status: planJson.status,
-      });
+        const path = planService.write(feature, content);
+        return { path, message: `Plan written to ${path}. Comments cleared for fresh review.` };
+      },
     },
-  });
+
+    hive_plan_read: {
+      description: 'Read the plan.md and any user comments for the active feature.',
+      parameters: z.object({
+        featureName: z.string().optional().describe('Feature name (defaults to active feature)'),
+      }),
+      execute: async ({ featureName }: { featureName?: string }) => {
+        const feature = featureName || featureService.getActive();
+        if (!feature) {
+          return { error: 'No active feature.' };
+        }
+
+        const result = planService.read(feature);
+        if (!result) {
+          return { error: `No plan.md found for feature '${feature}'` };
+        }
+
+        return result;
+      },
+    },
+
+    hive_plan_approve: {
+      description: 'Approve the plan for execution. After approval, run hive_tasks_sync to generate tasks.',
+      parameters: z.object({
+        featureName: z.string().optional().describe('Feature name (defaults to active feature)'),
+      }),
+      execute: async ({ featureName }: { featureName?: string }) => {
+        const feature = featureName || featureService.getActive();
+        if (!feature) {
+          return { error: 'No active feature.' };
+        }
+
+        const comments = planService.getComments(feature);
+        if (comments.length > 0) {
+          return { 
+            error: `Cannot approve: ${comments.length} unresolved comment(s). Address comments and rewrite plan first.`,
+            comments,
+          };
+        }
+
+        planService.approve(feature);
+        return { 
+          approved: true, 
+          message: 'Plan approved. Run hive_tasks_sync to generate tasks from the plan.',
+        };
+      },
+    },
+  };
 }

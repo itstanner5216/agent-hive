@@ -1,81 +1,92 @@
-import * as path from "path";
+import * as path from 'path';
+import * as fs from 'fs';
 
-export const TASKS_DIR = "tasks";
-export const CONTEXT_DIR = "context";
-export const DECISIONS_DIR = "decisions";
-export const REFERENCES_DIR = "references";
-export const ARTIFACTS_DIR = "artifacts";
+const HIVE_DIR = '.hive';
+const FEATURES_DIR = 'features';
+const TASKS_DIR = 'tasks';
+const CONTEXT_DIR = 'context';
+const PLAN_FILE = 'plan.md';
+const COMMENTS_FILE = 'comments.json';
+const FEATURE_FILE = 'feature.json';
+const STATUS_FILE = 'status.json';
+const REPORT_FILE = 'report.md';
+const ACTIVE_FILE = 'active-feature';
 
-export const PROBLEM_FILE = "problem.md";
-export const PLAN_FILE = "plan.json";
-export const FEATURE_FILE = "feature.json";
-
-/** @deprecated Use TASKS_DIR instead */
-export const EXECUTION_DIR = "execution";
-/** @deprecated Requirements merged into context/problem.md */
-export const REQUIREMENTS_DIR = "requirements";
-
-export function getHivePath(directory: string): string {
-  return path.join(directory, ".hive");
+export function getHivePath(projectRoot: string): string {
+  return path.join(projectRoot, HIVE_DIR);
 }
 
-export function getFeaturePath(directory: string, featureName: string): string {
-  return path.join(getHivePath(directory), "features", featureName);
+export function getFeaturesPath(projectRoot: string): string {
+  return path.join(getHivePath(projectRoot), FEATURES_DIR);
 }
 
-export function getTasksPath(featurePath: string): string {
-  return path.join(featurePath, TASKS_DIR);
+export function getFeaturePath(projectRoot: string, featureName: string): string {
+  return path.join(getFeaturesPath(projectRoot), featureName);
 }
 
-export function getTaskPath(featurePath: string, taskFolder: string): string {
-  return path.join(getTasksPath(featurePath), taskFolder);
+export function getPlanPath(projectRoot: string, featureName: string): string {
+  return path.join(getFeaturePath(projectRoot, featureName), PLAN_FILE);
 }
 
-export function getContextPath(featurePath: string): string {
-  return path.join(featurePath, CONTEXT_DIR);
+export function getCommentsPath(projectRoot: string, featureName: string): string {
+  return path.join(getFeaturePath(projectRoot, featureName), COMMENTS_FILE);
 }
 
-export function getDecisionsPath(featurePath: string): string {
-  return path.join(getContextPath(featurePath), DECISIONS_DIR);
+export function getFeatureJsonPath(projectRoot: string, featureName: string): string {
+  return path.join(getFeaturePath(projectRoot, featureName), FEATURE_FILE);
 }
 
-export function getReferencesPath(featurePath: string): string {
-  return path.join(getContextPath(featurePath), REFERENCES_DIR);
+export function getContextPath(projectRoot: string, featureName: string): string {
+  return path.join(getFeaturePath(projectRoot, featureName), CONTEXT_DIR);
 }
 
-export function getArtifactsPath(featurePath: string): string {
-  return path.join(getContextPath(featurePath), ARTIFACTS_DIR);
+export function getTasksPath(projectRoot: string, featureName: string): string {
+  return path.join(getFeaturePath(projectRoot, featureName), TASKS_DIR);
 }
 
-export function getProblemPath(featurePath: string): string {
-  return path.join(getContextPath(featurePath), PROBLEM_FILE);
+export function getTaskPath(projectRoot: string, featureName: string, taskFolder: string): string {
+  return path.join(getTasksPath(projectRoot, featureName), taskFolder);
 }
 
-export function getPlanPath(featurePath: string): string {
-  return path.join(featurePath, PLAN_FILE);
+export function getTaskStatusPath(projectRoot: string, featureName: string, taskFolder: string): string {
+  return path.join(getTaskPath(projectRoot, featureName, taskFolder), STATUS_FILE);
 }
 
-export function getActiveFeaturePath(directory: string): string {
-  return path.join(getHivePath(directory), "active-feature.txt");
+export function getTaskReportPath(projectRoot: string, featureName: string, taskFolder: string): string {
+  return path.join(getTaskPath(projectRoot, featureName, taskFolder), REPORT_FILE);
 }
 
-export function getDecisionFilename(title: string): string {
-  const timestamp = new Date().toISOString().split("T")[0];
-  const slug = title.toLowerCase().replace(/\s+/g, "-");
-  return `${timestamp}-${slug}.md`;
+export function getActiveFeaturePath(projectRoot: string): string {
+  return path.join(getHivePath(projectRoot), ACTIVE_FILE);
 }
 
-/** @deprecated Use getTasksPath instead */
-export function getExecutionPath(featurePath: string): string {
-  return path.join(featurePath, EXECUTION_DIR);
+export function ensureDir(dirPath: string): void {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
 }
 
-/** @deprecated Use getTaskPath instead */
-export function getStepPath(featurePath: string, stepFolder: string): string {
-  return path.join(getExecutionPath(featurePath), stepFolder);
+export function fileExists(filePath: string): boolean {
+  return fs.existsSync(filePath);
 }
 
-/** @deprecated Requirements merged into context/problem.md */
-export function getRequirementsPath(featurePath: string): string {
-  return path.join(featurePath, REQUIREMENTS_DIR);
+export function readJson<T>(filePath: string): T | null {
+  if (!fs.existsSync(filePath)) return null;
+  const content = fs.readFileSync(filePath, 'utf-8');
+  return JSON.parse(content) as T;
+}
+
+export function writeJson<T>(filePath: string, data: T): void {
+  ensureDir(path.dirname(filePath));
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+}
+
+export function readText(filePath: string): string | null {
+  if (!fs.existsSync(filePath)) return null;
+  return fs.readFileSync(filePath, 'utf-8');
+}
+
+export function writeText(filePath: string, content: string): void {
+  ensureDir(path.dirname(filePath));
+  fs.writeFileSync(filePath, content);
 }

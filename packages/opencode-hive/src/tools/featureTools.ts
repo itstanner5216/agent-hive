@@ -1,66 +1,128 @@
-import { tool } from "@opencode-ai/plugin";
-import { FeatureService } from "../services/featureService.js";
+import { z } from 'zod';
+import { FeatureService } from '../services/featureService.js';
+import type { TaskInfo } from '../types.js';
 
+export function createFeatureTools(projectRoot: string) {
+  const featureService = new FeatureService(projectRoot);
 
-export function createFeatureCreateTool(featureService: FeatureService) {
-  return tool({
-    description: "Create a new feature in .hive/features/. Sets it as active.",
-    args: {
-      name: tool.schema.string().describe("Feature name (kebab-case)"),
-      ticket: tool.schema.string().describe("Problem description / ticket content"),
+  return {
+    hive_feature_create: {
+      description: 'Create a new feature and set it as active.',
+      parameters: z.object({
+        name: z.string().describe('Feature name (will be used as folder name)'),
+        ticket: z.string().optional().describe('Ticket/issue reference'),
+      }),
+      execute: async ({ name, ticket }: { name: string; ticket?: string }) => {
+        const feature = featureService.create(name, ticket);
+        return {
+          name: feature.name,
+          status: feature.status,
+          path: `.hive/features/${name}`,
+          message: `Feature '${name}' created and set as active. Write a plan with hive_plan_write.`,
+        };
+      },
     },
-    async execute({ name, ticket }) {
-      const result = await featureService.create(name, ticket);
-      return `Feature "${name}" created at .hive/features/${name}/`;
-    },
-  });
-}
 
-export function createFeatureListTool(featureService: FeatureService) {
-  return tool({
-    description: "List all features in .hive/features/",
-    args: {},
-    async execute() {
-      const features = await featureService.list();
+    hive_feature_list: {
+      description: 'List all features.',
+      parameters: z.object({}),
+      execute: async () => {
+        const features = featureService.list();
+        const active = featureService.getActive();
+        
+        const details = features.map(name => {
+          const info = featureService.getInfo(name);
+          return {
+            name,
+            status: info?.status || 'unknown',
+            taskCount: info?.tasks.length || 0,
+            isActive: name === active,
+          };
+        });
 
-      if (features.length === 0) {
-        return "No features found. Use hive_feature_create to create one.";
-      }
+        return { features: details, active };
+      },
+    },
 
-      const result = features.map((f) => ({
-        name: f.name,
-        status: f.status,
-        createdAt: f.createdAt,
-      }));
+    hive_feature_switch: {
+      description: 'Switch to a different feature.',
+      parameters: z.object({
+        name: z.string().describe('Feature name to switch to'),
+      }),
+      execute: async ({ name }: { name: string }) => {
+        featureService.setActive(name);
+        const info = featureService.getInfo(name);
+        return {
+          switched: true,
+          name,
+          status: info?.status,
+          message: `Switched to feature '${name}'`,
+        };
+      },
+    },
 
-      return JSON.stringify({ features: result }, null, 2);
-    },
-  });
-}
+    hive_feature_complete: {
+      description: 'Mark a feature as completed. This is irreversible.',
+      parameters: z.object({
+        featureName: z.string().optional().describe('Feature name (defaults to active feature)'),
+      }),
+      execute: async ({ featureName }: { featureName?: string }) => {
+        const feature = featureName || featureService.getActive();
+        if (!feature) {
+          return { error: 'No active feature.' };
+        }
 
-export function createFeatureSwitchTool(featureService: FeatureService) {
-  return tool({
-    description: "Switch active feature to work on a different one",
-    args: {
-      name: tool.schema.string().describe("Feature name to switch to"),
-    },
-    async execute({ name }) {
-      const { feature } = await featureService.switch(name);
-      return `Switched to feature "${name}" (status: ${feature.status})`;
-    },
-  });
-}
+        const info = featureService.getInfo(feature);
+        const pendingTasks = info?.tasks.filter((t: TaskInfo) => t.status === 'pending' || t.status === 'in_progress') || [];
+        
+        if (pendingTasks.length > 0) {
+          return {
+            error: `Cannot complete: ${pendingTasks.length} task(s) still pending or in progress`,
+            pendingTasks: pendingTasks.map((t: TaskInfo) => t.folder),
+          };
+        }
 
-export function createFeatureCompleteTool(featureService: FeatureService) {
-  return tool({
-    description: "Mark a feature as completed (immutable)",
-    args: {
-      name: tool.schema.string().describe("Feature name to complete"),
-      force: tool.schema.boolean().optional().describe("Force completion even with incomplete steps"),
+        featureService.complete(feature);
+        return {
+          completed: true,
+          name: feature,
+          message: `Feature '${feature}' marked as completed.`,
+        };
+      },
     },
-    async execute({ name, force }) {
-      const result = await featureService.complete(name, force ?? false);
-      return `Feature "${name}" marked as completed (now immutable). Report saved to ${result.reportPath}`;
+
+    hive_status: {
+      description: 'Get overview of the active feature: status, plan, tasks.',
+      parameters: z.object({
+        featureName: z.string().optional().describe('Feature name (defaults to active feature)'),
+      }),
+      execute: async ({ featureName }: { featureName?: string }) => {
+        const feature = featureName || featureService.getActive();
+        if (!feature) {
+          return { error: 'No active feature. Create one with hive_feature_create.' };
+        }
+
+        const info = featureService.getInfo(feature);
+        if (!info) {
+          return { error: `Feature '${feature}' not found` };
+        }
+
+        const tasksByStatus = {
+          pending: info.tasks.filter((t: TaskInfo) => t.status === 'pending').length,
+          in_progress: info.tasks.filter((t: TaskInfo) => t.status === 'in_progress').length,
+          done: info.tasks.filter((t: TaskInfo) => t.status === 'done').length,
+          cancelled: info.tasks.filter((t: TaskInfo) => t.status === 'cancelled').length,
+        };
+
+        return {
+          feature: info.name,
+          status: info.status,
+          hasPlan: info.hasPlan,
+          commentCount: info.commentCount,
+          tasks: info.tasks,
+          taskSummary: tasksByStatus,
+        };
+      },
     },
-  });
+  };
 }

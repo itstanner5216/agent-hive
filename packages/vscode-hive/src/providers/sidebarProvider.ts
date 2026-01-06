@@ -1,370 +1,305 @@
 import * as vscode from 'vscode'
 import * as fs from 'fs'
 import * as path from 'path'
-import { HiveService } from '../services/hiveService'
-import { Feature, Step } from '../types'
 
-type FeatureStatus = 'in_progress' | 'completed' | 'pending'
-
-type HiveItem = FeatureItem | FolderItem | FileItem | ExecutionItem | StepItem | SpecFileItem | ReportFileItem | DiffFileItem | SessionTreeItem | FeatureStatusGroupItem | DecisionItem
-
-function classifyFeatureStatus(feature: Feature): FeatureStatus {
-  if (feature.status === 'completed' || feature.status === 'archived') return 'completed'
-  if (feature.stepsCount === 0) return 'pending'
-  if (feature.doneCount === 0) return 'pending'
-  if (feature.doneCount === feature.stepsCount) return 'completed'
-  return 'in_progress'
+interface FeatureJson {
+  name: string
+  status: 'planning' | 'approved' | 'executing' | 'completed'
+  createdAt: string
+  approvedAt?: string
 }
 
-class FeatureStatusGroupItem extends vscode.TreeItem {
-  constructor(
-    public readonly status: FeatureStatus,
-    public readonly features: Feature[]
-  ) {
-    const labels: Record<FeatureStatus, string> = { completed: 'COMPLETED', in_progress: 'IN-PROGRESS', pending: 'PENDING' }
-    const icons: Record<FeatureStatus, string> = { completed: 'pass-filled', in_progress: 'sync~spin', pending: 'circle-outline' }
-    super(labels[status], features.length > 0 ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.None)
-    this.contextValue = 'featureStatusGroup'
-    this.iconPath = new vscode.ThemeIcon(icons[status])
-    this.description = `${features.length}`
-  }
+interface TaskStatus {
+  status: 'pending' | 'in_progress' | 'done' | 'cancelled'
+  origin: 'plan' | 'manual'
+  summary?: string
+}
+
+type SidebarItem = FeatureItem | PlanItem | ContextFolderItem | ContextFileItem | TasksGroupItem | TaskItem
+
+const STATUS_ICONS: Record<string, string> = {
+  pending: 'circle-outline',
+  in_progress: 'sync~spin',
+  done: 'pass',
+  cancelled: 'circle-slash',
+  planning: 'edit',
+  approved: 'check',
+  executing: 'run-all',
+  completed: 'pass-filled',
 }
 
 class FeatureItem extends vscode.TreeItem {
-  public readonly featureName: string
-  public readonly isCompleted: boolean
-
-  constructor(public readonly feature: Feature) {
-    super(feature.name, vscode.TreeItemCollapsibleState.Expanded)
-    this.featureName = feature.name
-    this.isCompleted = feature.status === 'completed' || feature.status === 'archived'
-    
-    if (this.isCompleted && feature.completedAt) {
-      const date = new Date(feature.completedAt).toLocaleDateString()
-      this.description = `✓ ${date}`
-    } else {
-      this.description = `${feature.progress}% (${feature.doneCount}/${feature.stepsCount})`
-    }
-    
-    this.contextValue = this.isCompleted ? 'featureCompleted' : 'feature'
-    this.iconPath = new vscode.ThemeIcon(this.isCompleted ? 'pass-filled' : 'package')
-    this.command = {
-      command: 'hive.showFeature',
-      title: 'Show Feature Details',
-      arguments: [feature.name]
-    }
-  }
-}
-
-class FolderItem extends vscode.TreeItem {
   constructor(
-    label: string,
-    public readonly featureName: string,
-    public readonly folder: 'requirements' | 'context',
-    icon: string,
-    hasChildren: boolean
+    public readonly name: string,
+    public readonly feature: FeatureJson,
+    public readonly taskStats: { total: number; done: number },
+    public readonly isActive: boolean
   ) {
-    super(label, hasChildren ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None)
-    this.contextValue = 'folder'
-    this.iconPath = new vscode.ThemeIcon(icon)
+    super(name, vscode.TreeItemCollapsibleState.Expanded)
+    
+    const statusLabel = feature.status.charAt(0).toUpperCase() + feature.status.slice(1)
+    this.description = isActive 
+      ? `${statusLabel} · ${taskStats.done}/${taskStats.total}` 
+      : statusLabel
+    
+    this.contextValue = `feature-${feature.status}`
+    this.iconPath = new vscode.ThemeIcon(STATUS_ICONS[feature.status] || 'package')
+    
+    if (isActive) {
+      this.resourceUri = vscode.Uri.parse('hive:active')
+    }
   }
 }
 
-class FileItem extends vscode.TreeItem {
+class PlanItem extends vscode.TreeItem {
+  constructor(
+    public readonly featureName: string,
+    public readonly planPath: string,
+    public readonly featureStatus: string,
+    public readonly commentCount: number
+  ) {
+    super('Plan', vscode.TreeItemCollapsibleState.None)
+    
+    this.description = commentCount > 0 ? `${commentCount} comment(s)` : ''
+    this.contextValue = featureStatus === 'planning' ? 'plan-draft' : 'plan-approved'
+    this.iconPath = new vscode.ThemeIcon('file-text')
+    this.command = {
+      command: 'vscode.open',
+      title: 'Open Plan',
+      arguments: [vscode.Uri.file(planPath)]
+    }
+  }
+}
+
+class ContextFolderItem extends vscode.TreeItem {
+  constructor(
+    public readonly featureName: string,
+    public readonly contextPath: string,
+    public readonly fileCount: number
+  ) {
+    super('Context', fileCount > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None)
+    
+    this.description = fileCount > 0 ? `${fileCount} file(s)` : ''
+    this.contextValue = 'context-folder'
+    this.iconPath = new vscode.ThemeIcon('folder')
+  }
+}
+
+class ContextFileItem extends vscode.TreeItem {
   constructor(
     public readonly filename: string,
-    public readonly featureName: string,
-    public readonly folder: 'requirements' | 'context',
     public readonly filePath: string
   ) {
     super(filename, vscode.TreeItemCollapsibleState.None)
-    this.contextValue = 'file'
+    
+    this.contextValue = 'context-file'
     this.iconPath = new vscode.ThemeIcon(filename.endsWith('.md') ? 'markdown' : 'file')
     this.command = {
       command: 'vscode.open',
       title: 'Open File',
       arguments: [vscode.Uri.file(filePath)]
     }
-    this.resourceUri = vscode.Uri.file(filePath)
   }
 }
 
-class ExecutionItem extends vscode.TreeItem {
-  constructor(public readonly feature: Feature) {
-    super('Execution', vscode.TreeItemCollapsibleState.Expanded)
-    this.contextValue = 'execution'
-    this.iconPath = new vscode.ThemeIcon('run-all')
-  }
-}
-
-class StepItem extends vscode.TreeItem {
-  private static statusIcons: Record<string, string> = {
-    done: 'pass',
-    in_progress: 'sync~spin',
-    pending: 'circle-outline',
-    blocked: 'error'
-  }
-
-  public readonly stepName: string
-  public readonly stepFolder: string
-  public readonly sessionId?: string
-  public readonly canRevert: boolean
-
+class TasksGroupItem extends vscode.TreeItem {
   constructor(
     public readonly featureName: string,
-    public readonly step: Step,
-    hasSpecFiles: boolean
+    public readonly tasks: Array<{ folder: string; status: TaskStatus }>
   ) {
-    const canRevert = step.status === 'done' && step.execution?.canRevert === true
-    const label = `${String(step.order).padStart(2, '0')}-${step.name}${canRevert ? ' ⟲' : ''}`
+    super('Tasks', tasks.length > 0 ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.None)
     
-    super(
-      label,
-      (hasSpecFiles || step.sessionId || step.status === 'done') ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None
-    )
-    this.stepName = step.name
-    this.stepFolder = step.folderPath
-    this.sessionId = step.sessionId
-    this.canRevert = canRevert
-    this.contextValue = canRevert ? 'stepWithRevert' : 'step'
-    this.iconPath = new vscode.ThemeIcon(StepItem.statusIcons[step.status] || 'circle-outline')
+    const done = tasks.filter(t => t.status.status === 'done').length
+    this.description = `${done}/${tasks.length}`
+    this.contextValue = 'tasks-group'
+    this.iconPath = new vscode.ThemeIcon('checklist')
+  }
+}
+
+class TaskItem extends vscode.TreeItem {
+  constructor(
+    public readonly featureName: string,
+    public readonly folder: string,
+    public readonly status: TaskStatus,
+    public readonly reportPath: string | null
+  ) {
+    const name = folder.replace(/^\d+-/, '')
+    super(name, vscode.TreeItemCollapsibleState.None)
     
-    if (step.summary) {
-      this.description = step.summary
+    this.description = status.summary || ''
+    this.contextValue = `task-${status.status}${status.origin === 'manual' ? '-manual' : ''}`
+    
+    const iconName = STATUS_ICONS[status.status] || 'circle-outline'
+    this.iconPath = new vscode.ThemeIcon(iconName)
+    
+    this.tooltip = new vscode.MarkdownString()
+    this.tooltip.appendMarkdown(`**${folder}**\n\n`)
+    this.tooltip.appendMarkdown(`Status: ${status.status}\n\n`)
+    this.tooltip.appendMarkdown(`Origin: ${status.origin}\n\n`)
+    if (status.summary) {
+      this.tooltip.appendMarkdown(`Summary: ${status.summary}`)
     }
 
-    if (step.sessionId) {
-      this.tooltip = `Session: ${step.sessionId}`
-    } else if (canRevert) {
-      this.tooltip = 'Can be reverted'
-    }
-  }
-}
-
-class SpecFileItem extends vscode.TreeItem {
-  constructor(
-    public readonly filename: string,
-    public readonly featureName: string,
-    public readonly stepFolder: string,
-    public readonly filePath: string
-  ) {
-    super(filename, vscode.TreeItemCollapsibleState.None)
-    this.contextValue = 'specFile'
-    this.iconPath = new vscode.ThemeIcon('markdown')
-    this.command = {
-      command: 'vscode.open',
-      title: 'Open Spec',
-      arguments: [vscode.Uri.file(filePath)]
-    }
-    this.resourceUri = vscode.Uri.file(filePath)
-  }
-}
-
-class ReportFileItem extends vscode.TreeItem {
-  constructor(
-    public readonly featureName: string,
-    public readonly stepFolder: string,
-    public readonly filePath: string
-  ) {
-    super('report.json', vscode.TreeItemCollapsibleState.None)
-    this.contextValue = 'reportFile'
-    this.iconPath = new vscode.ThemeIcon('file-json')
-    this.command = {
-      command: 'vscode.open',
-      title: 'Open Report',
-      arguments: [vscode.Uri.file(filePath)]
-    }
-    this.resourceUri = vscode.Uri.file(filePath)
-  }
-}
-
-class DiffFileItem extends vscode.TreeItem {
-  constructor(
-    public readonly featureName: string,
-    public readonly stepFolder: string,
-    public readonly filePath: string
-  ) {
-    super('output.diff', vscode.TreeItemCollapsibleState.None)
-    this.contextValue = 'diffFile'
-    this.iconPath = new vscode.ThemeIcon('file-code')
-    this.command = {
-      command: 'hive.viewDiff',
-      title: 'View Diff',
-      arguments: [vscode.Uri.file(filePath)]
-    }
-    this.resourceUri = vscode.Uri.file(filePath)
-  }
-}
-
-class SessionTreeItem extends vscode.TreeItem {
-  constructor(
-    public readonly featureName: string,
-    public readonly stepFolder: string,
-    public readonly session: { id: string; title?: string; isParent: boolean; summary?: string }
-  ) {
-    super(session.title || session.id, vscode.TreeItemCollapsibleState.None)
-    this.contextValue = 'session'
-    this.iconPath = this.getIcon()
-    this.description = session.isParent ? 'main' : this.parseAgentType()
-    if (session.summary) {
-      this.tooltip = session.summary
-    }
-    this.command = {
-      command: 'hive.openSession',
-      title: 'Open in OpenCode',
-      arguments: [{ session }]
-    }
-  }
-
-  private parseAgentType(): string | undefined {
-    const match = this.session.title?.match(/@(\w+)\s+subagent/)
-    return match?.[1]
-  }
-
-  private getIcon(): vscode.ThemeIcon {
-    if (this.session.isParent) return new vscode.ThemeIcon('circle-filled')
-    const agent = this.parseAgentType()
-    switch (agent) {
-      case 'explore': return new vscode.ThemeIcon('search')
-      case 'librarian': return new vscode.ThemeIcon('book')
-      case 'general': return new vscode.ThemeIcon('hubot')
-      case 'oracle': return new vscode.ThemeIcon('lightbulb')
-      default: return new vscode.ThemeIcon('terminal')
+    if (reportPath) {
+      this.command = {
+        command: 'vscode.open',
+        title: 'View Report',
+        arguments: [vscode.Uri.file(reportPath)]
+      }
     }
   }
 }
 
-class DecisionItem extends vscode.TreeItem {
-  constructor(
-    public readonly featureName: string,
-    public readonly decision: { filename: string; title: string; filePath: string }
-  ) {
-    super(decision.title, vscode.TreeItemCollapsibleState.None)
-    this.contextValue = 'decision'
-    this.iconPath = new vscode.ThemeIcon('lightbulb')
-    this.description = decision.filename
-    this.command = {
-      command: 'vscode.open',
-      title: 'Open Decision',
-      arguments: [vscode.Uri.file(decision.filePath)]
-    }
-    this.resourceUri = vscode.Uri.file(decision.filePath)
-  }
-}
-
-export class HiveSidebarProvider implements vscode.TreeDataProvider<HiveItem> {
-  private _onDidChangeTreeData = new vscode.EventEmitter<HiveItem | undefined>()
+export class HiveSidebarProvider implements vscode.TreeDataProvider<SidebarItem> {
+  private _onDidChangeTreeData = new vscode.EventEmitter<SidebarItem | undefined>()
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event
 
-  constructor(private hiveService: HiveService) {}
+  constructor(private workspaceRoot: string) {}
 
   refresh(): void {
     this._onDidChangeTreeData.fire(undefined)
   }
 
-  getTreeItem(element: HiveItem): vscode.TreeItem {
+  getTreeItem(element: SidebarItem): vscode.TreeItem {
     return element
   }
 
-  async getChildren(element?: HiveItem): Promise<HiveItem[]> {
+  async getChildren(element?: SidebarItem): Promise<SidebarItem[]> {
     if (!element) {
-      const features = this.hiveService.getFeatures()
-      const grouped: Record<FeatureStatus, Feature[]> = { in_progress: [], pending: [], completed: [] }
-      
-      for (const f of features) {
-        grouped[classifyFeatureStatus(f)].push(f)
-      }
-      
-      // Sort by completion % (descending for in_progress, ascending for pending)
-      grouped.in_progress.sort((a, b) => b.progress - a.progress)
-      grouped.pending.sort((a, b) => a.progress - b.progress)
-      grouped.completed.sort((a, b) => b.progress - a.progress)
-      
-      const result: HiveItem[] = []
-      // Order: IN-PROGRESS, PENDING, COMPLETED
-      if (grouped.in_progress.length > 0) result.push(new FeatureStatusGroupItem('in_progress', grouped.in_progress))
-      if (grouped.pending.length > 0) result.push(new FeatureStatusGroupItem('pending', grouped.pending))
-      if (grouped.completed.length > 0) result.push(new FeatureStatusGroupItem('completed', grouped.completed))
-      
-      return result
-    }
-
-    if (element instanceof FeatureStatusGroupItem) {
-      return element.features.map(f => new FeatureItem(f))
+      return this.getFeatures()
     }
 
     if (element instanceof FeatureItem) {
-      const requirementsFiles = this.hiveService.getFilesInFolder(element.feature.name, 'requirements')
-      const contextFiles = this.hiveService.getFilesInFolder(element.feature.name, 'context')
-      return [
-        new FolderItem('Requirements', element.feature.name, 'requirements', 'question', requirementsFiles.length > 0),
-        new FolderItem('Context', element.feature.name, 'context', 'lightbulb', contextFiles.length > 0),
-        new ExecutionItem(element.feature)
-      ]
+      return this.getFeatureChildren(element.name)
     }
 
-    if (element instanceof FolderItem) {
-      if (element.folder === 'context') {
-        const decisions = this.hiveService.getDecisions(element.featureName)
-        return decisions.map(d => new DecisionItem(element.featureName, d))
-      }
-      const files = this.hiveService.getFilesInFolder(element.featureName, element.folder)
-      return files.map(f => new FileItem(
-        f,
-        element.featureName,
-        element.folder,
-        this.hiveService.getFilePath(element.featureName, element.folder, f)
-      ))
+    if (element instanceof ContextFolderItem) {
+      return this.getContextFiles(element.featureName, element.contextPath)
     }
 
-    if (element instanceof ExecutionItem) {
-      return element.feature.steps.map(s => new StepItem(
-        element.feature.name, 
-        s, 
-        s.specFiles.length > 0
-      ))
-    }
-
-    if (element instanceof StepItem) {
-      const step = this.hiveService.getFeature(element.featureName).steps.find(s => s.folderPath === element.stepFolder)
-      if (!step) return []
-
-      const children: HiveItem[] = []
-      const stepPath = path.join(this.hiveService['basePath'], 'features', element.featureName, 'execution', element.stepFolder)
-
-      children.push(...step.specFiles.map(f => new SpecFileItem(
-        f,
-        element.featureName,
-        element.stepFolder,
-        this.hiveService.getStepFilePath(element.featureName, element.stepFolder, f)
-      )))
-
-      const reportPath = path.join(stepPath, 'report.json')
-      if (fs.existsSync(reportPath)) {
-        children.push(new ReportFileItem(
-          element.featureName,
-          element.stepFolder,
-          reportPath
-        ))
-      }
-
-      const diffPath = path.join(stepPath, 'output.diff')
-      if (fs.existsSync(diffPath)) {
-        children.push(new DiffFileItem(
-          element.featureName,
-          element.stepFolder,
-          diffPath
-        ))
-      }
-
-      if (element.sessionId) {
-        const sessions = await this.hiveService.getStepSessions(element.featureName, element.stepFolder)
-        children.push(...sessions.map(s => new SessionTreeItem(element.featureName, element.stepFolder, s)))
-      }
-
-      return children
+    if (element instanceof TasksGroupItem) {
+      return this.getTasks(element.featureName, element.tasks)
     }
 
     return []
+  }
+
+  private getFeatures(): FeatureItem[] {
+    const featuresPath = path.join(this.workspaceRoot, '.hive', 'features')
+    if (!fs.existsSync(featuresPath)) return []
+
+    const activeFeature = this.getActiveFeature()
+    const features: FeatureItem[] = []
+
+    const dirs = fs.readdirSync(featuresPath, { withFileTypes: true })
+      .filter(d => d.isDirectory())
+      .map(d => d.name)
+
+    for (const name of dirs) {
+      const featureJsonPath = path.join(featuresPath, name, 'feature.json')
+      if (!fs.existsSync(featureJsonPath)) continue
+
+      const feature: FeatureJson = JSON.parse(fs.readFileSync(featureJsonPath, 'utf-8'))
+      const taskStats = this.getTaskStats(name)
+      const isActive = name === activeFeature
+
+      features.push(new FeatureItem(name, feature, taskStats, isActive))
+    }
+
+    features.sort((a, b) => {
+      if (a.isActive) return -1
+      if (b.isActive) return 1
+      const statusOrder = { executing: 0, approved: 1, planning: 2, completed: 3 }
+      return (statusOrder[a.feature.status] || 99) - (statusOrder[b.feature.status] || 99)
+    })
+
+    return features
+  }
+
+  private getFeatureChildren(featureName: string): SidebarItem[] {
+    const featurePath = path.join(this.workspaceRoot, '.hive', 'features', featureName)
+    const items: SidebarItem[] = []
+
+    const featureJsonPath = path.join(featurePath, 'feature.json')
+    const feature: FeatureJson = JSON.parse(fs.readFileSync(featureJsonPath, 'utf-8'))
+
+    const planPath = path.join(featurePath, 'plan.md')
+    if (fs.existsSync(planPath)) {
+      const commentCount = this.getCommentCount(featureName)
+      items.push(new PlanItem(featureName, planPath, feature.status, commentCount))
+    }
+
+    const contextPath = path.join(featurePath, 'context')
+    const contextFiles = fs.existsSync(contextPath) 
+      ? fs.readdirSync(contextPath).filter(f => !f.startsWith('.'))
+      : []
+    items.push(new ContextFolderItem(featureName, contextPath, contextFiles.length))
+
+    const tasks = this.getTaskList(featureName)
+    items.push(new TasksGroupItem(featureName, tasks))
+
+    return items
+  }
+
+  private getContextFiles(featureName: string, contextPath: string): ContextFileItem[] {
+    if (!fs.existsSync(contextPath)) return []
+
+    return fs.readdirSync(contextPath)
+      .filter(f => !f.startsWith('.'))
+      .map(f => new ContextFileItem(f, path.join(contextPath, f)))
+  }
+
+  private getTasks(featureName: string, tasks: Array<{ folder: string; status: TaskStatus }>): TaskItem[] {
+    const featurePath = path.join(this.workspaceRoot, '.hive', 'features', featureName)
+    
+    return tasks.map(t => {
+      const reportPath = path.join(featurePath, 'tasks', t.folder, 'report.md')
+      const hasReport = fs.existsSync(reportPath)
+      return new TaskItem(featureName, t.folder, t.status, hasReport ? reportPath : null)
+    })
+  }
+
+  private getTaskList(featureName: string): Array<{ folder: string; status: TaskStatus }> {
+    const tasksPath = path.join(this.workspaceRoot, '.hive', 'features', featureName, 'tasks')
+    if (!fs.existsSync(tasksPath)) return []
+
+    const folders = fs.readdirSync(tasksPath, { withFileTypes: true })
+      .filter(d => d.isDirectory())
+      .map(d => d.name)
+      .sort()
+
+    return folders.map(folder => {
+      const statusPath = path.join(tasksPath, folder, 'status.json')
+      const status: TaskStatus = fs.existsSync(statusPath)
+        ? JSON.parse(fs.readFileSync(statusPath, 'utf-8'))
+        : { status: 'pending', origin: 'plan' }
+      return { folder, status }
+    })
+  }
+
+  private getTaskStats(featureName: string): { total: number; done: number } {
+    const tasks = this.getTaskList(featureName)
+    return {
+      total: tasks.length,
+      done: tasks.filter(t => t.status.status === 'done').length
+    }
+  }
+
+  private getActiveFeature(): string | null {
+    const activePath = path.join(this.workspaceRoot, '.hive', 'active-feature')
+    if (!fs.existsSync(activePath)) return null
+    return fs.readFileSync(activePath, 'utf-8').trim()
+  }
+
+  private getCommentCount(featureName: string): number {
+    const commentsPath = path.join(this.workspaceRoot, '.hive', 'features', featureName, 'comments.json')
+    if (!fs.existsSync(commentsPath)) return 0
+    
+    try {
+      const data = JSON.parse(fs.readFileSync(commentsPath, 'utf-8'))
+      return data.threads?.length || 0
+    } catch {
+      return 0
+    }
   }
 }

@@ -1,9 +1,8 @@
 import * as vscode from 'vscode'
 import * as fs from 'fs'
 import * as path from 'path'
-import { HiveService, HiveWatcher, Launcher, CheckpointService } from './services'
-import { HiveSidebarProvider, HivePanelProvider, ReportViewProvider } from './providers'
-import { viewDiff } from './commands'
+import { HiveWatcher, Launcher } from './services'
+import { HiveSidebarProvider, PlanCommentController } from './providers'
 
 function findHiveRoot(startPath: string): string | null {
   let current = startPath
@@ -23,13 +22,15 @@ export function activate(context: vscode.ExtensionContext): void {
   const workspaceRoot = findHiveRoot(workspaceFolder)
   if (!workspaceRoot) return
 
-  const hiveService = new HiveService(workspaceRoot)
+  const sidebarProvider = new HiveSidebarProvider(workspaceRoot)
   const launcher = new Launcher(workspaceRoot)
-  const checkpointService = new CheckpointService(workspaceRoot)
+  const commentController = new PlanCommentController(workspaceRoot)
+
+  vscode.window.registerTreeDataProvider('hive.features', sidebarProvider)
+  commentController.registerCommands(context)
 
   context.subscriptions.push(
     vscode.commands.registerCommand('hive.refresh', () => {
-      const sidebarProvider = new HiveSidebarProvider(hiveService)
       sidebarProvider.refresh()
     }),
 
@@ -40,37 +41,18 @@ export function activate(context: vscode.ExtensionContext): void {
       })
       if (name) {
         const terminal = vscode.window.createTerminal('OpenCode - Hive')
-        terminal.sendText(`opencode --command "/hive new ${name}"`)
+        terminal.sendText(`opencode --command "/hive ${name}"`)
         terminal.show()
       }
-    }),
-
-    vscode.commands.registerCommand('hive.openStepInOpenCode', (featureName: string, stepName: string, sessionId?: string) => {
-      launcher.openStep('opencode', featureName, stepName, sessionId)
     }),
 
     vscode.commands.registerCommand('hive.openFeatureInOpenCode', (featureName: string) => {
       launcher.openFeature('opencode', featureName)
     }),
 
-    vscode.commands.registerCommand('hive.viewReport', (feature: string) => {
-      const report = hiveService.getReport(feature)
-      if (report) {
-        vscode.workspace.openTextDocument({ content: report, language: 'markdown' })
-          .then(doc => vscode.window.showTextDocument(doc))
-      } else {
-        vscode.window.showInformationMessage('No report generated yet')
-      }
-    }),
-
-    vscode.commands.registerCommand('hive.showFeature', (featureName: string) => {
-      const panelProvider = new HivePanelProvider(context.extensionUri, hiveService)
-      panelProvider.showFeature(featureName)
-    }),
-
-    vscode.commands.registerCommand('hive.openInOpenCode', (item: { featureName?: string; stepFolder?: string; sessionId?: string }) => {
-      if (item?.featureName && item?.stepFolder) {
-        launcher.openStep('opencode', item.featureName, item.stepFolder, item.sessionId)
+    vscode.commands.registerCommand('hive.openTaskInOpenCode', (item: { featureName?: string; folder?: string }) => {
+      if (item?.featureName && item?.folder) {
+        launcher.openStep('opencode', item.featureName, item.folder)
       }
     }),
 
@@ -81,99 +63,105 @@ export function activate(context: vscode.ExtensionContext): void {
       }
     }),
 
-    vscode.commands.registerCommand('hive.viewFeatureDetails', (item: { featureName?: string }) => {
+    vscode.commands.registerCommand('hive.approvePlan', async (item: { featureName?: string }) => {
       if (item?.featureName) {
-        const panelProvider = new HivePanelProvider(context.extensionUri, hiveService)
-        panelProvider.showFeature(item.featureName)
+        const terminal = vscode.window.createTerminal('OpenCode - Hive')
+        terminal.sendText(`opencode --command "hive_plan_approve"`)
+        terminal.show()
       }
     }),
 
-    vscode.commands.registerCommand('hive.openSession', (item: { session?: { id: string } }) => {
-      if (item?.session?.id) {
-        launcher.openSession(item.session.id)
+    vscode.commands.registerCommand('hive.syncTasks', async (item: { featureName?: string }) => {
+      if (item?.featureName) {
+        const terminal = vscode.window.createTerminal('OpenCode - Hive')
+        terminal.sendText(`opencode --command "hive_tasks_sync"`)
+        terminal.show()
       }
     }),
 
-    vscode.commands.registerCommand('hive.viewDiff', (stepPath: string) => {
-      viewDiff(stepPath)
-    }),
+    vscode.commands.registerCommand('hive.plan.doneReview', async () => {
+      const editor = vscode.window.activeTextEditor
+      if (!editor) return
 
-    vscode.commands.registerCommand('hive.viewStepReport', (item: { featureName?: string; stepFolder?: string }) => {
-      if (item?.featureName && item?.stepFolder) {
-        const reportViewProvider = new ReportViewProvider(context.extensionUri, hiveService, workspaceRoot)
-        reportViewProvider.show(item.featureName, item.stepFolder)
+      const filePath = editor.document.uri.fsPath
+      const featureMatch = filePath.match(/\.hive\/features\/([^/]+)\/plan\.md$/)
+      if (!featureMatch) {
+        vscode.window.showErrorMessage('Not a plan.md file')
+        return
       }
-    }),
 
-    vscode.commands.registerCommand('hive.revertStep', async (item: { featureName?: string; stepFolder?: string }) => {
-      if (item?.featureName && item?.stepFolder) {
-        const confirm = await vscode.window.showWarningMessage(
-          'Revert this step? Changes will be undone.',
-          { modal: true },
-          'Revert'
-        )
-        if (confirm === 'Revert') {
-          const result = await checkpointService.revertStep(item.featureName, item.stepFolder)
-          if (result.success) {
-            vscode.window.showInformationMessage('Step reverted')
-          } else {
-            vscode.window.showErrorMessage(`Failed to revert: ${result.error}`)
-          }
-          const sidebarProvider = new HiveSidebarProvider(hiveService)
-          sidebarProvider.refresh()
+      const featureName = featureMatch[1]
+      const featureJsonPath = path.join(workspaceRoot, '.hive', 'features', featureName, 'feature.json')
+      const commentsPath = path.join(workspaceRoot, '.hive', 'features', featureName, 'comments.json')
+
+      let sessionId: string | undefined
+      let comments: Array<{ body: string; line?: number }> = []
+
+      try {
+        const featureData = JSON.parse(fs.readFileSync(featureJsonPath, 'utf-8'))
+        sessionId = featureData.sessionId
+      } catch (error) {
+        console.warn(`Hive: failed to read sessionId for feature '${featureName}'`, error)
+      }
+
+      try {
+        const commentsData = JSON.parse(fs.readFileSync(commentsPath, 'utf-8'))
+        comments = commentsData.threads || []
+      } catch (error) {
+        console.warn(`Hive: failed to read comments for feature '${featureName}'`, error)
+      }
+
+      const hasComments = comments.length > 0
+      const inputPrompt = hasComments 
+        ? `${comments.length} comment(s) found. Add feedback or leave empty to submit comments only`
+        : 'Enter your review feedback (or leave empty to approve)'
+      
+      const userInput = await vscode.window.showInputBox({
+        prompt: inputPrompt,
+        placeHolder: hasComments ? 'Additional feedback (optional)' : 'e.g., "looks good" to approve, or describe changes needed'
+      })
+      
+      if (userInput === undefined) return
+
+      let prompt: string
+      if (hasComments) {
+        const allComments = comments.map(c => `Line ${c.line}: ${c.body}`).join('\n')
+        if (userInput === '') {
+          prompt = `User review comments:\n${allComments}`
+        } else {
+          prompt = `User review comments:\n${allComments}\n\nAdditional feedback: ${userInput}`
+        }
+      } else {
+        if (userInput === '') {
+          prompt = 'User reviewed the plan and approved. Run hive_plan_approve and then hive_tasks_sync.'
+        } else {
+          prompt = `User review feedback: "${userInput}"`
         }
       }
-    }),
 
-    vscode.commands.registerCommand('hive.revertBatch', async (item: { featureName?: string; order?: number }) => {
-      if (item?.featureName && item?.order) {
-        const confirm = await vscode.window.showWarningMessage(
-          `Revert batch ${item.order}? All steps in this batch will be reverted.`,
-          { modal: true },
-          'Revert'
-        )
-        if (confirm === 'Revert') {
-          const results = await checkpointService.revertBatch(item.featureName, item.order)
-          const failed = results.filter(r => !r.success)
-          if (failed.length === 0) {
-            vscode.window.showInformationMessage(`Batch ${item.order} reverted`)
-          } else {
-            vscode.window.showErrorMessage(`Some steps failed to revert: ${failed.map(f => f.error).join(', ')}`)
-          }
-          const sidebarProvider = new HiveSidebarProvider(hiveService)
-          sidebarProvider.refresh()
-        }
+      const shellEscapeSingleQuotes = (value: string): string => {
+        return `'${value.replace(/'/g, `'\"'\"'`)}'`
       }
-    }),
 
-    vscode.commands.registerCommand('hive.executeBatch', async (item: { featureName?: string; order?: number }) => {
-      if (item?.featureName && item?.order) {
-        const confirm = await vscode.window.showInformationMessage(
-          `Execute batch ${item.order}? This will run all pending steps in this batch.`,
-          { modal: true },
-          'Execute'
-        )
-        if (confirm === 'Execute') {
-          const terminal = vscode.window.createTerminal('OpenCode - Hive')
-          terminal.sendText(`opencode --command "/hive execute --batch ${item.order}"`)
-          terminal.show()
-        }
+      const terminal = vscode.window.createTerminal('OpenCode - Hive')
+      const escapedPrompt = shellEscapeSingleQuotes(prompt)
+
+      if (sessionId) {
+        const escapedSessionId = shellEscapeSingleQuotes(sessionId)
+        terminal.sendText(`opencode run --session ${escapedSessionId} ${escapedPrompt}`)
+      } else {
+        terminal.sendText(`opencode run ${escapedPrompt}`)
       }
+
+      terminal.show()
     })
   )
 
-  if (!hiveService.exists()) return
-
-  const sidebarProvider = new HiveSidebarProvider(hiveService)
-  vscode.window.registerTreeDataProvider('hive.features', sidebarProvider)
-
-  const panelProvider = new HivePanelProvider(context.extensionUri, hiveService)
-  context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider(HivePanelProvider.viewType, panelProvider)
-  )
-
   const watcher = new HiveWatcher(workspaceRoot, () => sidebarProvider.refresh())
-  context.subscriptions.push({ dispose: () => watcher.dispose() })
+  
+  context.subscriptions.push(
+    { dispose: () => watcher.dispose() }
+  )
 }
 
 export function deactivate(): void {}

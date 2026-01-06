@@ -1,305 +1,144 @@
-import { tool } from "@opencode-ai/plugin";
-import type { WorktreeService, DiffResult } from "../services/worktreeService.js";
-import { StepService } from "../services/stepService.js";
-import { FeatureService } from "../services/featureService.js";
-import { PlanService } from "../services/planService.js";
-import { CommentService } from "../services/commentService.js";
-import { readFile, writeFile } from "../utils/json.js";
-import { getFeaturePath, getStepPath } from "../utils/paths.js";
-import { assertFeatureMutable, assertStepMutable } from "../utils/immutability.js";
-import * as path from "path";
+import * as path from 'path';
+import { z } from 'zod';
+import { TaskService } from '../services/taskService.js';
+import { FeatureService } from '../services/featureService.js';
+import { WorktreeService } from '../services/worktreeService';
 
-export function createExecStartTool(
-  worktreeService: WorktreeService,
-  stepService: StepService,
-  featureService: FeatureService,
-  directory: string,
-  planService?: PlanService,
-  commentService?: CommentService
-) {
-  return tool({
-    description: "Create worktree and begin work on a step",
-    args: {
-      stepFolder: tool.schema.string().describe("Step folder name (e.g., 01-setup)"),
-      skipPlanCheck: tool.schema.boolean().optional().describe("Skip plan approval check (default: false)"),
-    },
-    async execute({ stepFolder, skipPlanCheck }) {
-      const featureName = await featureService.getActive();
-      if (!featureName) {
-        return "Error: No active feature.";
-      }
+export function createExecTools(projectRoot: string) {
+  const taskService = new TaskService(projectRoot);
+  const featureService = new FeatureService(projectRoot);
+  const worktreeService = new WorktreeService({
+    baseDir: projectRoot,
+    hiveDir: path.join(projectRoot, '.hive'),
+  });
 
-      const feature = await featureService.get(featureName);
-      if (!feature) {
-        return `Error: Feature "${featureName}" not found.`;
-      }
-      try {
-        await assertFeatureMutable(feature, featureName);
-      } catch (e) {
-        return `Error: ${(e as Error).message}`;
-      }
-
-      if (!skipPlanCheck && planService) {
-        const plan = await planService.getPlan(featureName);
-        
-        if (!plan) {
-          return JSON.stringify({
-            blocked: true,
-            reason: "no-plan",
-            message: "No plan generated. Run hive_plan_generate first, or use skipPlanCheck=true to bypass.",
-            action: "generate-plan",
-          }, null, 2);
+  return {
+    hive_exec_start: {
+      description: 'Create a git worktree and begin work on a task. Sets task status to in_progress.',
+      parameters: z.object({
+        task: z.string().describe('Task folder name (e.g., "01-auth-service")'),
+        featureName: z.string().optional().describe('Feature name (defaults to active feature)'),
+      }),
+      execute: async ({ task, featureName }: { task: string; featureName?: string }) => {
+        const feature = featureName || featureService.getActive();
+        if (!feature) {
+          return { error: 'No active feature.' };
         }
 
-        if (plan.status === "draft") {
-          const unresolvedComments = commentService 
-            ? await commentService.getUnresolvedComments(featureName)
-            : [];
-          
-          return JSON.stringify({
-            blocked: true,
-            reason: "not-approved",
-            message: "Plan not approved. Review and approve the plan before execution, or use skipPlanCheck=true to bypass.",
-            planPath: planService.getPlanPath(featureName),
-            unresolvedComments: unresolvedComments.length,
-            action: "open-plan-review",
-          }, null, 2);
+        const featureData = featureService.get(feature);
+        if (!featureData || featureData.status === 'planning') {
+          return { error: 'Feature must be approved before starting execution.' };
         }
 
-        if (plan.status === "locked") {
-          // Already locked - this is fine, execution is in progress
+        const taskInfo = taskService.get(feature, task);
+        if (!taskInfo) {
+          return { error: `Task '${task}' not found` };
         }
 
-        // Lock the plan on first step execution
-        if (plan.status === "approved") {
-          await planService.lock(featureName);
+        if (taskInfo.status === 'done') {
+          return { error: `Task '${task}' is already completed` };
         }
-      }
 
-      const step = await stepService.read(featureName, stepFolder);
-      if (!step) {
-        return `Error: Step "${stepFolder}" not found.`;
-      }
-      if (step.status === "done") {
-        return `Error: Step "${stepFolder}" is already completed. Use hive_exec_revert first if you need to redo it.`;
-      }
+        if (taskInfo.status === 'in_progress') {
+          const existing = await worktreeService.get(feature, task);
+          if (existing) {
+            return { 
+              worktreePath: existing.path,
+              branch: existing.branch,
+              message: `Task already in progress. Worktree at ${existing.path}`,
+            };
+          }
+        }
 
-      const worktree = await worktreeService.create(featureName, stepFolder);
+        const worktree = await worktreeService.create(feature, task);
+        taskService.update(feature, task, { status: 'in_progress' });
 
-      await stepService.update(featureName, stepFolder, {
-        status: "in_progress",
-        sessionId: undefined,
-      });
-
-      const spec = step?.spec || "(no spec)";
-
-      return JSON.stringify(
-        {
+        return {
           worktreePath: worktree.path,
           branch: worktree.branch,
-          spec,
-          instructions: `Work in ${worktree.path}. When done, call hive_exec_complete with stepFolder="${stepFolder}".`,
-        },
-        null,
-        2
-      );
+          message: `Worktree created at ${worktree.path}. Work on branch ${worktree.branch}.`,
+        };
+      },
     },
-  });
-}
 
-export function createExecCompleteTool(
-  worktreeService: WorktreeService,
-  stepService: StepService,
-  featureService: FeatureService,
-  directory: string
-) {
-  return tool({
-    description: "Apply changes, mark step as done, save diff",
-    args: {
-      stepFolder: tool.schema.string().describe("Step folder name"),
-      summary: tool.schema.string().describe("Completion summary"),
+    hive_exec_complete: {
+      description: 'Complete a task: commit changes, apply to main branch, write report, cleanup worktree.',
+      parameters: z.object({
+        task: z.string().describe('Task folder name'),
+        summary: z.string().describe('Summary of what was done'),
+        report: z.string().optional().describe('Detailed report (markdown). If not provided, summary is used.'),
+        featureName: z.string().optional().describe('Feature name (defaults to active feature)'),
+      }),
+      execute: async ({ task, summary, report, featureName }: { task: string; summary: string; report?: string; featureName?: string }) => {
+        const feature = featureName || featureService.getActive();
+        if (!feature) {
+          return { error: 'No active feature.' };
+        }
+
+        const taskInfo = taskService.get(feature, task);
+        if (!taskInfo) {
+          return { error: `Task '${task}' not found` };
+        }
+
+        if (taskInfo.status !== 'in_progress') {
+          return { error: `Task '${task}' is not in progress (status: ${taskInfo.status})` };
+        }
+
+        const worktree = await worktreeService.get(feature, task);
+        if (!worktree) {
+          return { error: `No worktree found for task '${task}'` };
+        }
+
+        const diff = await worktreeService.getDiff(feature, task);
+        if (diff) {
+          await worktreeService.applyDiff(feature, task);
+        }
+
+        const reportContent = report || `# ${task}\n\n## Summary\n\n${summary}\n`;
+        taskService.writeReport(feature, task, reportContent);
+        taskService.update(feature, task, { status: 'done', summary });
+
+        await worktreeService.remove(feature, task);
+
+        return {
+          completed: true,
+          task,
+          summary,
+          message: `Task '${task}' completed. Changes applied to main branch.`,
+        };
+      },
     },
-    async execute({ stepFolder, summary }) {
-      const featureName = await featureService.getActive();
-      if (!featureName) {
-        return "Error: No active feature.";
-      }
 
-      const feature = await featureService.get(featureName);
-      if (!feature) {
-        return `Error: Feature "${featureName}" not found.`;
-      }
-      try {
-        await assertFeatureMutable(feature, featureName);
-      } catch (e) {
-        return `Error: ${(e as Error).message}`;
-      }
+    hive_exec_abort: {
+      description: 'Abort work on a task: discard changes, cleanup worktree, reset status to pending.',
+      parameters: z.object({
+        task: z.string().describe('Task folder name'),
+        featureName: z.string().optional().describe('Feature name (defaults to active feature)'),
+      }),
+      execute: async ({ task, featureName }: { task: string; featureName?: string }) => {
+        const feature = featureName || featureService.getActive();
+        if (!feature) {
+          return { error: 'No active feature.' };
+        }
 
-      const step = await stepService.read(featureName, stepFolder);
-      if (!step) {
-        return `Error: Step "${stepFolder}" not found.`;
-      }
-      if (step.status !== "in_progress") {
-        return `Error: Step "${stepFolder}" is not in progress (current status: ${step.status}). Use hive_exec_start first.`;
-      }
+        const taskInfo = taskService.get(feature, task);
+        if (!taskInfo) {
+          return { error: `Task '${task}' not found` };
+        }
 
-      const diff = await worktreeService.getDiff(featureName, stepFolder);
-      const featurePath = getFeaturePath(directory, featureName);
-      const stepPath = getStepPath(featurePath, stepFolder);
+        if (taskInfo.status !== 'in_progress') {
+          return { error: `Task '${task}' is not in progress` };
+        }
 
-      if (diff.hasDiff) {
-        await writeFile(path.join(stepPath, "output.diff"), diff.diffContent);
-      }
+        await worktreeService.remove(feature, task);
+        taskService.update(feature, task, { status: 'pending' });
 
-      const applyResult = await worktreeService.applyDiff(featureName, stepFolder);
-      if (!applyResult.success) {
-        return `Error applying changes: ${applyResult.error}`;
-      }
-
-      await stepService.update(featureName, stepFolder, {
-        status: "done",
-        summary,
-      });
-
-      return JSON.stringify(
-        {
-          success: true,
-          filesAffected: applyResult.filesAffected,
-          diffStats: {
-            filesChanged: diff.filesChanged.length,
-            insertions: diff.insertions,
-            deletions: diff.deletions,
-          },
-        },
-        null,
-        2
-      );
+        return {
+          aborted: true,
+          task,
+          message: `Task '${task}' aborted. Worktree removed, status reset to pending.`,
+        };
+      },
     },
-  });
-}
-
-export function createExecAbortTool(
-  worktreeService: WorktreeService,
-  stepService: StepService,
-  featureService: FeatureService,
-  directory: string
-) {
-  return tool({
-    description: "Abandon worktree and reset step to pending",
-    args: {
-      stepFolder: tool.schema.string().describe("Step folder name"),
-    },
-    async execute({ stepFolder }) {
-      const featureName = await featureService.getActive();
-      if (!featureName) {
-        return "Error: No active feature.";
-      }
-
-      const feature = await featureService.get(featureName);
-      if (!feature) {
-        return `Error: Feature "${featureName}" not found.`;
-      }
-      try {
-        await assertFeatureMutable(feature, featureName);
-      } catch (e) {
-        return `Error: ${(e as Error).message}`;
-      }
-
-      const step = await stepService.read(featureName, stepFolder);
-      if (!step) {
-        return `Error: Step "${stepFolder}" not found.`;
-      }
-
-      await worktreeService.remove(featureName, stepFolder, true);
-
-      await stepService.update(featureName, stepFolder, {
-        status: "pending",
-        summary: undefined,
-        sessionId: undefined,
-      });
-
-      return `Step "${stepFolder}" aborted and reset to pending.`;
-    },
-  });
-}
-
-export function createExecRevertTool(
-  worktreeService: WorktreeService,
-  stepService: StepService,
-  featureService: FeatureService,
-  directory: string
-) {
-  return tool({
-    description: "Revert a completed step's changes",
-    args: {
-      stepFolder: tool.schema.string().describe("Step folder name"),
-    },
-    async execute({ stepFolder }) {
-      const featureName = await featureService.getActive();
-      if (!featureName) {
-        return "Error: No active feature.";
-      }
-
-      const feature = await featureService.get(featureName);
-      if (!feature) {
-        return `Error: Feature "${featureName}" not found.`;
-      }
-      try {
-        await assertFeatureMutable(feature, featureName);
-      } catch (e) {
-        return `Error: ${(e as Error).message}`;
-      }
-
-      const step = await stepService.read(featureName, stepFolder);
-      if (!step) {
-        return `Error: Step "${stepFolder}" not found.`;
-      }
-      if (step.status !== "done") {
-        return `Error: Step "${stepFolder}" is not completed (current status: ${step.status}). Only completed steps can be reverted.`;
-      }
-
-      const featurePath = getFeaturePath(directory, featureName);
-      const stepPath = getStepPath(featurePath, stepFolder);
-      const diffPath = path.join(stepPath, "output.diff");
-
-      const diffContent = await readFile(diffPath);
-      if (!diffContent) {
-        return `Error: No diff saved for step "${stepFolder}"`;
-      }
-
-      if (!diffContent.trim()) {
-        await stepService.update(featureName, stepFolder, { status: "pending", summary: undefined });
-        return JSON.stringify({ success: true, filesReverted: [] }, null, 2);
-      }
-
-      const conflicts = await worktreeService.checkConflictsFromSavedDiff(diffPath, true);
-      if (conflicts.length > 0) {
-        return JSON.stringify(
-          {
-            success: false,
-            error: "Revert would cause conflicts",
-            conflictFiles: conflicts,
-          },
-          null,
-          2
-        );
-      }
-
-      const revertResult = await worktreeService.revertFromSavedDiff(diffPath);
-      if (!revertResult.success) {
-        return `Error reverting: ${revertResult.error}`;
-      }
-
-      await stepService.update(featureName, stepFolder, { status: "pending", summary: undefined });
-
-      return JSON.stringify(
-        {
-          success: true,
-          filesReverted: revertResult.filesAffected,
-        },
-        null,
-        2
-      );
-    },
-  });
+  };
 }

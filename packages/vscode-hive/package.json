@@ -1,10 +1,28 @@
 {
   "name": "vscode-hive",
   "displayName": "Hive",
-  "description": "Context-Driven Development UI",
-  "version": "0.3.0",
+  "description": "From Vibe Coding to Hive Coding - Review and approve AI-generated plans",
+  "version": "0.4.0",
   "publisher": "tctinh",
-  "license": "CC-BY-NC-4.0",
+  "license": "MIT WITH Commons-Clause",
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tctinh/agent-hive.git",
+    "directory": "packages/vscode-hive"
+  },
+  "homepage": "https://github.com/tctinh/agent-hive#readme",
+  "bugs": {
+    "url": "https://github.com/tctinh/agent-hive/issues"
+  },
+  "keywords": [
+    "ai",
+    "hive",
+    "vibe-coding",
+    "opencode",
+    "planning",
+    "workflow"
+  ],
   "engines": {
     "vscode": "^1.80.0"
   },
@@ -49,7 +67,6 @@
         "title": "Open in OpenCode",
         "icon": "$(terminal)"
       },
-
       {
         "command": "hive.viewReport",
         "title": "View Report",
@@ -83,6 +100,29 @@
         "command": "hive.executeBatch",
         "title": "Execute Batch",
         "icon": "$(run)"
+      },
+      {
+        "command": "hive.plan.doneReview",
+        "title": "Done Review",
+        "icon": "$(check)"
+      },
+      {
+        "command": "hive.comment.create",
+        "title": "Add Comment",
+        "enablement": "!commentIsEmpty"
+      },
+      {
+        "command": "hive.comment.reply",
+        "title": "Reply",
+        "enablement": "!commentIsEmpty"
+      },
+      {
+        "command": "hive.comment.resolve",
+        "title": "Resolve Thread"
+      },
+      {
+        "command": "hive.comment.delete",
+        "title": "Delete Comment"
       }
     ],
     "menus": {
@@ -109,7 +149,6 @@
           "when": "viewItem == step",
           "group": "inline"
         },
-
         {
           "command": "hive.viewReport",
           "when": "viewItem == feature"
@@ -138,11 +177,42 @@
           "when": "viewItem == batchPending",
           "group": "inline"
         }
+      ],
+      "editor/title": [
+        {
+          "command": "hive.plan.doneReview",
+          "when": "resourceFilename == plan.md",
+          "group": "navigation"
+        }
+      ],
+      "comments/commentThread/context": [
+        {
+          "command": "hive.comment.create",
+          "group": "inline",
+          "when": "commentController == hive-plan-review && commentThreadIsEmpty"
+        },
+        {
+          "command": "hive.comment.reply",
+          "group": "inline",
+          "when": "commentController == hive-plan-review && !commentThreadIsEmpty"
+        },
+        {
+          "command": "hive.comment.resolve",
+          "group": "inline",
+          "when": "commentController == hive-plan-review && !commentThreadIsEmpty"
+        }
+      ],
+      "comments/comment/title": [
+        {
+          "command": "hive.comment.delete",
+          "group": "inline",
+          "when": "commentController == hive-plan-review"
+        }
       ]
     }
   },
   "scripts": {
-    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
+    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap && vsce package --no-dependencies -o vscode-hive.vsix",
     "watch": "npm run build -- --watch",
     "build:types": "tsc --emitDeclarationOnly"
   },

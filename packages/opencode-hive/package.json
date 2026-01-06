@@ -1,8 +1,28 @@
 {
-  "name": "@agent-hive/opencode-plugin",
+  "name": "opencode-hive",
   "version": "0.2.0",
   "type": "module",
-  "description": "OpenCode plugin for agent-hive - context-driven development workflow",
+  "description": "OpenCode plugin for Agent Hive - from vibe coding to hive coding",
+  "license": "MIT WITH Commons-Clause",
+  "author": "tctinh",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tctinh/agent-hive.git",
+    "directory": "packages/opencode-hive"
+  },
+  "homepage": "https://github.com/tctinh/agent-hive#readme",
+  "bugs": {
+    "url": "https://github.com/tctinh/agent-hive/issues"
+  },
+  "keywords": [
+    "opencode",
+    "ai",
+    "hive",
+    "vibe-coding",
+    "workflow",
+    "planning",
+    "agent"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {

@@ -118,7 +118,7 @@ describe("WorktreeService", () => {
       expect(diff.filesChanged).toEqual([]);
     });
 
-    it("returns diff when files changed", async () => {
+    it("returns diff when files changed and committed", async () => {
       const worktree = await service.create("my-feature", "01-task");
       fs.writeFileSync(path.join(worktree.path, "new-file.txt"), "content");
       const { execSync } = await import("child_process");
@@ -129,6 +129,99 @@ describe("WorktreeService", () => {
 
       expect(diff.hasDiff).toBe(true);
       expect(diff.filesChanged).toContain("new-file.txt");
+    });
+
+    it("returns diff for uncommitted staged changes", async () => {
+      const worktree = await service.create("my-feature", "01-task");
+      fs.writeFileSync(path.join(worktree.path, "uncommitted.txt"), "staged content");
+
+      const diff = await service.getDiff("my-feature", "01-task");
+
+      expect(diff.hasDiff).toBe(true);
+      expect(diff.filesChanged).toContain("uncommitted.txt");
+    });
+  });
+
+  describe("commitChanges", () => {
+    it("commits all staged changes", async () => {
+      const worktree = await service.create("my-feature", "01-task");
+      fs.writeFileSync(path.join(worktree.path, "file.txt"), "content");
+
+      const result = await service.commitChanges("my-feature", "01-task", "test commit");
+
+      expect(result.committed).toBe(true);
+      expect(result.sha).toBeTruthy();
+    });
+
+    it("returns committed=false when no changes", async () => {
+      await service.create("my-feature", "01-task");
+
+      const result = await service.commitChanges("my-feature", "01-task");
+
+      expect(result.committed).toBe(false);
+      expect(result.message).toBe("No changes to commit");
+    });
+
+    it("returns error when worktree not found", async () => {
+      const result = await service.commitChanges("nope", "nope");
+
+      expect(result.committed).toBe(false);
+      expect(result.message).toBe("Worktree not found");
+    });
+  });
+
+  describe("hasUncommittedChanges", () => {
+    it("returns false when no changes", async () => {
+      await service.create("my-feature", "01-task");
+
+      const result = await service.hasUncommittedChanges("my-feature", "01-task");
+
+      expect(result).toBe(false);
+    });
+
+    it("returns true when files modified", async () => {
+      const worktree = await service.create("my-feature", "01-task");
+      fs.writeFileSync(path.join(worktree.path, "new.txt"), "content");
+
+      const result = await service.hasUncommittedChanges("my-feature", "01-task");
+
+      expect(result).toBe(true);
+    });
+  });
+
+  describe("merge", () => {
+    it("merges task branch into main", async () => {
+      const worktree = await service.create("my-feature", "01-task");
+      fs.writeFileSync(path.join(worktree.path, "feature.txt"), "feature content");
+      const { execSync } = await import("child_process");
+      execSync("git add . && git commit -m 'feature'", { cwd: worktree.path });
+
+      const result = await service.merge("my-feature", "01-task");
+
+      expect(result.success).toBe(true);
+      expect(result.merged).toBe(true);
+      expect(fs.existsSync(path.join(TEST_ROOT, "feature.txt"))).toBe(true);
+    });
+
+    it("returns error for non-existent branch", async () => {
+      const result = await service.merge("nope", "nope");
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("not found");
+    });
+
+    it("supports squash strategy", async () => {
+      const worktree = await service.create("my-feature", "01-task");
+      fs.writeFileSync(path.join(worktree.path, "file1.txt"), "1");
+      const { execSync } = await import("child_process");
+      execSync("git add . && git commit -m 'commit 1'", { cwd: worktree.path });
+      fs.writeFileSync(path.join(worktree.path, "file2.txt"), "2");
+      execSync("git add . && git commit -m 'commit 2'", { cwd: worktree.path });
+
+      const result = await service.merge("my-feature", "01-task", "squash");
+
+      expect(result.success).toBe(true);
+      expect(result.merged).toBe(true);
     });
   });
 

@@ -24,6 +24,21 @@ export interface ApplyResult {
   filesAffected: string[];
 }
 
+export interface CommitResult {
+  committed: boolean;
+  sha: string;
+  message?: string;
+}
+
+export interface MergeResult {
+  success: boolean;
+  merged: boolean;
+  sha?: string;
+  filesChanged?: string[];
+  conflicts?: string[];
+  error?: string;
+}
+
 export interface WorktreeConfig {
   baseDir: string;
   hiveDir: string;
@@ -142,8 +157,21 @@ export class WorktreeService {
 
     try {
       await worktreeGit.raw(["add", "-A"]);
-      const diffContent = await worktreeGit.diff([`${base}...HEAD`]);
-      const stat = await worktreeGit.diff([`${base}...HEAD`, "--stat"]);
+      
+      const status = await worktreeGit.status();
+      const hasStaged = status.staged.length > 0;
+      
+      let diffContent = "";
+      let stat = "";
+      
+      if (hasStaged) {
+        diffContent = await worktreeGit.diff(["--cached"]);
+        stat = diffContent ? await worktreeGit.diff(["--cached", "--stat"]) : "";
+      } else {
+        diffContent = await worktreeGit.diff([`${base}..HEAD`]).catch(() => "");
+        stat = diffContent ? await worktreeGit.diff([`${base}..HEAD`, "--stat"]) : "";
+      }
+      
       const statLines = stat.split("\n").filter((l) => l.trim());
 
       const filesChanged = statLines
@@ -424,6 +452,150 @@ export class WorktreeService {
 
       return conflicts;
     }
+  }
+
+  async commitChanges(feature: string, step: string, message?: string): Promise<CommitResult> {
+    const worktreePath = this.getWorktreePath(feature, step);
+    
+    try {
+      await fs.access(worktreePath);
+    } catch {
+      return { committed: false, sha: "", message: "Worktree not found" };
+    }
+
+    const worktreeGit = this.getGit(worktreePath);
+
+    try {
+      await worktreeGit.add("-A");
+      
+      const status = await worktreeGit.status();
+      const hasChanges = status.staged.length > 0 || status.modified.length > 0 || status.not_added.length > 0;
+      
+      if (!hasChanges) {
+        const currentSha = (await worktreeGit.revparse(["HEAD"])).trim();
+        return { committed: false, sha: currentSha, message: "No changes to commit" };
+      }
+
+      const commitMessage = message || `hive(${step}): task changes`;
+      const result = await worktreeGit.commit(commitMessage, ["--allow-empty-message"]);
+      
+      return { 
+        committed: true, 
+        sha: result.commit,
+        message: commitMessage,
+      };
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      const currentSha = (await worktreeGit.revparse(["HEAD"]).catch(() => "")).trim();
+      return { 
+        committed: false, 
+        sha: currentSha,
+        message: err.message || "Commit failed",
+      };
+    }
+  }
+
+  async merge(feature: string, step: string, strategy: 'merge' | 'squash' | 'rebase' = 'merge'): Promise<MergeResult> {
+    const branchName = this.getBranchName(feature, step);
+    const git = this.getGit();
+
+    try {
+      const branches = await git.branch();
+      if (!branches.all.includes(branchName)) {
+        return { success: false, merged: false, error: `Branch ${branchName} not found` };
+      }
+
+      const currentBranch = branches.current;
+
+      const diffStat = await git.diff([`${currentBranch}...${branchName}`, "--stat"]);
+      const filesChanged = diffStat
+        .split("\n")
+        .filter(l => l.trim() && l.includes("|"))
+        .map(l => l.split("|")[0].trim());
+
+      if (strategy === 'squash') {
+        await git.raw(["merge", "--squash", branchName]);
+        const result = await git.commit(`hive: merge ${step} (squashed)`);
+        return {
+          success: true,
+          merged: true,
+          sha: result.commit,
+          filesChanged,
+        };
+      } else if (strategy === 'rebase') {
+        const commits = await git.log([`${currentBranch}..${branchName}`]);
+        const commitsToApply = [...commits.all].reverse();
+        for (const commit of commitsToApply) {
+          await git.raw(["cherry-pick", commit.hash]);
+        }
+        const head = (await git.revparse(["HEAD"])).trim();
+        return {
+          success: true,
+          merged: true,
+          sha: head,
+          filesChanged,
+        };
+      } else {
+        const result = await git.merge([branchName, "--no-ff", "-m", `hive: merge ${step}`]);
+        const head = (await git.revparse(["HEAD"])).trim();
+        return {
+          success: true,
+          merged: !result.failed,
+          sha: head,
+          filesChanged,
+          conflicts: result.conflicts?.map(c => c.file || String(c)) || [],
+        };
+      }
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      
+      if (err.message?.includes("CONFLICT") || err.message?.includes("conflict")) {
+        await git.raw(["merge", "--abort"]).catch(() => {});
+        await git.raw(["rebase", "--abort"]).catch(() => {});
+        await git.raw(["cherry-pick", "--abort"]).catch(() => {});
+        
+        return {
+          success: false,
+          merged: false,
+          error: "Merge conflicts detected",
+          conflicts: this.parseConflictsFromError(err.message || ""),
+        };
+      }
+
+      return {
+        success: false,
+        merged: false,
+        error: err.message || "Merge failed",
+      };
+    }
+  }
+
+  async hasUncommittedChanges(feature: string, step: string): Promise<boolean> {
+    const worktreePath = this.getWorktreePath(feature, step);
+    
+    try {
+      const worktreeGit = this.getGit(worktreePath);
+      const status = await worktreeGit.status();
+      return status.modified.length > 0 || 
+             status.not_added.length > 0 || 
+             status.staged.length > 0 ||
+             status.deleted.length > 0 ||
+             status.created.length > 0;
+    } catch {
+      return false;
+    }
+  }
+
+  private parseConflictsFromError(errorMessage: string): string[] {
+    const conflicts: string[] = [];
+    const lines = errorMessage.split("\n");
+    for (const line of lines) {
+      if (line.includes("CONFLICT") && line.includes("Merge conflict in")) {
+        const match = line.match(/Merge conflict in (.+)/);
+        if (match) conflicts.push(match[1]);
+      }
+    }
+    return conflicts;
   }
 }
 

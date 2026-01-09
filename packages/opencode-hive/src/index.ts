@@ -13,7 +13,7 @@ const HIVE_SYSTEM_PROMPT = `
 
 Plan-first development: Write plan → User reviews → Approve → Execute tasks
 
-### Tools (16 total)
+### Tools (17 total)
 
 | Domain | Tools |
 |--------|-------|
@@ -21,6 +21,7 @@ Plan-first development: Write plan → User reviews → Approve → Execute task
 | Plan | hive_plan_write, hive_plan_read, hive_plan_approve |
 | Task | hive_tasks_sync, hive_task_create, hive_task_update |
 | Exec | hive_exec_start, hive_exec_complete, hive_exec_abort |
+| Merge | hive_merge, hive_worktree_list |
 | Context | hive_context_write, hive_context_read, hive_context_list |
 | Session | hive_session_open, hive_session_list |
 
@@ -31,7 +32,11 @@ Plan-first development: Write plan → User reviews → Approve → Execute task
 3. User adds comments in VSCode → \`hive_plan_read\` to see them
 4. Revise plan → User approves
 5. \`hive_tasks_sync()\` - Generate tasks from plan
-6. \`hive_exec_start(task)\` → work → \`hive_exec_complete(task, summary)\`
+6. \`hive_exec_start(task)\` → work in worktree → \`hive_exec_complete(task, summary)\`
+7. \`hive_merge(task)\` - Merge task branch into main (when ready)
+
+**Important:** \`hive_exec_complete\` commits changes to task branch but does NOT merge.
+Use \`hive_merge\` to explicitly integrate changes. Worktrees persist until manually removed.
 
 ### Plan Format
 
@@ -323,7 +328,7 @@ const plugin: Plugin = async (ctx) => {
       }),
 
       hive_exec_complete: tool({
-        description: 'Complete task: apply changes, write report',
+        description: 'Complete task: commit changes to branch, write report (does NOT merge or cleanup)',
         args: {
           task: tool.schema.string().describe('Task folder name'),
           summary: tool.schema.string().describe('Summary of what was done'),
@@ -337,24 +342,17 @@ const plugin: Plugin = async (ctx) => {
           if (!taskInfo) return `Error: Task "${task}" not found`;
           if (taskInfo.status !== 'in_progress') return "Error: Task not in progress";
 
-          const diff = await worktreeService.getDiff(feature, task);
-          let changesApplied = false;
-          let applyError = "";
+          const commitResult = await worktreeService.commitChanges(feature, task, `hive(${task}): ${summary.slice(0, 50)}`);
           
-          if (diff?.hasDiff) {
-            const result = await worktreeService.applyDiff(feature, task);
-            changesApplied = result.success;
-            if (!result.success) {
-              applyError = result.error || "Unknown apply error";
-            }
-          }
+          const diff = await worktreeService.getDiff(feature, task);
 
           const reportLines: string[] = [
             `# Task Report: ${task}`,
             '',
             `**Feature:** ${feature}`,
             `**Completed:** ${new Date().toISOString()}`,
-            `**Status:** ${applyError ? 'completed with errors' : 'success'}`,
+            `**Status:** success`,
+            `**Commit:** ${commitResult.sha || 'none'}`,
             '',
             '---',
             '',
@@ -390,12 +388,8 @@ const plugin: Plugin = async (ctx) => {
           taskService.writeReport(feature, task, reportLines.join('\n'));
           taskService.update(feature, task, { status: 'done', summary });
 
-          await worktreeService.remove(feature, task);
-
-          if (applyError) {
-            return `Task "${task}" completed but changes failed to apply: ${applyError}`;
-          }
-          return `Task "${task}" completed.${changesApplied ? " Changes applied." : ""}`;
+          const worktree = await worktreeService.get(feature, task);
+          return `Task "${task}" completed. Changes committed to branch ${worktree?.branch || 'unknown'}.\nUse hive_merge to integrate changes. Worktree preserved at ${worktree?.path || 'unknown'}.`;
         },
       }),
 
@@ -413,6 +407,55 @@ const plugin: Plugin = async (ctx) => {
           taskService.update(feature, task, { status: 'pending' });
 
           return `Task "${task}" aborted. Status reset to pending.`;
+        },
+      }),
+
+      hive_merge: tool({
+        description: 'Merge completed task branch into current branch (explicit integration)',
+        args: {
+          task: tool.schema.string().describe('Task folder name to merge'),
+          strategy: tool.schema.enum(['merge', 'squash', 'rebase']).optional().describe('Merge strategy (default: merge)'),
+          feature: tool.schema.string().optional().describe('Feature name (defaults to active)'),
+        },
+        async execute({ task, strategy = 'merge', feature: explicitFeature }) {
+          const feature = resolveFeature(explicitFeature);
+          if (!feature) return "Error: No feature specified. Create a feature or provide feature param.";
+
+          const taskInfo = taskService.get(feature, task);
+          if (!taskInfo) return `Error: Task "${task}" not found`;
+          if (taskInfo.status !== 'done') return "Error: Task must be completed before merging. Use hive_exec_complete first.";
+
+          const result = await worktreeService.merge(feature, task, strategy);
+          
+          if (!result.success) {
+            if (result.conflicts && result.conflicts.length > 0) {
+              return `Merge failed with conflicts in:\n${result.conflicts.map(f => `- ${f}`).join('\n')}\n\nResolve conflicts manually or try a different strategy.`;
+            }
+            return `Merge failed: ${result.error}`;
+          }
+
+          return `Task "${task}" merged successfully using ${strategy} strategy.\nCommit: ${result.sha}\nFiles changed: ${result.filesChanged?.length || 0}`;
+        },
+      }),
+
+      hive_worktree_list: tool({
+        description: 'List all worktrees for current feature',
+        args: {
+          feature: tool.schema.string().optional().describe('Feature name (defaults to active)'),
+        },
+        async execute({ feature: explicitFeature }) {
+          const feature = resolveFeature(explicitFeature);
+          if (!feature) return "Error: No feature specified. Create a feature or provide feature param.";
+
+          const worktrees = await worktreeService.list(feature);
+          if (worktrees.length === 0) return "No worktrees found for this feature.";
+
+          const lines: string[] = ['| Task | Branch | Has Changes |', '|------|--------|-------------|'];
+          for (const wt of worktrees) {
+            const hasChanges = await worktreeService.hasUncommittedChanges(wt.feature, wt.step);
+            lines.push(`| ${wt.step} | ${wt.branch} | ${hasChanges ? 'Yes' : 'No'} |`);
+          }
+          return lines.join('\n');
         },
       }),
 

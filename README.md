@@ -25,6 +25,7 @@ Vibe coding is powerful but chaotic. Without structure:
 | **Scope creep** | "Add dark mode" becomes "rewrite the entire theme system." |
 | **Messes to clean up** | Agent changes 47 files. Half are broken. Good luck reverting. |
 | **No audit trail** | "What happened?" Nobody knows. Logs scattered everywhere. |
+| **Agent hallucination** | Agent invents solutions that don't fit your codebase. No grounding. |
 
 ---
 
@@ -37,8 +38,28 @@ Vibe coding is powerful but chaotic. Without structure:
 | Scope creep | **Plan approval gate** — Human shapes, agent builds |
 | Messes to clean up | **Worktree isolation** — Each task isolated, easy discard |
 | No audit trail | **Automatic tracking** — Every task logged to `.hive/` |
+| Agent hallucination | **TDD subtasks** — Tests ground the agent, verify work, 2-3x quality |
 
-**Hive doesn't change how you work. It makes what happens traceable and auditable.**
+**Hive doesn't change how you work. It makes what happens traceable, auditable, and grounded.**
+
+---
+
+## Built on Battle-Tested Principles
+
+We studied what actually works in the AI coding community and built upon it:
+
+| Source | What We Learned | Hive Implementation |
+|--------|-----------------|---------------------|
+| **[Boris Cherny's 13 Tips](https://www.anthropic.com/research/claude-code-best-practices)** | Feedback loops = 2-3x quality | TDD subtasks with spec.md/report.md |
+| **[Spec Kit](https://github.com/github/spec-kit)** | Specs are valuable | Specs emerge from dialogue, not upfront |
+| **[Conductor](https://github.com/gemini-cli-extensions/conductor)** | Context persistence matters | Feature-scoped `.hive/context/` |
+| **[Ralph Wiggum](https://awesomeclaude.ai/ralph-wiggum)** | Retry loops work for verification | TDD loops, not infinite retries |
+| **[Oh My OpenCode](https://github.com/code-yeongyu/oh-my-opencode)** | Agent delegation scales | OMO as Hive Queen, Hive as workflow |
+| **Antigravity** | Plan gates build trust | Plan → Approve → Execute workflow |
+
+> *"Give Claude a way to verify its work. When Claude has a feedback loop, it will 2-3x the quality of the final result."* — Boris Cherny
+
+See [PHILOSOPHY.md](PHILOSOPHY.md) for the full breakdown of what we learned from each tool.
 
 ---
 
@@ -96,7 +117,9 @@ Main Agent: Creates plan, you approve it
     │
     ├── Batch 1 (parallel):
     │   ├── Task A (own worktree, tracked)
+    │   │   └── Subtasks: test → implement → verify
     │   ├── Task B (own worktree, tracked)
+    │   │   └── Subtasks: test → implement → verify
     │   └── Task C (own worktree, tracked)
     │           ↓
     │      Context flows forward
@@ -316,43 +339,16 @@ Clean git history (worktree merges), full documentation (generated as you work),
 
 ## Philosophy
 
-Hive is built on 6 core principles, grounded in [battle-tested practices from the AI coding community](https://www.anthropic.com/research/claude-code-best-practices):
+Hive is built on 6 core principles:
 
-1. **Context Persists** — Calibration survives sessions. The "3 months later" problem solved. *(Boris's Tip 4)*
-2. **Plan → Approve → Execute** — Dialogue until approved, then trust. Two phases with a clear gate. *(Boris's Tip 6)*
+1. **Context Persists** — Calibration survives sessions. The "3 months later" problem solved.
+2. **Plan → Approve → Execute** — Dialogue until approved, then trust. Two phases with a clear gate.
 3. **Human Shapes, Agent Builds** — Human owns the why. Agent owns the how.
 4. **Good Enough Wins** — Capture what works for this context. Reject over-engineering.
-5. **Batched Parallelism** — Parallel tasks in batches. Sequential batches share context. *(Boris's Tip 8)*
-6. **Tests Define Done** — For implementation tasks, tests provide the feedback loop. TDD for agents. *(Boris's Tip 13)*
-
-> *"Give Claude a way to verify its work. When Claude has a feedback loop, it will 2-3x the quality of the final result."* — Boris Cherny
+5. **Batched Parallelism** — Parallel tasks in batches. Sequential batches share context.
+6. **Tests Define Done** — For implementation tasks, tests provide the feedback loop. TDD for agents.
 
 See [PHILOSOPHY.md](PHILOSOPHY.md) for the full framework.
-
----
-
-## TDD Subtasks
-
-Break complex tasks into subtasks with their own `spec.md` (what to do) and `report.md` (what was done):
-
-```
-tasks/01-auth-service/
-├── spec.md
-├── report.md
-└── subtasks/
-    ├── 1-write-failing-tests/
-    │   ├── spec.md      ← Test requirements
-    │   └── report.md    ← Tests written, all failing ✓
-    ├── 2-implement-service/
-    │   ├── spec.md      ← Implementation approach
-    │   └── report.md    ← All tests passing ✓
-    └── 3-verify-coverage/
-        └── report.md    ← Final verification ✓
-```
-
-**Subtask types:** `test`, `implement`, `verify`, `review`, `research`, `debug`, `custom`
-
-**Smart click in VS Code:** Click subtask → opens `spec.md` (pending) or `report.md` (done)
 
 ---
 

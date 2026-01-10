@@ -245,6 +245,132 @@ Hive works WITH existing tools, not instead of them.
 
 ---
 
+## What We Learned From Others
+
+Hive didn't emerge in a vacuum. We studied existing tools, took what worked, and built upon them.
+
+### From Spec Kit (GitHub)
+
+**What they do well:**
+- Structured specifications before coding
+- Clear contracts between human intent and agent execution
+- Documentation as a first-class artifact
+
+**What we learned:**
+- Specs are valuable, but requiring them UPFRONT is too heavy
+- Most developers won't write detailed specs before they understand the problem
+- Specs should EMERGE from dialogue, not precede it
+
+**What we built:**
+- `plan.md` emerges from conversation, not a template
+- `spec.md` per task captures just enough context
+- No forced structure — content matters, not format
+
+### From Conductor (Gemini CLI Extensions)
+
+**What they do well:**
+- Context-driven execution with "tracks"
+- Persistent memory across sessions
+- Structured workflow without being rigid
+
+**What we learned:**
+- Context persistence is essential (we agreed completely)
+- Track-based organization works, but needs isolation
+- Parallel execution needs coordination, not just parallelism
+
+**What we built:**
+- Feature-scoped context in `.hive/context/`
+- Git worktrees for true isolation (not just logical tracks)
+- Batched parallelism with context flow between batches
+
+### From Ralph Wiggum
+
+**What they do well:**
+- Persistence wins — keep trying until success
+- Automated retry loops for long-running tasks
+- "Set and forget" execution model
+
+**What we learned:**
+- Loops are powerful for VERIFICATION, not planning
+- Unbounded retries can waste time on wrong approaches
+- Sometimes you need to stop and re-plan, not retry
+
+**What we built:**
+- TDD subtasks give feedback loops WHERE IT MATTERS (verification)
+- Plan approval gate prevents wasted retries on bad plans
+- Fix tasks instead of infinite loops — know when to pivot
+
+### From Antigravity (Plan System)
+
+**What they do well:**
+- Structured planning with clear phases
+- Human review gates before execution
+- Task breakdown with dependencies
+
+**What we learned:**
+- Two-phase model (plan → execute) is the right abstraction
+- Approval gates build trust and catch scope creep
+- Dependencies between tasks need explicit handling
+
+**What we built:**
+- Plan → Approve → Execute workflow
+- Batched parallelism handles dependencies naturally
+- Glue tasks synthesize results between batches
+
+### From Boris Cherny's 13 Tips
+
+**What resonated most:**
+- Tip 4: Team CLAUDE.md — shared context compounds
+- Tip 6: Start in Plan mode — planning before execution
+- Tip 8: Leverage subagents — parallel workers with coordination
+- Tip 13: Feedback loops — 2-3x quality improvement
+
+**What we built:**
+- `.hive/context/` for feature-scoped CLAUDE.md equivalent
+- Plan approval gate enforces "plan mode first"
+- Batched parallelism with worktree isolation
+- TDD subtasks with spec.md/report.md for feedback loops
+
+### From Oh My OpenCode
+
+**What they do well:**
+- Agent-first architecture with specialized workers
+- Delegation model — right agent for right task
+- System prompt engineering for agent behavior
+- Seamless integration with OpenCode ecosystem
+
+**What we learned:**
+- Specialized agents beat one-size-fits-all
+- Delegation needs structure to avoid chaos
+- Agent behavior is shaped by context, not just prompts
+- The "Hive Queen" orchestrating workers is a powerful pattern
+
+**What we built:**
+- Hive as the WORKFLOW layer, OMO as the AGENT layer
+- Feature-scoped context shapes agent behavior per-task
+- Batched parallelism = structured delegation
+- Perfect complement: OMO agents execute Hive tasks
+
+---
+
+## The Synthesis
+
+What makes Hive unique is the COMBINATION:
+
+| Concept | Borrowed From | Hive's Addition |
+|---------|---------------|-----------------|
+| Specs | Spec Kit | Emerge from dialogue, not upfront |
+| Context persistence | Conductor | Feature-scoped, not global |
+| Retry loops | Ralph Wiggum | Only for verification (TDD), not planning |
+| Plan gates | Antigravity | Approval before execution |
+| Feedback loops | Boris Cherny | TDD subtasks with audit trail |
+| Parallelism | All of them | Batched with context flow + worktree isolation |
+| Agent delegation | Oh My OpenCode | Hive as workflow layer, OMO as agent layer |
+
+**The result:** A system where humans shape direction, agents execute in isolation, context persists, and tests verify — all with full audit trail.
+
+---
+
 ## The Mental Model
 
 ```

@@ -42,6 +42,39 @@ Vibe coding is powerful but chaotic. Without structure:
 
 ---
 
+## Quick Start
+
+### 1. Add to OpenCode
+
+Add `opencode-hive` to your `opencode.json`:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": ["opencode-hive"]
+}
+```
+
+OpenCode handles the rest — no manual npm install needed.
+
+### 2. Install VS Code Extension
+
+```bash
+code --install-extension tctinh.vscode-hive
+```
+
+Or search "Hive" in VS Code Extensions.
+
+### 3. Start Hiving
+
+```
+You: "Create a feature for user dashboard"
+```
+
+That's it. You're hiving.
+
+---
+
 ## How It Works
 
 ### The Old Way (Chaos)
@@ -234,39 +267,6 @@ The extension watches your `.hive/` directory and displays the current state. Al
 5. **Add comments** — Use VS Code's comment feature on plan.md lines
 6. **Approve plans** — Click the approve button when ready
 7. **Monitor progress** — Watch task status update in real-time as OpenCode executes
-
----
-
-## Quick Start
-
-### 1. Add to OpenCode
-
-Add `opencode-hive` to your `opencode.json`:
-
-```json
-{
-  "$schema": "https://opencode.ai/config.json",
-  "plugin": ["opencode-hive"]
-}
-```
-
-OpenCode handles the rest — no manual npm install needed.
-
-### 2. Install VS Code Extension
-
-```bash
-code --install-extension tctinh.vscode-hive
-```
-
-Or search "Hive" in VS Code Extensions.
-
-### 3. Start Hiving
-
-```
-You: "Create a feature for user dashboard"
-```
-
-That's it. You're hiving.
 
 ---
 

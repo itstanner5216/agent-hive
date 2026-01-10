@@ -1,3 +1,4 @@
+const __importMetaUrl = require('url').pathToFileURL(__filename).href;
 var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -52,7 +53,6 @@ var import_node_path = require("node:path");
 var import_node_events = require("node:events");
 var fs7 = __toESM(require("fs"), 1);
 var path4 = __toESM(require("path"), 1);
-var import_meta = {};
 var __create2 = Object.create;
 var __getProtoOf2 = Object.getPrototypeOf;
 var __defProp2 = Object.defineProperty;
@@ -70,7 +70,7 @@ var __toESM2 = (mod, isNodeMode, target) => {
   return to;
 };
 var __commonJS = (cb, mod) => () => (mod || cb((mod = { exports: {} }).exports, mod), mod.exports);
-var __require = /* @__PURE__ */ (0, import_node_module.createRequire)(import_meta.url);
+var __require = /* @__PURE__ */ (0, import_node_module.createRequire)(__importMetaUrl);
 var require_ms = __commonJS((exports2, module2) => {
   var s = 1e3;
   var m = s * 60;
@@ -6213,38 +6213,52 @@ var Launcher = class {
    * Open a feature's plan in VS Code and show instructions
    */
   async openFeature(feature) {
+    if (!feature || !this.workspaceRoot) {
+      vscode2.window.showWarningMessage("Hive: Invalid feature name or workspace root");
+      return;
+    }
     const planPath = path2.join(this.workspaceRoot, ".hive", "features", feature, "plan.md");
     try {
-      const doc = await vscode2.workspace.openTextDocument(planPath);
-      await vscode2.window.showTextDocument(doc);
+      const uri = vscode2.Uri.file(planPath);
+      await vscode2.workspace.openTextDocument(uri);
+      await vscode2.window.showTextDocument(uri);
       vscode2.window.showInformationMessage(
         `Hive: Opened ${feature} plan. Use @Hive in Copilot Chat to continue.`
       );
-    } catch {
-      vscode2.window.showWarningMessage(`Hive: No plan found for feature "${feature}"`);
+    } catch (error) {
+      vscode2.window.showWarningMessage(`Hive: No plan found for feature "${feature}" - ${error}`);
     }
   }
   /**
    * Open a task's worktree folder in a new VS Code window
    */
   async openTask(feature, task) {
+    if (!feature || !task || !this.workspaceRoot) {
+      vscode2.window.showWarningMessage("Hive: Invalid feature name, task name, or workspace root");
+      return;
+    }
     const worktreePath = path2.join(this.workspaceRoot, ".hive", ".worktrees", feature, task);
     const uri = vscode2.Uri.file(worktreePath);
     try {
       await vscode2.commands.executeCommand("vscode.openFolder", uri, { forceNewWindow: true });
-    } catch {
-      vscode2.window.showErrorMessage(`Hive: Worktree not found for ${feature}/${task}`);
+    } catch (error) {
+      vscode2.window.showErrorMessage(`Hive: Worktree not found for ${feature}/${task} - ${error}`);
     }
   }
   /**
    * Open a file in VS Code
    */
   async openFile(filePath) {
+    if (!filePath || !this.workspaceRoot) {
+      vscode2.window.showWarningMessage("Hive: Invalid file path or workspace root");
+      return;
+    }
     try {
-      const doc = await vscode2.workspace.openTextDocument(filePath);
-      await vscode2.window.showTextDocument(doc);
-    } catch {
-      vscode2.window.showErrorMessage(`Hive: Could not open file "${filePath}"`);
+      const uri = vscode2.Uri.file(filePath);
+      await vscode2.workspace.openTextDocument(uri);
+      await vscode2.window.showTextDocument(uri);
+    } catch (error) {
+      vscode2.window.showErrorMessage(`Hive: Could not open file "${filePath}" - ${error}`);
     }
   }
 };

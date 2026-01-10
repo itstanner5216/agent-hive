@@ -1,6 +1,6 @@
 {
   "name": "opencode-hive",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "type": "module",
   "description": "OpenCode plugin for Agent Hive - from vibe coding to hive coding",
   "license": "MIT WITH Commons-Clause",
@@ -27,7 +27,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "npm run clean && bun build src/index.ts --outdir dist --target node --format esm && tsc --emitDeclarationOnly",
+    "build": "npm run clean && bun build src/index.ts --outdir dist --target node --format esm --packages=bundle && tsc --emitDeclarationOnly",
     "dev": "opencode plugin dev",
     "test": "bun test"
   },
@@ -35,9 +35,10 @@
     "@opencode-ai/plugin": ">=0.13.7"
   },
   "dependencies": {
-    "hive-core": "workspace:*"
+    "simple-git": "^3.27.0"
   },
   "devDependencies": {
+    "hive-core": "workspace:*",
     "@opencode-ai/plugin": "^1.0.143",
     "@opencode-ai/sdk": "^0.13.0",
     "@types/bun": "^1.2.0",

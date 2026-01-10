@@ -15,11 +15,19 @@ export type TaskOrigin = 'plan' | 'manual';
 export type SubtaskType = 'test' | 'implement' | 'review' | 'verify' | 'research' | 'debug' | 'custom';
 
 export interface Subtask {
-  id: string; // e.g., "1.1", "1.2" (taskOrder.subtaskOrder)
+  id: string;
   name: string;
+  folder: string;
   status: TaskStatusType;
   type?: SubtaskType;
   createdAt?: string;
+  completedAt?: string;
+}
+
+export interface SubtaskStatus {
+  status: TaskStatusType;
+  type?: SubtaskType;
+  createdAt: string;
   completedAt?: string;
 }
 

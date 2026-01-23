@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import stripJsonComments from 'strip-json-comments';
 import { HiveConfig, DEFAULT_HIVE_CONFIG } from '../types.js';
 
 /**
@@ -44,20 +45,36 @@ export class ConfigService {
         agents: {
           ...DEFAULT_HIVE_CONFIG.agents,
           ...stored.agents,
-          // Deep merge hive agent config
-          hive: {
-            ...DEFAULT_HIVE_CONFIG.agents?.hive,
-            ...stored.agents?.hive,
+          // Deep merge hive-master agent config
+          'hive-master': {
+            ...DEFAULT_HIVE_CONFIG.agents?.['hive-master'],
+            ...stored.agents?.['hive-master'],
           },
-          // Deep merge forager agent config
-          forager: {
-            ...DEFAULT_HIVE_CONFIG.agents?.forager,
-            ...stored.agents?.forager,
+          // Deep merge architect-planner agent config
+          'architect-planner': {
+            ...DEFAULT_HIVE_CONFIG.agents?.['architect-planner'],
+            ...stored.agents?.['architect-planner'],
           },
-        },
-        omoSlim: {
-          ...DEFAULT_HIVE_CONFIG.omoSlim,
-          ...stored.omoSlim,
+          // Deep merge swarm-orchestrator agent config
+          'swarm-orchestrator': {
+            ...DEFAULT_HIVE_CONFIG.agents?.['swarm-orchestrator'],
+            ...stored.agents?.['swarm-orchestrator'],
+          },
+          // Deep merge scout-researcher agent config
+          'scout-researcher': {
+            ...DEFAULT_HIVE_CONFIG.agents?.['scout-researcher'],
+            ...stored.agents?.['scout-researcher'],
+          },
+          // Deep merge forager-worker agent config
+          'forager-worker': {
+            ...DEFAULT_HIVE_CONFIG.agents?.['forager-worker'],
+            ...stored.agents?.['forager-worker'],
+          },
+          // Deep merge hygienic-reviewer agent config
+          'hygienic-reviewer': {
+            ...DEFAULT_HIVE_CONFIG.agents?.['hygienic-reviewer'],
+            ...stored.agents?.['hygienic-reviewer'],
+          },
         },
       };
     } catch {
@@ -78,10 +95,6 @@ export class ConfigService {
         ...current.agents,
         ...updates.agents,
       } : current.agents,
-      omoSlim: updates.omoSlim ? {
-        ...current.omoSlim,
-        ...updates.omoSlim,
-      } : current.omoSlim,
     };
 
     // Ensure config directory exists
@@ -112,24 +125,74 @@ export class ConfigService {
   }
 
   /**
-   * Check if OMO-Slim delegation is enabled.
+   * Register Hive agents in OpenCode's opencode.json.
+   * This is required because OpenCode doesn't support dynamic agent registration via plugin hooks.
+   * Agents are written to ~/.config/opencode/opencode.json under the 'agent' key.
    */
-  isOmoSlimEnabled(): boolean {
-    return this.get().omoSlim?.enabled ?? false;
+  registerAgentsInOpenCode(agents: Record<string, {
+    model?: string;
+    temperature?: number;
+    description: string;
+    prompt: string;
+    hidden?: boolean;
+    permission?: Record<string, string>;
+  }>): void {
+    const homeDir = process.env.HOME || process.env.USERPROFILE || '';
+    const opencodePath = path.join(homeDir, '.config', 'opencode', 'opencode.json');
+    
+    try {
+      if (!fs.existsSync(opencodePath)) {
+        // No opencode.json, skip registration
+        return;
+      }
+
+      const raw = fs.readFileSync(opencodePath, 'utf-8');
+      
+      const config = JSON.parse(stripJsonComments(raw));
+      
+      // Initialize agent section if not exists
+      if (!config.agent) {
+        config.agent = {};
+      }
+
+       // Initialize agent section (no legacy cleanup)
+
+      // Merge in our agents (don't overwrite user customizations)
+      for (const [name, agentConfig] of Object.entries(agents)) {
+        if (!config.agent[name]) {
+          config.agent[name] = agentConfig;
+        } else {
+          // Preserve user's model/temperature overrides, but update prompt and description
+          config.agent[name] = {
+            ...agentConfig,
+            model: config.agent[name].model || agentConfig.model,
+            temperature: config.agent[name].temperature ?? agentConfig.temperature,
+          };
+        }
+      }
+
+      fs.writeFileSync(opencodePath, JSON.stringify(config, null, 2));
+    } catch (err) {
+      // Silent fail - don't break plugin if we can't write
+      console.error('[Hive] Failed to register agents in opencode.json:', err);
+    }
   }
 
   /**
-   * Enable or disable OMO-Slim delegation.
+   * Get agent-specific model config
    */
-  setOmoSlim(enabled: boolean): HiveConfig {
-    return this.set({ omoSlim: { enabled } });
-  }
-
-  /**
-   * Get agent-specific model config (hive or forager)
-   */
-  getAgentConfig(agent: 'hive' | 'forager'): { model?: string; temperature?: number; skills?: string[] } {
+  getAgentConfig(
+    agent: 'hive-master' | 'architect-planner' | 'swarm-orchestrator' | 'scout-researcher' | 'forager-worker' | 'hygienic-reviewer',
+  ): { model?: string; temperature?: number; skills?: string[] } {
     const config = this.get();
     return config.agents?.[agent] ?? {};
+  }
+
+  /**
+   * Check if OMO-Slim delegation is enabled via user config.
+   */
+  isOmoSlimEnabled(): boolean {
+    const config = this.get();
+    return config.omoSlimEnabled === true;
   }
 }

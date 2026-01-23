@@ -2,36 +2,64 @@
  * Hive Agents
  * 
  * The Hive Colony Model:
- * - Queen (User): Demands honey
- * - Scout (Planner): Finds flowers, writes plans
- * - Foragers (Workers): Gather nectar, execute tasks
- * - Receiver (Orchestrator): Integrates into hive, merges work
+ * - Hive (Hybrid): Plans AND orchestrates based on phase
+ * - Architect (Planner): Plans features, interviews, writes plans
+ * - Swarm (Orchestrator): Delegates, spawns workers, verifies, merges
+ * - Scout (Research/Collector): Explores codebase and external docs
+ * - Forager (Worker/Coder): Executes tasks in isolation
+ * - Hygienic (Consultant/Reviewer): Reviews plan quality
  */
 
-export { scoutAgent, SCOUT_PROMPT } from './scout';
-export { receiverAgent, RECEIVER_PROMPT } from './receiver';
-export { foragerAgent, FORAGER_PROMPT } from './forager';
+// Bee agents (lean, focused)
+export { hiveBeeAgent, QUEEN_BEE_PROMPT } from './hive';
+export { architectBeeAgent, ARCHITECT_BEE_PROMPT } from './architect';
+export { swarmBeeAgent, SWARM_BEE_PROMPT } from './swarm';
+export { scoutBeeAgent, SCOUT_BEE_PROMPT } from './scout';
+export { foragerBeeAgent, FORAGER_BEE_PROMPT } from './forager';
+export { hygienicBeeAgent, HYGIENIC_BEE_PROMPT } from './hygienic';
 
-// Legacy export for backward compatibility
-export { buildHiveAgentPrompt, hiveAgent } from './hive';
 
 /**
  * Agent registry for OpenCode plugin
+ * 
+ * Bee Agents (recommended):
+ * - hive: Hybrid planner + orchestrator (detects phase, loads skills)
+ * - architect: Discovery/planning (requirements, plan writing)
+ * - swarm: Orchestration (delegates, verifies, merges)
+ * - scout: Research/collection (codebase + external docs/data)
+ * - forager: Worker/coder (executes tasks in worktrees)
+ * - hygienic: Consultant/reviewer (plan quality)
  */
 export const hiveAgents = {
-  scout: {
-    name: 'scout',
-    description: 'Scout - Discovery and planning. Finds flowers, writes plans.',
+  // Bee Agents (lean, focused - recommended)
+  hive: {
+    name: 'Hive (Hybrid)',
+    description: 'Hybrid planner + orchestrator. Detects phase, loads skills on-demand.',
     mode: 'primary' as const,
   },
-  receiver: {
-    name: 'receiver', 
-    description: 'Receiver - Orchestrates execution. Spawns workers, merges work.',
+  architect: {
+    name: 'Architect (Planner)',
+    description: 'Plans features, interviews, writes plans. NEVER executes.',
     mode: 'primary' as const,
+  },
+  swarm: {
+    name: 'Swarm (Orchestrator)',
+    description: 'Orchestrates execution. Delegates, spawns workers, verifies, merges.',
+    mode: 'primary' as const,
+  },
+  scout: {
+    name: 'Scout (Explorer/Researcher/Retrieval)',
+    description: 'Explores codebase, external docs, and retrieves external data.',
+    mode: 'subagent' as const,
   },
   forager: {
-    name: 'forager',
-    description: 'Forager - Executes tasks in isolation. Implements and verifies.',
+    name: 'Forager (Worker/Coder)',
+    description: 'Executes tasks directly in isolated worktrees. Never delegates.',
+    mode: 'subagent' as const,
+  },
+  hygienic: {
+    name: 'Hygienic (Consultant/Reviewer/Debugger)',
+    description: 'Reviews plan documentation quality. OKAY/REJECT verdict.',
     mode: 'subagent' as const,
   },
 };

@@ -16,9 +16,11 @@ import { OpencodeClient, AgentInfo, AgentValidationResult } from './types.js';
  */
 const BLOCKED_AGENTS = new Set([
   'orchestrator',
-  'hive',           // Hive Master - orchestrates, shouldn't be a worker
-  'conductor',      // OMO-Slim orchestrator
-  'main',           // Default main agent
+  'hive',           // Legacy Hive alias - orchestrator
+  'hive-master',     // Hive Master - orchestrates, shouldn't be a worker
+  'swarm-orchestrator', // Swarm - orchestrator, shouldn't be a worker
+  'conductor',       // OMO-Slim orchestrator
+  'main',            // Default main agent
 ]);
 
 /**
@@ -107,7 +109,7 @@ export class AgentGate {
       return {
         valid: false,
         error: `Agent "${agentName}" is an orchestrator agent and cannot be spawned as a background worker. ` +
-               `Use a worker agent like "forager", "explorer", "librarian", or "designer".`,
+               `Use a worker agent like "forager-worker", "scout-researcher", or "hygienic-reviewer".`,
       };
     }
 

@@ -5,45 +5,16 @@ description: Plan-first AI development with isolated git worktrees and human rev
 
 # Hive Workflow
 
-Plan-first development with phase-aware orchestration.
+Plan-first development with bee roles.
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                  @hive (Phase-Aware Master)                 │
-│                                                             │
-│  Scout Mode ◄────── replan ──────► Receiver Mode            │
-│  (Planning)                        (Orchestration)          │
-│      │                                   │                  │
-│      ▼                                   ▼                  │
-│  background_task                   hive_exec_start          │
-│  (research)                        (spawn worker)           │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Forager (Worker)                         │
-│  - Executes in isolated worktree                            │
-│  - Reports via hive_exec_complete                           │
-│  - Can research via background_task                         │
-└─────────────────────────────────────────────────────────────┘
+Architect (Planner) -> Swarm (Orchestrator)
+                           \-> Scout (Explorer/Researcher/Retrieval)
+Swarm -> Forager (Worker/Coder)
+Swarm -> Hygienic (Consultant/Reviewer/Debugger)
 ```
-
----
-
-## Phase Detection
-
-The @hive agent auto-switches mode based on feature state:
-
-| State | Mode | Focus |
-|-------|------|-------|
-| No feature / planning | **Scout** | Discovery → Planning |
-| Approved | **Transition** | Sync tasks → Start execution |
-| Executing | **Receiver** | Spawn workers → Handle blockers → Merge |
-| Completed | **Report** | Summarize and close |
-
-Check with `hive_status()`.
 
 ---
 
@@ -51,30 +22,31 @@ Check with `hive_status()`.
 
 | Agent | Mode | Use |
 |-------|------|-----|
-| `@hive` | Auto | Primary agent - switches Scout/Receiver |
-| `@scout` | Explicit | Planning only (won't execute) |
-| `@receiver` | Explicit | Orchestration only (won't plan) |
-| `@forager` | Subagent | Spawned by exec_start (don't invoke directly) |
+| `@architect` | Primary | Discovery + planning |
+| `@swarm` | Primary | Orchestration |
+| `@scout` | Subagent | Exploration/research/retrieval |
+| `@forager` | Subagent | Executes tasks in worktrees |
+| `@hygienic` | Subagent | Plan quality review |
 
 ---
 
-## Research Delegation (OMO-Slim)
+## Research Delegation (MCP Tools + task)
 
-All agents can delegate research to specialists:
+Use MCP tools for focused research; use `task` to delegate to scout or other specialist subagents.
 
-| Specialist | Use For |
-|------------|---------|
-| **explorer** | Find code patterns, locate files |
-| **librarian** | External docs, API references |
-| **oracle** | Architecture advice, debugging |
-| **designer** | UI/UX guidance, component patterns |
+| Tool | Use For |
+|------|---------|
+| `grep_app_searchGitHub` | Find code in OSS repos |
+| `context7_query-docs` | Library documentation |
+| `websearch_web_search_exa` | Web search and scraping |
+| `ast_grep_search` | AST-aware code search |
+| `task` | Delegate to scout or specialist | 
 
 ```
-background_task({
-  agent: "explorer",
+task({
+  subagent_type: "scout",
   prompt: "Find all API routes in src/api/",
-  description: "Find API patterns",
-  sync: true
+  description: "Find API patterns"
 })
 ```
 
@@ -104,12 +76,12 @@ Classify Intent → Discovery → Plan → Review → Execute → Merge
 
 ---
 
-## Phase 1: Discovery (Scout Mode)
+## Phase 1: Discovery (Architect)
 
 ### Research First (Greenfield/Complex)
 
 ```
-background_task({ agent: "explorer", prompt: "Find patterns...", sync: true })
+task({ subagent_type: "scout", prompt: "Find patterns..." })
 hive_context_write({ name: "research", content: "# Findings\n..." })
 ```
 
@@ -237,7 +209,7 @@ hive_plan_write({ content: "..." })
 
 ---
 
-## Phase 4: Execute (Receiver Mode)
+## Phase 4: Execute (Swarm Bee)
 
 ### Sync Tasks
 
@@ -249,9 +221,9 @@ hive_tasks_sync()
 
 ```
 hive_exec_start({ task: "01-task-name" })  // Creates worktree; returns delegation instructions
-background_task({ ...backgroundTaskCall })  // Only when delegationRequired is true
+task({ ...taskCall })  // Only when delegationRequired is true
   ↓
-[Forager implements in worktree]
+[Forager Bee implements in worktree]
   ↓
 hive_exec_complete({ task, summary, status: "completed" })
   ↓
@@ -262,7 +234,7 @@ hive_merge({ task: "01-task-name", strategy: "squash" })
 
 When tasks are parallelizable:
 
-If `delegationRequired` is returned for a task, call `background_task` to spawn that worker.
+If `delegationRequired` is returned for a task, call `task` to spawn that worker.
 
 ```
 hive_exec_start({ task: "02-task-a" })
@@ -312,14 +284,14 @@ If "Revise Plan":
 
 | Phase | Tool | Purpose |
 |-------|------|---------|
-| Discovery | `background_task` | Research delegation |
+| Discovery | `grep_app_searchGitHub` / `context7_query-docs` / `task` | Research delegation |
 | Plan | `hive_feature_create` | Start feature |
 | Plan | `hive_context_write` | Save research |
 | Plan | `hive_plan_write` | Write plan |
 | Plan | `hive_plan_read` | Check comments |
 | Plan | `hive_plan_approve` | Approve plan |
 | Execute | `hive_tasks_sync` | Generate tasks |
-| Execute | `hive_exec_start` | Spawn Forager worker |
+| Execute | `hive_exec_start` | Spawn Forager Bee worker |
 | Execute | `hive_exec_complete` | Finish task |
 | Execute | `hive_exec_abort` | Discard task |
 | Execute | `hive_merge` | Integrate task |
@@ -357,7 +329,7 @@ hive_exec_start({ task })  # Fresh start
 
 ### After 3 Failures
 1. Stop all workers
-2. Consult oracle: `background_task({ agent: "oracle", prompt: "Analyze failure..." })`
+2. Consult oracle: `task({ subagent_type: "oracle", prompt: "Analyze failure..." })`
 3. Ask user how to proceed
 
 ### Merge Conflicts

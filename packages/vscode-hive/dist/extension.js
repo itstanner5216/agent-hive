@@ -882,6 +882,119 @@ var require_dist2 = __commonJS((exports2) => {
   exports2.createDeferred = deferred;
   exports2.default = deferred;
 });
+var require_strip_json_comments = __commonJS((exports2, module2) => {
+  var singleComment = 1;
+  var multiComment = 2;
+  function stripWithoutWhitespace() {
+    return "";
+  }
+  function stripWithWhitespace(str, start, end) {
+    return str.slice(start, end).replace(/\S/g, " ");
+  }
+  module2.exports = function(str, opts) {
+    opts = opts || {};
+    var currentChar;
+    var nextChar;
+    var insideString = false;
+    var insideComment = false;
+    var offset = 0;
+    var ret = "";
+    var strip = opts.whitespace === false ? stripWithoutWhitespace : stripWithWhitespace;
+    for (var i = 0; i < str.length; i++) {
+      currentChar = str[i];
+      nextChar = str[i + 1];
+      if (!insideComment && currentChar === '"') {
+        var escaped = str[i - 1] === "\\" && str[i - 2] !== "\\";
+        if (!escaped) {
+          insideString = !insideString;
+        }
+      }
+      if (insideString) {
+        continue;
+      }
+      if (!insideComment && currentChar + nextChar === "//") {
+        ret += str.slice(offset, i);
+        offset = i;
+        insideComment = singleComment;
+        i++;
+      } else if (insideComment === singleComment && currentChar + nextChar === `\r
+`) {
+        i++;
+        insideComment = false;
+        ret += strip(str, offset, i);
+        offset = i;
+        continue;
+      } else if (insideComment === singleComment && currentChar === `
+`) {
+        insideComment = false;
+        ret += strip(str, offset, i);
+        offset = i;
+      } else if (!insideComment && currentChar + nextChar === "/*") {
+        ret += str.slice(offset, i);
+        offset = i;
+        insideComment = multiComment;
+        i++;
+        continue;
+      } else if (insideComment === multiComment && currentChar + nextChar === "*/") {
+        i++;
+        insideComment = false;
+        ret += strip(str, offset, i + 1);
+        offset = i + 1;
+        continue;
+      }
+    }
+    return ret + (insideComment ? strip(str.substr(offset)) : str.substr(offset));
+  };
+});
+var DEFAULT_AGENT_MODELS = {
+  "hive-master": "github-copilot/claude-opus-4.5",
+  "architect-planner": "github-copilot/gpt-5.2-codex",
+  "swarm-orchestrator": "github-copilot/claude-opus-4.5",
+  "scout-researcher": "zai-coding-plan/glm-4.7",
+  "forager-worker": "github-copilot/gpt-5.2-codex",
+  "hygienic-reviewer": "github-copilot/gpt-5.2-codex"
+};
+var DEFAULT_HIVE_CONFIG = {
+  $schema: "https://raw.githubusercontent.com/tctinh/agent-hive/main/packages/opencode-hive/schema/agent_hive.schema.json",
+  enableToolsFor: [],
+  agents: {
+    "hive-master": {
+      model: DEFAULT_AGENT_MODELS["hive-master"],
+      temperature: 0.5,
+      skills: [
+        "brainstorming",
+        "writing-plans",
+        "dispatching-parallel-agents",
+        "executing-plans"
+      ]
+    },
+    "architect-planner": {
+      model: DEFAULT_AGENT_MODELS["architect-planner"],
+      temperature: 0.7,
+      skills: ["brainstorming", "writing-plans"]
+    },
+    "swarm-orchestrator": {
+      model: DEFAULT_AGENT_MODELS["swarm-orchestrator"],
+      temperature: 0.5,
+      skills: ["dispatching-parallel-agents", "executing-plans"]
+    },
+    "scout-researcher": {
+      model: DEFAULT_AGENT_MODELS["scout-researcher"],
+      temperature: 0.5,
+      skills: []
+    },
+    "forager-worker": {
+      model: DEFAULT_AGENT_MODELS["forager-worker"],
+      temperature: 0.3,
+      skills: ["test-driven-development", "verification-before-completion"]
+    },
+    "hygienic-reviewer": {
+      model: DEFAULT_AGENT_MODELS["hygienic-reviewer"],
+      temperature: 0.3,
+      skills: ["systematic-debugging"]
+    }
+  }
+};
 var HIVE_DIR = ".hive";
 var FEATURES_DIR = "features";
 var TASKS_DIR = "tasks";
@@ -969,6 +1082,115 @@ function readJson(filePath) {
 function writeJson(filePath, data) {
   ensureDir(path.dirname(filePath));
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+}
+var DEFAULT_LOCK_OPTIONS = {
+  timeout: 5e3,
+  retryInterval: 50,
+  staleLockTTL: 3e4
+};
+function getLockPath(filePath) {
+  return `${filePath}.lock`;
+}
+function isLockStale(lockPath, staleTTL) {
+  try {
+    const stat2 = fs.statSync(lockPath);
+    const age = Date.now() - stat2.mtimeMs;
+    return age > staleTTL;
+  } catch {
+    return true;
+  }
+}
+function acquireLockSync(filePath, options = {}) {
+  const opts = { ...DEFAULT_LOCK_OPTIONS, ...options };
+  const lockPath = getLockPath(filePath);
+  const startTime = Date.now();
+  const lockContent = JSON.stringify({
+    pid: process.pid,
+    timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+    filePath
+  });
+  while (true) {
+    try {
+      const fd = fs.openSync(lockPath, fs.constants.O_CREAT | fs.constants.O_EXCL | fs.constants.O_WRONLY);
+      fs.writeSync(fd, lockContent);
+      fs.closeSync(fd);
+      return () => {
+        try {
+          fs.unlinkSync(lockPath);
+        } catch {
+        }
+      };
+    } catch (err) {
+      const error = err;
+      if (error.code !== "EEXIST") {
+        throw error;
+      }
+      if (isLockStale(lockPath, opts.staleLockTTL)) {
+        try {
+          fs.unlinkSync(lockPath);
+          continue;
+        } catch {
+        }
+      }
+      if (Date.now() - startTime >= opts.timeout) {
+        throw new Error(`Failed to acquire lock on ${filePath} after ${opts.timeout}ms. Lock file: ${lockPath}`);
+      }
+      const waitUntil = Date.now() + opts.retryInterval;
+      while (Date.now() < waitUntil) {
+      }
+    }
+  }
+}
+function writeAtomic(filePath, content) {
+  ensureDir(path.dirname(filePath));
+  const tempPath = `${filePath}.tmp.${process.pid}.${Date.now()}`;
+  try {
+    fs.writeFileSync(tempPath, content);
+    fs.renameSync(tempPath, filePath);
+  } catch (error) {
+    try {
+      fs.unlinkSync(tempPath);
+    } catch {
+    }
+    throw error;
+  }
+}
+function writeJsonAtomic(filePath, data) {
+  writeAtomic(filePath, JSON.stringify(data, null, 2));
+}
+function writeJsonLockedSync(filePath, data, options = {}) {
+  const release = acquireLockSync(filePath, options);
+  try {
+    writeJsonAtomic(filePath, data);
+  } finally {
+    release();
+  }
+}
+function deepMerge(target, patch) {
+  const result = { ...target };
+  for (const key of Object.keys(patch)) {
+    const patchValue = patch[key];
+    if (patchValue === void 0) {
+      continue;
+    }
+    if (patchValue !== null && typeof patchValue === "object" && !Array.isArray(patchValue) && result[key] !== null && typeof result[key] === "object" && !Array.isArray(result[key])) {
+      result[key] = deepMerge(result[key], patchValue);
+    } else {
+      result[key] = patchValue;
+    }
+  }
+  return result;
+}
+function patchJsonLockedSync(filePath, patch, options = {}) {
+  const release = acquireLockSync(filePath, options);
+  try {
+    const current = readJson(filePath) || {};
+    const merged = deepMerge(current, patch);
+    writeJsonAtomic(filePath, merged);
+    return merged;
+  } finally {
+    release();
+  }
 }
 function readText(filePath) {
   if (!fs.existsSync(filePath))
@@ -1083,6 +1305,7 @@ var FeatureService = class {
         name,
         status: status?.status || "pending",
         origin: status?.origin || "plan",
+        planTitle: status?.planTitle,
         summary: status?.summary
       };
     });
@@ -1187,6 +1410,7 @@ var PlanService = class {
     writeJson(commentsPath, { threads: [] });
   }
 };
+var TASK_STATUS_SCHEMA_VERSION = 1;
 var TaskService = class {
   projectRoot;
   constructor(projectRoot) {
@@ -1246,7 +1470,8 @@ var TaskService = class {
     ensureDir(taskPath);
     const status = {
       status: "pending",
-      origin: "manual"
+      origin: "manual",
+      planTitle: name
     };
     writeJson(getTaskStatusPath(this.projectRoot, featureName, folder), status);
     return folder;
@@ -1256,7 +1481,8 @@ var TaskService = class {
     ensureDir(taskPath);
     const status = {
       status: "pending",
-      origin: "plan"
+      origin: "plan",
+      planTitle: task.name
     };
     writeJson(getTaskStatusPath(this.projectRoot, featureName, task.folder), status);
     const specLines = [
@@ -1299,7 +1525,7 @@ var TaskService = class {
     writeText(specPath, content);
     return specPath;
   }
-  update(featureName, taskFolder, updates) {
+  update(featureName, taskFolder, updates, lockOptions) {
     const statusPath = getTaskStatusPath(this.projectRoot, featureName, taskFolder);
     const current = readJson(statusPath);
     if (!current) {
@@ -1307,7 +1533,8 @@ var TaskService = class {
     }
     const updated = {
       ...current,
-      ...updates
+      ...updates,
+      schemaVersion: TASK_STATUS_SCHEMA_VERSION
     };
     if (updates.status === "in_progress" && !current.startedAt) {
       updated.startedAt = (/* @__PURE__ */ new Date()).toISOString();
@@ -1315,8 +1542,25 @@ var TaskService = class {
     if (updates.status === "done" && !current.completedAt) {
       updated.completedAt = (/* @__PURE__ */ new Date()).toISOString();
     }
-    writeJson(statusPath, updated);
+    writeJsonLockedSync(statusPath, updated, lockOptions);
     return updated;
+  }
+  patchBackgroundFields(featureName, taskFolder, patch, lockOptions) {
+    const statusPath = getTaskStatusPath(this.projectRoot, featureName, taskFolder);
+    const safePatch = {
+      schemaVersion: TASK_STATUS_SCHEMA_VERSION
+    };
+    if (patch.idempotencyKey !== void 0) {
+      safePatch.idempotencyKey = patch.idempotencyKey;
+    }
+    if (patch.workerSession !== void 0) {
+      safePatch.workerSession = patch.workerSession;
+    }
+    return patchJsonLockedSync(statusPath, safePatch, lockOptions);
+  }
+  getRawStatus(featureName, taskFolder) {
+    const statusPath = getTaskStatusPath(this.projectRoot, featureName, taskFolder);
+    return readJson(statusPath);
   }
   get(featureName, taskFolder) {
     const statusPath = getTaskStatusPath(this.projectRoot, featureName, taskFolder);
@@ -1328,6 +1572,7 @@ var TaskService = class {
       name: taskFolder.replace(/^\d+-/, ""),
       status: status.status,
       origin: status.origin,
+      planTitle: status.planTitle,
       summary: status.summary
     };
   }
@@ -6077,6 +6322,7 @@ ${f.content}`);
     return `${normalized}.md`;
   }
 };
+var import_strip_json_comments = __toESM2(require_strip_json_comments(), 1);
 
 // src/services/watcher.ts
 var vscode = __toESM(require("vscode"));

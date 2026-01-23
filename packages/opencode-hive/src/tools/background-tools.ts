@@ -93,7 +93,7 @@ export function createBackgroundTools(
     background_task: tool({
       description: 'Spawn a background agent task. Returns task_id for tracking. Use sync=true to wait for completion.',
       args: {
-        agent: tool.schema.string().describe('Agent to use (e.g., "forager", "explorer")'),
+        agent: tool.schema.string().describe('Agent to use (e.g., "forager-worker", "scout-researcher")'),
         prompt: tool.schema.string().describe('Task instructions/prompt'),
         description: tool.schema.string().describe('Human-readable task description'),
         sync: tool.schema.boolean().optional().describe('Wait for completion (default: false)'),

@@ -137,7 +137,7 @@ export interface TaskSpec {
   priorTasks: Array<{ folder: string; summary?: string }>;
 }
 
-/** Agent model/temperature configuration (matches OMO-Slim pattern) */
+/** Agent model/temperature configuration */
 export interface AgentModelConfig {
   /** Model to use - format: "provider/model-id" (e.g., 'anthropic/claude-sonnet-4-20250514') */
   model?: string;
@@ -148,49 +148,77 @@ export interface AgentModelConfig {
 }
 
 export interface HiveConfig {
+  /** Schema reference for config file */
+  $schema?: string;
   /** Enable hive tools for specific features */
   enableToolsFor?: string[];
+  /** Enable OMO-Slim delegation (optional integration) */
+  omoSlimEnabled?: boolean;
   /** Agent configuration */
   agents?: {
-    worker: {
-      visible: boolean;
-    };
-    /** Hive Master agent config */
-    hive?: AgentModelConfig;
-    /** Forager worker agent config */
-    forager?: AgentModelConfig;
-  };
-  /** OMO-Slim integration settings */
-  omoSlim?: {
-    /** Enable delegated execution via OMO-Slim background tasks */
-    enabled: boolean;
+    /** Hive Master (hybrid planner + orchestrator) */
+    'hive-master'?: AgentModelConfig;
+    /** Architect Planner (planning-only) */
+    'architect-planner'?: AgentModelConfig;
+    /** Swarm Orchestrator */
+    'swarm-orchestrator'?: AgentModelConfig;
+    /** Scout Researcher */
+    'scout-researcher'?: AgentModelConfig;
+    /** Forager Worker */
+    'forager-worker'?: AgentModelConfig;
+    /** Hygienic Reviewer */
+    'hygienic-reviewer'?: AgentModelConfig;
   };
 }
 
-/** Default models for Hive agents (like OMO-Slim's DEFAULT_MODELS) */
+/** Default models for Hive agents */
 export const DEFAULT_AGENT_MODELS = {
-  hive: 'anthropic/claude-sonnet-4-20250514',
-  forager: 'anthropic/claude-sonnet-4-20250514',
+  'hive-master': 'github-copilot/claude-opus-4.5',
+  'architect-planner': 'github-copilot/gpt-5.2-codex',
+  'swarm-orchestrator': 'github-copilot/claude-opus-4.5',
+  'scout-researcher': 'zai-coding-plan/glm-4.7',
+  'forager-worker': 'github-copilot/gpt-5.2-codex',
+  'hygienic-reviewer': 'github-copilot/gpt-5.2-codex',
 } as const;
 
 export const DEFAULT_HIVE_CONFIG: HiveConfig = {
+  $schema: 'https://raw.githubusercontent.com/tctinh/agent-hive/main/packages/opencode-hive/schema/agent_hive.schema.json',
   enableToolsFor: [],
   agents: {
-    worker: {
-      visible: true,
+    'hive-master': {
+      model: DEFAULT_AGENT_MODELS['hive-master'],
+      temperature: 0.5,
+      skills: [
+        'brainstorming',
+        'writing-plans',
+        'dispatching-parallel-agents',
+        'executing-plans',
+      ],
     },
-    hive: {
-      model: DEFAULT_AGENT_MODELS.hive,
+    'architect-planner': {
+      model: DEFAULT_AGENT_MODELS['architect-planner'],
       temperature: 0.7,
-      skills: ['*'],
+      skills: ['brainstorming', 'writing-plans'],
     },
-    forager: {
-      model: DEFAULT_AGENT_MODELS.forager,
-      temperature: 0.3,
+    'swarm-orchestrator': {
+      model: DEFAULT_AGENT_MODELS['swarm-orchestrator'],
+      temperature: 0.5,
+      skills: ['dispatching-parallel-agents', 'executing-plans'],
+    },
+    'scout-researcher': {
+      model: DEFAULT_AGENT_MODELS['scout-researcher'],
+      temperature: 0.5,
       skills: [],
     },
-  },
-  omoSlim: {
-    enabled: false,
+    'forager-worker': {
+      model: DEFAULT_AGENT_MODELS['forager-worker'],
+      temperature: 0.3,
+      skills: ['test-driven-development', 'verification-before-completion'],
+    },
+    'hygienic-reviewer': {
+      model: DEFAULT_AGENT_MODELS['hygienic-reviewer'],
+      temperature: 0.3,
+      skills: ['systematic-debugging'],
+    },
   },
 };

@@ -10,6 +10,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { normalizePath } from 'hive-core';
 
 /**
  * Result of resolving prompt content from a file.
@@ -62,11 +63,13 @@ export function isValidPromptFilePath(filePath: string, workspaceRoot: string): 
     // Normalize both paths to resolve any .. or . segments
     const normalizedFilePath = path.resolve(filePath);
     const normalizedWorkspace = path.resolve(workspaceRoot);
+    const normalizedFilePathForCompare = normalizePath(normalizedFilePath);
+    const normalizedWorkspaceForCompare = normalizePath(normalizedWorkspace);
 
     // Check that the file path starts with the workspace root
     // This prevents path traversal attacks
-    if (!normalizedFilePath.startsWith(normalizedWorkspace + path.sep) && 
-        normalizedFilePath !== normalizedWorkspace) {
+    if (!normalizedFilePathForCompare.startsWith(normalizedWorkspaceForCompare + '/') &&
+        normalizedFilePathForCompare !== normalizedWorkspaceForCompare) {
       return false;
     }
 

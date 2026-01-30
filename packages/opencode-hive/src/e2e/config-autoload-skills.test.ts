@@ -702,4 +702,107 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     const indexB = hiveMasterPrompt.indexOf("# Skill B Content");
     expect(indexA).toBeLessThan(indexB);
   });
+
+  it("disableSkills prevents injection of a file-based skill", async () => {
+    // Create a file-based skill that would otherwise be loaded
+    const projectSkillDir = path.join(testRoot, ".opencode", "skills");
+    createFileSkill(
+      projectSkillDir,
+      "my-disabled-skill",
+      "A skill that should be disabled",
+      "# Disabled Skill\n\nThis should NOT appear because it's disabled.",
+    );
+
+    // Also create another skill that should NOT be disabled
+    createFileSkill(
+      projectSkillDir,
+      "my-enabled-skill",
+      "A skill that should remain enabled",
+      "# Enabled Skill\n\nThis SHOULD appear.",
+    );
+
+    const configPath = path.join(testRoot, ".config", "opencode", "agent_hive.json");
+    fs.mkdirSync(path.dirname(configPath), { recursive: true });
+    fs.writeFileSync(
+      configPath,
+      JSON.stringify({
+        agentMode: "unified",
+        disableSkills: ["my-disabled-skill"],
+        agents: {
+          "hive-master": {
+            autoLoadSkills: ["my-disabled-skill", "my-enabled-skill"],
+          },
+        },
+      }),
+    );
+
+    const ctx: any = {
+      directory: testRoot,
+      worktree: testRoot,
+      serverUrl: new URL("http://localhost:1"),
+      project: createProject(testRoot),
+      client: OPENCODE_CLIENT,
+    };
+
+    const hooks = await plugin(ctx);
+    const opencodeConfig: any = { agent: {} };
+    await hooks.config!(opencodeConfig);
+
+    const hiveMasterPrompt = opencodeConfig.agent["hive-master"]?.prompt as string;
+    expect(hiveMasterPrompt).toBeDefined();
+
+    // Disabled skill should NOT be present
+    expect(hiveMasterPrompt).not.toContain("# Disabled Skill");
+    expect(hiveMasterPrompt).not.toContain("This should NOT appear because it's disabled.");
+
+    // Enabled skill should still be present
+    expect(hiveMasterPrompt).toContain("# Enabled Skill");
+    expect(hiveMasterPrompt).toContain("This SHOULD appear.");
+  });
+
+  it("invalid IDs do not throw and do not prevent other skills from loading", async () => {
+    // Create a valid file-based skill
+    const projectSkillDir = path.join(testRoot, ".opencode", "skills");
+    createFileSkill(
+      projectSkillDir,
+      "valid-skill",
+      "A valid skill",
+      "# Valid Skill\n\nThis should load successfully.",
+    );
+
+    const configPath = path.join(testRoot, ".config", "opencode", "agent_hive.json");
+    fs.mkdirSync(path.dirname(configPath), { recursive: true });
+    fs.writeFileSync(
+      configPath,
+      JSON.stringify({
+        agentMode: "unified",
+        agents: {
+          "hive-master": {
+            // Include invalid IDs (path traversal, nonexistent) alongside valid skill
+            autoLoadSkills: ["../traversal-attempt", "valid-skill", "nonexistent-skill-xyz"],
+          },
+        },
+      }),
+    );
+
+    const ctx: any = {
+      directory: testRoot,
+      worktree: testRoot,
+      serverUrl: new URL("http://localhost:1"),
+      project: createProject(testRoot),
+      client: OPENCODE_CLIENT,
+    };
+
+    // Should NOT throw even with invalid IDs
+    const hooks = await plugin(ctx);
+    const opencodeConfig: any = { agent: {} };
+    await hooks.config!(opencodeConfig);
+
+    const hiveMasterPrompt = opencodeConfig.agent["hive-master"]?.prompt as string;
+    expect(hiveMasterPrompt).toBeDefined();
+
+    // Valid skill should still be loaded despite invalid IDs in the list
+    expect(hiveMasterPrompt).toContain("# Valid Skill");
+    expect(hiveMasterPrompt).toContain("This should load successfully.");
+  });
 });

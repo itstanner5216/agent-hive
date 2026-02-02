@@ -553,4 +553,64 @@ Do it later
     );
     expect(agents["forager-worker"]?.prompt).not.toContain(onboardingSnippet);
   });
+
+  it("includes task prompt mode when delegateMode=task", async () => {
+    const configPath = path.join(process.env.HOME || "", ".config", "opencode", "agent_hive.json");
+    fs.mkdirSync(path.dirname(configPath), { recursive: true });
+    fs.writeFileSync(
+      configPath,
+      JSON.stringify({ delegateMode: "task" })
+    );
+
+    const ctx: PluginInput = {
+      directory: testRoot,
+      worktree: testRoot,
+      serverUrl: new URL("http://localhost:1"),
+      project: createProject(testRoot),
+      client: OPENCODE_CLIENT,
+      $: createStubShell(),
+    };
+
+    const hooks = await plugin(ctx);
+    const toolContext = createToolContext("sess_task_prompt_mode");
+
+    await hooks.tool!.hive_feature_create.execute(
+      { name: "prompt-mode-feature" },
+      toolContext
+    );
+
+    const plan = `# Prompt Mode Feature
+
+## Tasks
+
+### 1. First Task
+Do it
+`;
+
+    await hooks.tool!.hive_plan_write.execute(
+      { content: plan, feature: "prompt-mode-feature" },
+      toolContext
+    );
+    await hooks.tool!.hive_plan_approve.execute(
+      { feature: "prompt-mode-feature" },
+      toolContext
+    );
+    await hooks.tool!.hive_tasks_sync.execute(
+      { feature: "prompt-mode-feature" },
+      toolContext
+    );
+
+    const execStartOutput = await hooks.tool!.hive_exec_start.execute(
+      { feature: "prompt-mode-feature", task: "01-first-task" },
+      toolContext
+    );
+
+    const execStart = JSON.parse(execStartOutput as string) as {
+      delegateMode?: string;
+      taskPromptMode?: string;
+    };
+
+    expect(execStart.delegateMode).toBe("task");
+    expect(execStart.taskPromptMode).toBe("opencode-at-file");
+  });
 });

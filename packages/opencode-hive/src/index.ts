@@ -904,6 +904,9 @@ Note: delegateMode is set to 'task' in agent_hive.json. To use Hive's background
             delegationRequired: true,
             workerPromptPath: relativePromptPath, // File reference (canonical)
             workerPromptPreview, // Truncated preview for display
+            ...(!useHiveBackground && {
+              taskPromptMode: 'opencode-at-file',
+            }),
             ...(useHiveBackground && {
               backgroundTaskCall: {
                 // NOTE: Uses promptFile instead of prompt to prevent truncation

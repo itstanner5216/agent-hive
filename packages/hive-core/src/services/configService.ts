@@ -191,4 +191,40 @@ export class ConfigService {
     return { mode, ...(image && { image }), persistent };
   }
 
+  /**
+   * Get hook execution cadence for a specific hook.
+   * Returns the configured cadence or 1 (every turn) if not set.
+   * Validates cadence values and defaults to 1 for invalid values.
+   * 
+   * @param hookName - The OpenCode hook name (e.g., 'experimental.chat.system.transform')
+   * @param options - Optional configuration
+   * @param options.safetyCritical - If true, enforces cadence=1 regardless of config
+   * @returns Validated cadence value (always >= 1)
+   */
+  getHookCadence(hookName: string, options?: { safetyCritical?: boolean }): number {
+    const config = this.get();
+    const configuredCadence = config.hook_cadence?.[hookName];
+
+    // Safety-critical hooks must always fire (cadence=1)
+    if (options?.safetyCritical && configuredCadence && configuredCadence > 1) {
+      console.warn(
+        `[hive:cadence] Ignoring cadence > 1 for safety-critical hook: ${hookName}`
+      );
+      return 1;
+    }
+
+    // Validate and clamp cadence
+    if (configuredCadence === undefined || configuredCadence === null) {
+      return 1;
+    }
+    if (configuredCadence <= 0 || !Number.isInteger(configuredCadence)) {
+      console.warn(
+        `[hive:cadence] Invalid cadence ${configuredCadence} for ${hookName}, using 1`
+      );
+      return 1;
+    }
+
+    return configuredCadence;
+  }
+
 }

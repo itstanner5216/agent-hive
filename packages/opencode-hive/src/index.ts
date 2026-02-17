@@ -313,6 +313,41 @@ To unblock: Remove .hive/features/${feature}/BLOCKED`;
     return null;
   };
 
+  // ============================================================================
+  // Hook Cadence Management
+  // ============================================================================
+  
+  /**
+   * Turn counters for hook cadence management.
+   * Each hook tracks its own invocation count to determine when to fire.
+   */
+  const turnCounters: Record<string, number> = {};
+
+  /**
+   * Check if a hook should execute based on its configured cadence.
+   * 
+   * @param hookName - The OpenCode hook name
+   * @param options - Optional configuration
+   * @param options.safetyCritical - If true, enforces cadence=1 regardless of config
+   * @returns true if the hook should execute this turn, false otherwise
+   */
+  const shouldExecuteHook = (hookName: string, options?: { safetyCritical?: boolean }): boolean => {
+    const cadence = configService.getHookCadence(hookName, options);
+    
+    // Increment turn counter
+    turnCounters[hookName] = (turnCounters[hookName] || 0) + 1;
+    const currentTurn = turnCounters[hookName];
+    
+    // Cadence of 1 means fire every turn (no gating needed)
+    if (cadence === 1) {
+      return true;
+    }
+    
+    // Fire on turns 1, (1+cadence), (1+2*cadence), ...
+    // Using (currentTurn - 1) % cadence === 0 ensures turn 1 always fires
+    return (currentTurn - 1) % cadence === 0;
+  };
+
   const checkDependencies = (feature: string, taskFolder: string): { allowed: boolean; error?: string } => {
     const taskStatus = taskService.getRawStatus(feature, taskFolder);
     if (!taskStatus) {
@@ -368,6 +403,11 @@ To unblock: Remove .hive/features/${feature}/BLOCKED`;
       input: { agent?: string } | unknown,
       output: { system: string[] },
     ) => {
+      // Cadence gate: check if this hook should execute this turn
+      if (!shouldExecuteHook("experimental.chat.system.transform")) {
+        return;
+      }
+
       output.system.push(HIVE_SYSTEM_PROMPT);
 
       // NOTE: autoLoadSkills injection is now done in the config hook (prompt field)
@@ -408,6 +448,11 @@ To unblock: Remove .hive/features/${feature}/BLOCKED`;
         parts: unknown[];
       },
     ): Promise<void> => {
+      // Cadence gate: check if this hook should execute this turn
+      if (!shouldExecuteHook("chat.message")) {
+        return;
+      }
+
       const { agent } = input;
 
       // Skip if no agent specified
@@ -430,6 +475,14 @@ To unblock: Remove .hive/features/${feature}/BLOCKED`;
     }) as any,
 
     "tool.execute.before": async (input, output) => {
+      // Cadence gate: check if this hook should execute this turn
+      // SAFETY-CRITICAL: This hook wraps commands for Docker sandbox isolation.
+      // Setting cadence > 1 could allow unsafe commands through.
+      // The safetyCritical flag enforces cadence=1 regardless of config.
+      if (!shouldExecuteHook("tool.execute.before", { safetyCritical: true })) {
+        return;
+      }
+
       if (input.tool !== "bash") return;
       
       const sandboxConfig = configService.getSandboxConfig();

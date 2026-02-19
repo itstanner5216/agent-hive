@@ -322,7 +322,7 @@ Do it
 
     expect(execStart.taskToolCall).toBeDefined();
     expect(execStart.taskToolCall?.subagent_type).toBeDefined();
-    expect(execStart.taskToolCall?.description).toBe("Hive: 01-first-task");
+    expect(execStart.taskToolCall?.description).toBe("Pantheon: 01-first-task");
     expect(execStart.taskToolCall?.prompt).toContain(`@${expectedPromptPath}`);
     expect(execStart.instructions).toContain("task({");
     expect(execStart.instructions).toContain(
@@ -383,7 +383,7 @@ Do it
     expect(agentConfig.prompt).toContain(brainstormingSkill!.template);
     
     // Verify status hint is in system.transform (this is still there)
-    expect(joined).toContain("### Current Hive Status");
+    expect(joined).toContain("### Current Pantheon Status");
   });
 
   it("blocks pantheon_worktree_create when dependencies are not done", async () => {

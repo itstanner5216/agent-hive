@@ -111,9 +111,9 @@ The Pantheon platform doesn't slow agents down. It channels their energy into ac
 
 ## Built on Battle-Tested Principles
 
-Hive's design is grounded in proven practices from the AI coding community, particularly [Boris Cherny's 13 Pro Tips for Claude Code](https://www.anthropic.com/research/claude-code-best-practices).
+Pantheon's design is grounded in proven practices from the AI coding community, particularly [Boris Cherny's 13 Pro Tips for Claude Code](https://www.anthropic.com/research/claude-code-best-practices).
 
-| Boris's Tip | Hive Implementation |
+| Boris's Tip | Pantheon Implementation |
 |-------------|---------------------|
 | **Tip 4: Team CLAUDE.md** | Context persists per-feature in `.pantheon/context/` |
 | **Tip 6: Start in Plan mode** | Plan → Approve → Execute workflow |

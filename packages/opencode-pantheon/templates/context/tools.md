@@ -53,7 +53,7 @@ websearch_web_search_exa({ query: "Next.js 15 new features 2026", numResults: 5 
 
 ### Parallel Exploration (Preferred)
 
-In task mode, use task() for research fan-out; in hive mode, use hive_background_task.
+In task mode, use task() for research fan-out.
 
 For exploratory research, load `pantheon_skill("parallel-exploration")` for the full playbook.
 

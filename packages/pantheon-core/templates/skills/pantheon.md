@@ -1,9 +1,9 @@
 ---
-name: hive
+name: pantheon
 description: Plan-first AI development with isolated git worktrees and human review. Use for any feature development.
 ---
 
-# Hive Workflow
+# Pantheon Workflow
 
 Plan-first development with bee roles.
 

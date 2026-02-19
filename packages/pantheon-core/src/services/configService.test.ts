@@ -8,7 +8,7 @@ import { DEFAULT_HIVE_CONFIG } from "../types";
 let originalHome: string | undefined;
 let tempHome: string;
 
-const makeTempHome = () => fs.mkdtempSync(path.join(os.tmpdir(), "hive-home-"));
+const makeTempHome = () => fs.mkdtempSync(path.join(os.tmpdir(), "pantheon-home-"));
 
 beforeEach(() => {
   originalHome = process.env.HOME;

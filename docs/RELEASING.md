@@ -1,4 +1,4 @@
-# Releasing Agent Hive
+# Releasing Pantheon
 
 This repo publishes:
 

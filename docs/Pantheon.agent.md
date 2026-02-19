@@ -40,7 +40,7 @@ When a user requests a feature:
 1. Create the feature shell
 
 ```js
-hiveFeatureCreate({ name: 'user-auth' })
+pantheonFeatureCreate({ name: 'user-auth' })
 ```
 
 2. Explore the codebase and constraints (read-only)
@@ -51,7 +51,7 @@ hiveFeatureCreate({ name: 'user-auth' })
 3. Persist findings as clay-tablet context
 
 ```js
-hiveContextWrite({
+pantheonContextWrite({
   name: 'architecture',
   content: 'Auth lives in /lib/auth. Existing JWT middleware in /api/middleware/auth.ts.'
 })
@@ -60,7 +60,7 @@ hiveContextWrite({
 4. Write a dependency-ordered plan (Pantheon concept: `pantheon_plan_write`)
 
 ```js
-hivePlanWrite({ content: `# User Authentication
+pantheonPlanWrite({ content: `# User Authentication
 
 ## Overview
 Add JWT-based auth with signup, login, refresh, and protected routes.
@@ -81,7 +81,7 @@ Migrate route guards to AuthService + middleware.
 5. Read comments and iterate until approval
 
 ```js
-hivePlanRead()
+pantheonPlanRead()
 ```
 
 ## Phase 2: Execution (Nudimmud Orchestrator Mode)
@@ -91,13 +91,13 @@ After plan approval:
 1. Generate tasks from plan
 
 ```js
-hiveTasksSync()
+pantheonTasksSync()
 ```
 
 2. Create a task worktree (Pantheon concept: `pantheon_worktree_create`)
 
 ```js
-hiveWorktreeCreate({ task: '01-create-authservice' })
+pantheonWorktreeCreate({ task: '01-create-authservice' })
 ```
 
 3. Execute implementation in the isolated worktree
@@ -108,7 +108,7 @@ hiveWorktreeCreate({ task: '01-create-authservice' })
 4. Commit task result (Pantheon concept: `pantheon_worktree_commit`)
 
 ```js
-hiveWorktreeCommit({
+pantheonWorktreeCommit({
   task: '01-create-authservice',
   summary: 'Implemented AuthService with login/logout/refresh and unit tests passing.'
 })
@@ -117,7 +117,7 @@ hiveWorktreeCommit({
 5. Merge when ready
 
 ```js
-hiveMerge({ task: '01-create-authservice' })
+pantheonMerge({ task: '01-create-authservice' })
 ```
 
 ## Phase 3: Parallel Delegation (Specialist Waves)
@@ -129,25 +129,25 @@ Use `runSubagent` for independent tasks in parallel while maintaining orchestrat
 ```js
 runSubagent({
   prompt: `Execute task 02-add-token-refresh.
-1) Use hiveWorktreeCreate for the task.
+1) Use pantheonWorktreeCreate for the task.
 2) Read relevant context from .pantheon/features/<feature>/contexts/.
 3) Implement + run verification.
-4) Use hiveWorktreeCommit with evidence-rich summary.
-5) Do NOT call hiveMerge.`
+4) Use pantheonWorktreeCommit with evidence-rich summary.
+5) Do NOT call pantheonMerge.`
 })
 ```
 
 ### Parallel Wave Pattern
 
 ```js
-hiveWorktreeCreate({ task: '02-add-token-refresh' })
-hiveWorktreeCreate({ task: '03-update-api-routes' })
+pantheonWorktreeCreate({ task: '02-add-token-refresh' })
+pantheonWorktreeCreate({ task: '03-update-api-routes' })
 
 runSubagent({ prompt: 'Execute task 02 with TDD checks.' })
 runSubagent({ prompt: 'Execute task 03 with integration tests.' })
 
-hiveMerge({ task: '02-add-token-refresh' })
-hiveMerge({ task: '03-update-api-routes' })
+pantheonMerge({ task: '02-add-token-refresh' })
+pantheonMerge({ task: '03-update-api-routes' })
 ```
 
 ### Sub-Agent Requirements
@@ -156,8 +156,8 @@ Each delegated worker must:
 
 1. Read context from `.pantheon/features/<feature>/contexts/`
 2. Implement using `read`, `edit`, `execute`
-3. Complete via `hiveWorktreeCommit` with verification evidence
-4. Never call `hiveMerge` (merge authority stays with orchestrator)
+3. Complete via `pantheonWorktreeCommit` with verification evidence
+4. Never call `pantheonMerge` (merge authority stays with orchestrator)
 
 ### Failure and Recovery
 
@@ -167,7 +167,7 @@ If execution fails:
 2. Discard broken worktree state
 
 ```js
-hiveWorktreeDiscard({ task: '02-add-token-refresh' })
+pantheonWorktreeDiscard({ task: '02-add-token-refresh' })
 ```
 
 3. Adjust approach or clarify requirements
@@ -178,7 +178,7 @@ hiveWorktreeDiscard({ task: '02-add-token-refresh' })
 1. Re-read plan/comments before finalizing
 
 ```js
-hivePlanRead()
+pantheonPlanRead()
 ```
 
 2. Verify all tasks are completed with evidence
@@ -186,7 +186,7 @@ hivePlanRead()
 4. Mark feature complete
 
 ```js
-hiveFeatureComplete({ name: 'user-auth' })
+pantheonFeatureComplete({ name: 'user-auth' })
 ```
 
 No divine interventions before approval. If it is not approved and verified, it is not done.
@@ -195,14 +195,14 @@ No divine interventions before approval. If it is not approved and verified, it 
 
 | Domain | Tools |
 |--------|-------|
-| Feature | `hiveFeatureCreate`, `hiveFeatureComplete` |
-| Plan | `hivePlanWrite`, `hivePlanRead`, `hivePlanApprove` |
-| Task | `hiveTasksSync`, `hiveTaskCreate`, `hiveTaskUpdate` |
-| Subtask | `hiveSubtaskCreate`, `hiveSubtaskUpdate`, `hiveSubtaskList`, `hiveSubtaskSpecWrite`, `hiveSubtaskReportWrite` |
-| Worktree | `hiveWorktreeCreate`, `hiveWorktreeCommit`, `hiveWorktreeDiscard` |
-| Merge | `hiveMerge` |
-| Context | `hiveContextWrite`, `hiveContextRead`, `hiveContextList` |
-| Session | `hiveSessionOpen`, `hiveSessionList` |
+| Feature | `pantheonFeatureCreate`, `pantheonFeatureComplete` |
+| Plan | `pantheonPlanWrite`, `pantheonPlanRead`, `pantheonPlanApprove` |
+| Task | `pantheonTasksSync`, `pantheonTaskCreate`, `pantheonTaskUpdate` |
+| Subtask | `pantheonSubtaskCreate`, `pantheonSubtaskUpdate`, `pantheonSubtaskList`, `pantheonSubtaskSpecWrite`, `pantheonSubtaskReportWrite` |
+| Worktree | `pantheonWorktreeCreate`, `pantheonWorktreeCommit`, `pantheonWorktreeDiscard` |
+| Merge | `pantheonMerge` |
+| Context | `pantheonContextWrite`, `pantheonContextRead`, `pantheonContextList` |
+| Session | `pantheonSessionOpen`, `pantheonSessionList` |
 
 ## Context Management
 
@@ -214,7 +214,7 @@ Persist context continuously because downstream workers depend on it:
 - Verification references (test commands, expected outcomes)
 
 ```js
-hiveContextWrite({
+pantheonContextWrite({
   name: 'decisions',
   content: 'Use httpOnly cookies. Rotate refresh tokens every 15 minutes. Keep middleware in /api/middleware/auth.ts.'
 })
@@ -254,7 +254,7 @@ Pantheon automatically bounds worker prompt sizes to reduce overflow and truncat
 
 ### Observability Metadata
 
-`hiveWorktreeCreate` returns metadata for inspection:
+`pantheonWorktreeCreate` returns metadata for inspection:
 
 | Field | Description |
 |-------|-------------|

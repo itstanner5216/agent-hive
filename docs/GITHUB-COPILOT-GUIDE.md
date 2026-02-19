@@ -1,6 +1,6 @@
-# Agent Hive + GitHub Copilot Guide
+# Pantheon + GitHub Copilot Guide
 
-This guide teaches you how to create a Hive agent for GitHub Copilot. Just install the extension, create the agent file, and you're ready to go.
+This guide teaches you how to create a Pantheon agent for GitHub Copilot. Just install the extension, create the agent file, and you're ready to go.
 
 ## Quick Start
 
@@ -10,11 +10,11 @@ This guide teaches you how to create a Hive agent for GitHub Copilot. Just insta
 code --install-extension tctinh.vscode-hive
 ```
 
-Or search "Agent Hive" in VS Code Extensions.
+Or search "vscode-hive" in VS Code Extensions.
 
 ### 2. Create Your Agent
 
-Create `.github/agents/Hive.agent.md` in your repository:
+Create `.github/agents/Pantheon.agent.md` in your repository:
 
 ```markdown
 ---
@@ -22,7 +22,7 @@ description: 'Plan-first feature development with isolated worktrees and persist
 tools: ['runSubagent', 'tctinh.vscode-hive/hiveFeatureCreate', 'tctinh.vscode-hive/hiveFeatureList', 'tctinh.vscode-hive/hiveFeatureComplete', 'tctinh.vscode-hive/hivePlanWrite', 'tctinh.vscode-hive/hivePlanRead', 'tctinh.vscode-hive/hivePlanApprove', 'tctinh.vscode-hive/hiveTasksSync', 'tctinh.vscode-hive/hiveTaskCreate', 'tctinh.vscode-hive/hiveTaskUpdate', 'tctinh.vscode-hive/hiveExecStart', 'tctinh.vscode-hive/hiveExecComplete', 'tctinh.vscode-hive/hiveExecAbort', 'tctinh.vscode-hive/hiveMerge', 'tctinh.vscode-hive/hiveWorktreeList', 'tctinh.vscode-hive/hiveContextWrite', 'tctinh.vscode-hive/hiveStatus']
 ---
 
-# Hive Agent
+# Pantheon Agent
 
 You are a plan-first development orchestrator.
 
@@ -36,10 +36,10 @@ You are a plan-first development orchestrator.
 In Copilot Chat, invoke your agent:
 
 ```
-@Hive I want to add user authentication
+@Pantheon I want to add user authentication
 ```
 
-That's it. Copilot will use your Hive agent with all the tools.
+That's it. Copilot will use your Pantheon agent with all the tools.
 
 ## Understanding the Agent File
 
@@ -187,7 +187,7 @@ User: "Add dark mode"
 ## Complete Example Agent
 
 See the full reference implementation:
-[.github/agents/Hive.agent.md](/.github/agents/Hive.agent.md)
+[.github/agents/Pantheon.agent.md](/.github/agents/Pantheon.agent.md)
 
 Copy this file to your repository and customize as needed.
 
@@ -201,7 +201,7 @@ Copy this file to your repository and customize as needed.
 
 ### Tools Not Working
 
-- Verify Agent Hive extension is installed
+- Verify vscode-hive extension is installed
 - Check tool names use full path in frontmatter: `tctinh.vscode-hive/hiveFeatureCreate`
 - Run "Developer: Reload Window" in VS Code
 

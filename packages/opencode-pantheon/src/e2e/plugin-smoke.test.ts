@@ -334,7 +334,7 @@ Do it
     expect(execStart.instructions).not.toContain("Read the prompt file");
   });
 
-  it("system prompt hook injects Hive instructions", async () => {
+  it("system prompt hook injects Pantheon instructions", async () => {
     const configPath = path.join(process.env.HOME || "", ".config", "opencode", "agent_hive.json");
     fs.mkdirSync(path.dirname(configPath), { recursive: true });
     fs.writeFileSync(
@@ -366,7 +366,7 @@ Do it
     output.system.push("## Base Agent Prompt");
 
     const joined = output.system.join("\n");
-    expect(joined).toContain("## Hive - Feature Development System");
+    expect(joined).toContain("## Pantheon - Feature Development System");
     expect(joined).toContain("pantheon_feature_create");
     
     // Auto-loaded skills are now injected via config hook (prompt field), NOT system.transform

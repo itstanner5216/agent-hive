@@ -160,7 +160,7 @@ export interface AgentModelConfig {
 export interface HiveConfig {
   /** Schema reference for config file */
   $schema?: string;
-  /** Enable hive tools for specific features */
+  /** Enable pantheon tools for specific features */
   enableToolsFor?: string[];
   /** Globally disable specific skills (won't appear in pantheon_skill tool) */
   disableSkills?: string[];

@@ -927,7 +927,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
             taskPromptMode: 'opencode-at-file',
             taskToolCall: {
               subagent_type: agent,
-              description: `Hive: ${task}`,
+              description: `Pantheon: ${task}`,
               prompt: taskToolPrompt,
             },
             instructions: taskToolInstructions,
@@ -1081,7 +1081,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
               blocker,
               worktreePath: worktree?.path,
               branch: worktree?.branch,
-              message: 'Task blocked. Hive Master will ask user and resume with pantheon_worktree_create(continueFrom: "blocked", decision: answer)',
+              message: 'Task blocked. Pantheon Master will ask user and resume with pantheon_worktree_create(continueFrom: "blocked", decision: answer)',
               nextAction: 'Wait for orchestrator to collect user decision and resume with continueFrom: "blocked".',
             });
           }
@@ -1640,11 +1640,11 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         allAgents['kulla-coder'] = kullaConfig;
         allAgents['nanshe-reviewer'] = nansheConfig;
       } else {
-        // lean: 4 essential agents (enki plans + orchestrates)
+        // lean: 4 essential agents
         allAgents['enki-planner'] = enkiConfig;
-        allAgents['adapa-explorer'] = adapaConfig;
+        allAgents['nudimmud-orchestrator'] = nudimmudConfig;
         allAgents['kulla-coder'] = kullaConfig;
-        allAgents['nanshe-reviewer'] = nansheConfig;
+        allAgents['adapa-explorer'] = adapaConfig;
       }
 
       // Merge agents into opencodeConfig.agent

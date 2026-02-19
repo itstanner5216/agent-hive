@@ -1,5 +1,5 @@
 /**
- * Prompt and payload observability utilities for Hive.
+ * Prompt and payload observability utilities for Pantheon.
  * 
  * Provides visibility into prompt/payload sizes to detect when
  * thresholds are exceeded, preventing silent truncation risks.

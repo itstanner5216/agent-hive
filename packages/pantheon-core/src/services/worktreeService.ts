@@ -78,7 +78,7 @@ export class WorktreeService {
   }
 
   private getBranchName(feature: string, step: string): string {
-    return `hive/${feature}/${step}`;
+    return `pantheon/${feature}/${step}`;
   }
 
   async create(feature: string, step: string, baseBranch?: string): Promise<WorktreeInfo> {
@@ -476,7 +476,7 @@ export class WorktreeService {
         return { committed: false, sha: currentSha, message: "No changes to commit" };
       }
 
-      const commitMessage = message || `hive(${step}): task changes`;
+      const commitMessage = message || `pantheon(${step}): task changes`;
       const result = await worktreeGit.commit(commitMessage, ["--allow-empty-message"]);
       
       return { 
@@ -515,7 +515,7 @@ export class WorktreeService {
 
       if (strategy === 'squash') {
         await git.raw(["merge", "--squash", branchName]);
-        const result = await git.commit(`hive: merge ${step} (squashed)`);
+        const result = await git.commit(`pantheon: merge ${step} (squashed)`);
         return {
           success: true,
           merged: true,
@@ -536,7 +536,7 @@ export class WorktreeService {
           filesChanged,
         };
       } else {
-        const result = await git.merge([branchName, "--no-ff", "-m", `hive: merge ${step}`]);
+        const result = await git.merge([branchName, "--no-ff", "-m", `pantheon: merge ${step}`]);
         const head = (await git.revparse(["HEAD"])).trim();
         return {
           success: true,

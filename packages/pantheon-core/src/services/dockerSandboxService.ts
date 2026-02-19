@@ -9,7 +9,7 @@ export interface SandboxConfig {
 }
 
 /**
- * DockerSandboxService handles Level 1 Docker sandboxing for Hive workers.
+ * DockerSandboxService handles Level 1 Docker sandboxing for Pantheon workers.
  * Uses ephemeral containers (docker run --rm) with volume mounts.
  * 
  * Level 1: Lightweight docker run (no devcontainer.json, no persistent containers)
@@ -71,7 +71,7 @@ export class DockerSandboxService {
    * Extracts feature and task from .pantheon/.worktrees/<feature>/<task> pattern.
    * 
    * @param worktreePath - Path to the worktree directory
-   * @returns Container name (e.g., 'hive-my-feature-my-task')
+   * @returns Container name (e.g., 'pantheon-my-feature-my-task')
    */
   static containerName(worktreePath: string): string {
     const parts = worktreePath.split(sep);
@@ -79,14 +79,14 @@ export class DockerSandboxService {
     
     if (worktreeIdx === -1 || worktreeIdx + 2 >= parts.length) {
       // Not a standard worktree path, use timestamp
-      return `hive-sandbox-${Date.now()}`;
+      return `pantheon-sandbox-${Date.now()}`;
     }
     
     const feature = parts[worktreeIdx + 1];
     const task = parts[worktreeIdx + 2];
     
     // Sanitize for Docker container name (only alphanumeric and hyphens)
-    const name = `hive-${feature}-${task}`.replace(/[^a-z0-9-]/gi, '-').toLowerCase();
+    const name = `pantheon-${feature}-${task}`.replace(/[^a-z0-9-]/gi, '-').toLowerCase();
     
     // Docker container names must be <= 63 characters
     return name.slice(0, 63);

@@ -1,7 +1,7 @@
 /**
- * Hive Skill System Types
+ * Pantheon Skill System Types
  * 
- * Skill definitions for Hive.
+ * Skill definitions for Pantheon.
  */
 
 /**

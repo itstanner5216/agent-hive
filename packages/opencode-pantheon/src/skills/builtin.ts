@@ -1,5 +1,5 @@
 /**
- * Builtin Skills for Hive
+ * Builtin Skills for Pantheon
  * 
  * Skills are loaded from the generated registry.
  * This file provides the infrastructure to load builtin skills.
@@ -74,11 +74,11 @@ export function getFilteredSkills(
 
 /**
  * Get skill metadata for tool description (XML format).
- * Uses (hive - Skill) prefix for consistency with formatSkillsXml in index.ts.
+ * Uses (pantheon - Skill) prefix for consistency with formatSkillsXml in index.ts.
  */
 export function getBuiltinSkillsXml(): string {
   const skillsXml = BUILTIN_SKILLS.map(s => 
-    `  <skill>\n    <name>${s.name}</name>\n    <description>(hive - Skill) ${s.description}</description>\n  </skill>`
+    `  <skill>\n    <name>${s.name}</name>\n    <description>(pantheon - Skill) ${s.description}</description>\n  </skill>`
   ).join('\n');
 
   return `<available_skills>\n${skillsXml}\n</available_skills>`;

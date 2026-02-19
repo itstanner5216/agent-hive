@@ -1,4 +1,4 @@
-// Skill templates for Init Hive Nest
+// Skill templates for Init Pantheon Nest
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -17,5 +17,5 @@ export function getCopilotAgentTemplate(): string {
 }
 
 export function getAllSkillNames(): string[] {
-  return ['hive'];
+  return ['pantheon'];
 }

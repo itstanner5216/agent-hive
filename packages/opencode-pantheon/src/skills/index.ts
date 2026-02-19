@@ -1,5 +1,5 @@
 /**
- * Hive Skills System
+ * Pantheon Skills System
  * 
  * Export skill infrastructure for use in pantheon_skill tool.
  */

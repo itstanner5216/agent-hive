@@ -135,7 +135,7 @@ describe('DockerSandboxService', () => {
       
       // Should contain docker exec instead of docker run
       expect(result).toContain('docker exec');
-      expect(result).toContain('hive-my-feature-my-task');
+      expect(result).toContain('pantheon-my-feature-my-task');
       
       execSyncSpy.mockRestore();
     });
@@ -151,19 +151,19 @@ describe('DockerSandboxService', () => {
     test('extracts feature and task from worktree path', () => {
       const worktreePath = '/home/user/project/.pantheon/.worktrees/my-feature/my-task';
       const result = DockerSandboxService.containerName(worktreePath);
-      expect(result).toBe('hive-my-feature-my-task');
+      expect(result).toBe('pantheon-my-feature-my-task');
     });
 
     test('handles complex feature and task names', () => {
       const worktreePath = '/repo/.pantheon/.worktrees/v1.2.0-tighten-gates/07-implement-persistent-sandbox';
       const result = DockerSandboxService.containerName(worktreePath);
-      expect(result).toBe('hive-v1-2-0-tighten-gates-07-implement-persistent-sandbox');
+      expect(result).toBe('pantheon-v1-2-0-tighten-gates-07-implement-persistent-sandbox');
     });
 
     test('handles non-worktree paths gracefully', () => {
       const worktreePath = '/some/random/path';
       const result = DockerSandboxService.containerName(worktreePath);
-      expect(result).toMatch(/^hive-sandbox-\d+$/);
+      expect(result).toMatch(/^pantheon-sandbox-\d+$/);
     });
 
     test('truncates names longer than 63 characters', () => {
@@ -185,7 +185,7 @@ describe('DockerSandboxService', () => {
       const worktreePath = '/repo/.pantheon/.worktrees/my-feature/my-task';
       const result = DockerSandboxService.ensureContainer(worktreePath, 'node:22-slim');
       
-      expect(result).toBe('hive-my-feature-my-task');
+      expect(result).toBe('pantheon-my-feature-my-task');
       expect(execSyncSpy).toHaveBeenCalledWith(
         expect.stringContaining('docker inspect'),
         expect.any(Object)
@@ -205,7 +205,7 @@ describe('DockerSandboxService', () => {
       const worktreePath = '/repo/.pantheon/.worktrees/my-feature/my-task';
       const result = DockerSandboxService.ensureContainer(worktreePath, 'node:22-slim');
       
-      expect(result).toBe('hive-my-feature-my-task');
+      expect(result).toBe('pantheon-my-feature-my-task');
       expect(execSyncSpy).toHaveBeenCalledWith(
         expect.stringContaining('docker run -d'),
         expect.any(Object)
@@ -221,8 +221,8 @@ describe('DockerSandboxService', () => {
 
   describe('buildExecCommand', () => {
     test('produces correct docker exec command', () => {
-      const result = DockerSandboxService.buildExecCommand('hive-my-feature-my-task', 'npm test');
-      expect(result).toBe("docker exec hive-my-feature-my-task sh -c 'npm test'");
+      const result = DockerSandboxService.buildExecCommand('pantheon-my-feature-my-task', 'npm test');
+      expect(result).toBe("docker exec pantheon-my-feature-my-task sh -c 'npm test'");
     });
 
     test('escapes single quotes in commands', () => {
@@ -244,7 +244,7 @@ describe('DockerSandboxService', () => {
       DockerSandboxService.stopContainer(worktreePath);
       
       expect(execSyncSpy).toHaveBeenCalledWith(
-        'docker rm -f hive-my-feature-my-task',
+        'docker rm -f pantheon-my-feature-my-task',
         { stdio: 'ignore' }
       );
       

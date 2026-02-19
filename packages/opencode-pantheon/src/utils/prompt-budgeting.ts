@@ -1,5 +1,5 @@
 /**
- * Deterministic prompt budgeting utilities for Hive.
+ * Deterministic prompt budgeting utilities for Pantheon.
  *
  * Limits history/context included in prompts to bound growth:
  * - Include only last N completed tasks

@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { WorktreeService } from 'hive-core';
+import { WorktreeService } from 'pantheon-core';
 import type { ToolRegistration } from './base';
 
 export function getMergeTools(workspaceRoot: string): ToolRegistration[] {

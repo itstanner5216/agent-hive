@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { WorktreeService, TaskService, buildEffectiveDependencies } from 'hive-core';
+import { WorktreeService, TaskService, buildEffectiveDependencies } from 'pantheon-core';
 import type { ToolRegistration } from './base';
 
 /**

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import * as fs from 'fs'
 import * as path from 'path'
-import { FeatureService, PlanService, TaskService, WorktreeService } from 'hive-core'
+import { FeatureService, PlanService, TaskService, WorktreeService } from 'pantheon-core'
 import { HiveWatcher, Launcher } from './services'
 import { HiveSidebarProvider, PlanCommentController } from './providers'
 import {

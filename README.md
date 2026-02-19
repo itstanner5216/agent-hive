@@ -2,7 +2,7 @@
 
 **From Vibe Coding to Hive Coding** — Plan first. Execute with trust. Context persists.
 
-[![npm version](https://img.shields.io/npm/v/opencode-hive.svg)](https://www.npmjs.com/package/opencode-hive)
+[![npm version](https://img.shields.io/npm/v/opencode-pantheon.svg)](https://www.npmjs.com/package/opencode-pantheon)
 [![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/tctinh.vscode-hive.svg)](https://marketplace.visualstudio.com/items?itemName=tctinh.vscode-hive)
 [![License: MIT with Commons Clause](https://img.shields.io/badge/License-MIT%20with%20Commons%20Clause-blue.svg)](LICENSE)
 
@@ -85,12 +85,12 @@ See the full [GitHub Copilot Guide](docs/GITHUB-COPILOT-GUIDE.md) for creating a
 
 ### Option B: OpenCode
 
-Add `opencode-hive` to your `opencode.json`:
+Add `opencode-pantheon` to your `opencode.json`:
 
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["opencode-hive"]
+  "plugin": ["opencode-pantheon"]
 }
 ```
 
@@ -102,7 +102,7 @@ Run Agent Hive once to auto-generate a default configuration at `~/.config/openc
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/tctinh/agent-hive/main/packages/opencode-hive/schema/agent_hive.schema.json",
+  "$schema": "https://raw.githubusercontent.com/tctinh/agent-hive/main/packages/opencode-pantheon/schema/agent_hive.schema.json",
   "agentMode": "unified",
   "disableSkills": [],
   "disableMcps": [],
@@ -183,7 +183,7 @@ Skills provide specialized workflows that agents can load on-demand via `pantheo
 
 **Supported skill sources for `autoLoadSkills`:**
 
-1. **Hive builtin** — Skills bundled with opencode-hive (always win if ID matches)
+1. **Hive builtin** — Skills bundled with opencode-pantheon (always win if ID matches)
 2. **Project OpenCode** — `<project>/.opencode/skills/<id>/SKILL.md`
 3. **Global OpenCode** — `~/.config/opencode/skills/<id>/SKILL.md`
 4. **Project Claude** — `<project>/.claude/skills/<id>/SKILL.md`
@@ -223,7 +223,7 @@ Set reasoning/effort levels per agent:
 
 Variants must match keys in your OpenCode config at `provider.<provider>.models.<model>.variants`.
 
-See [packages/opencode-hive/README.md](packages/opencode-hive/README.md) for advanced configuration options.
+See [packages/opencode-pantheon/README.md](packages/opencode-pantheon/README.md) for advanced configuration options.
 
 ### Start Hiving
 
@@ -428,7 +428,7 @@ Visual management without leaving your editor:
 
 **You need:**
 1. **OpenCode CLI** — The AI coding assistant that runs the Hive workflow
-2. **opencode-hive plugin** — Installed in your OpenCode configuration
+2. **opencode-pantheon plugin** — Installed in your OpenCode configuration
 3. **vscode-hive extension** — For visual management in VS Code
 
 The extension watches your `.pantheon/` directory and displays the current state. All planning and execution happens through OpenCode.
@@ -449,7 +449,7 @@ The extension watches your `.pantheon/` directory and displays the current state
 
 | Package | Platform | Description |
 |---------|----------|-------------|
-| **[opencode-hive](https://www.npmjs.com/package/opencode-hive)** | npm | OpenCode plugin — 6 specialized bee agents, 15 tools, 11 skills |
+| **[opencode-pantheon](https://www.npmjs.com/package/opencode-pantheon)** | npm | OpenCode plugin — 6 specialized bee agents, 15 tools, 11 skills |
 | **[vscode-hive](https://marketplace.visualstudio.com/items?itemName=tctinh.vscode-hive)** | VS Code | Visual management — review, comment, approve |
 
 **Agent Selection:** Use `hive`, `architect`, or `swarm` as your primary agent. Use `@scout`, `@forager`, or `@hygienic` to mention subagents directly.
@@ -525,7 +525,7 @@ Hive complements these excellent projects:
 | Platform | Setup | Status |
 |----------|-------|--------|
 | **GitHub Copilot** | Install extension + create agent file | Full support |
-| **OpenCode** | Add `opencode-hive` plugin | Full support |
+| **OpenCode** | Add `opencode-pantheon` plugin | Full support |
 | **VS Code** | Extension for visual management | Full support |
 
 Designed to work seamlessly with:

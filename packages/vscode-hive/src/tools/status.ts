@@ -1,5 +1,5 @@
-import { FeatureService, TaskService, PlanService, ContextService, buildEffectiveDependencies, computeRunnableAndBlocked } from 'hive-core';
-import type { TaskWithDeps } from 'hive-core';
+import { FeatureService, TaskService, PlanService, ContextService, buildEffectiveDependencies, computeRunnableAndBlocked } from 'pantheon-core';
+import type { TaskWithDeps } from 'pantheon-core';
 import type { ToolRegistration } from './base';
 
 export function getStatusTools(workspaceRoot: string): ToolRegistration[] {

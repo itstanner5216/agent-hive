@@ -29,8 +29,8 @@ PROBLEM  -> CONTEXT  -> EXECUTION -> REPORT
     └── {feature}/{task}/ <- Full repo copy for safe execution
 
 packages/
-├── hive-core/            <- Shared logic (services, types, utils)
-├── opencode-hive/        <- OpenCode plugin (planning, execution, tracking)
+├── pantheon-core/            <- Shared logic (services, types, utils)
+├── opencode-pantheon/        <- OpenCode plugin (planning, execution, tracking)
 └── vscode-hive/          <- VS Code extension (visualization, review, approval)
 ```
 

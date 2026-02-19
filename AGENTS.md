@@ -27,12 +27,12 @@ Worktree dependency note: worktrees are isolated checkouts and do not share the 
 ### Package-Specific Commands
 
 ```bash
-# From packages/hive-core/
-bun run build             # Build hive-core
-bun run test              # Run hive-core tests
+# From packages/pantheon-core/
+bun run build             # Build pantheon-core
+bun run test              # Run pantheon-core tests
 
-# From packages/opencode-hive/
-bun run build             # Build opencode-hive plugin
+# From packages/opencode-pantheon/
+bun run build             # Build opencode-pantheon plugin
 bun run dev               # Watch mode
 
 # From packages/vscode-hive/
@@ -83,12 +83,12 @@ async function loadConfig(): Promise<Config> {
 
 ```
 packages/
-├── hive-core/           # Shared logic (services, types, utils)
+├── pantheon-core/           # Shared logic (services, types, utils)
 │   └── src/
 │       ├── services/    # FeatureService, TaskService, PlanService, etc.
 │       ├── utils/       # paths.ts, detection.ts
 │       └── types.ts     # Shared type definitions
-├── opencode-hive/       # OpenCode plugin
+├── opencode-pantheon/       # OpenCode plugin
 │   └── src/
 │       ├── agents/      # scout, swarm, hive, architect, forager, hygienic
 │       ├── mcp/         # websearch, grep-app, context7, ast-grep
@@ -163,21 +163,21 @@ Features stored in `.pantheon/features/<name>/`:
 
 ### Adding a New Tool
 
-1. Create tool in `packages/opencode-hive/src/tools/`
+1. Create tool in `packages/opencode-pantheon/src/tools/`
 2. Register in tool index
 3. Add to agent system prompt if needed
 4. Test with actual agent invocation
 
 ### Adding a New Skill
 
-1. Create directory in `packages/opencode-hive/skills/<name>/`
+1. Create directory in `packages/opencode-pantheon/skills/<name>/`
 2. Add `SKILL.md` with skill instructions
 3. Register in skill loader
 4. Document triggers in skill description
 
 ### Adding a Service
 
-1. Create in `packages/hive-core/src/services/`
+1. Create in `packages/pantheon-core/src/services/`
 2. Export from `services/index.ts`
 3. Add types to `types.ts`
 4. Write unit tests
@@ -186,7 +186,7 @@ Features stored in `.pantheon/features/<name>/`:
 
 ### File System Operations
 
-Use the utility functions from hive-core:
+Use the utility functions from pantheon-core:
 
 ```typescript
 import { readJson, writeJson, fileExists, ensureDir } from './utils/fs.js';

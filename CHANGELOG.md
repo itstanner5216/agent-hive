@@ -78,7 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - **Background Task Infrastructure**: ~5,000 lines deleted — `agent-gate.ts`, `concurrency.ts`, `manager.ts`, `poller.ts`, `store.ts`, `types.ts`, `background-tools.ts` and tests. The complexity wasn't justified; direct worktree execution is simpler and more reliable
 - **`delegateMode` Config**: Removed from types and configuration — no longer needed without background tasks
-- **Journal Infrastructure**: Removed journal paths, templates, and references from hive-core — journals were write-only artifacts nobody read
+- **Journal Infrastructure**: Removed journal paths, templates, and references from pantheon-core — journals were write-only artifacts nobody read
 - **8 Redundant Tools**: `hive_background_start`, `hive_background_status`, `hive_background_cancel`, `hive_background_result`, `hive_exec_start`, `hive_exec_complete`, `hive_journal_read`, `hive_feature_status`
 - **Dead Notepad References**: Cleaned up stale notepad guidance from forager prompt
 
@@ -88,7 +88,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Stats
 - 54 files changed, 512 insertions, 7,328 deletions (net ~6,800 lines removed)
 - Test suite: 88 tests across 5 files (4 new tests for task-type inference)
-- Clean build across all 3 packages (hive-core, opencode-hive, vscode-hive)
+- Clean build across all 3 packages (pantheon-core, opencode-pantheon, vscode-hive)
 
 ## [1.0.7] - 2026-02-04
 
@@ -191,7 +191,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Parallel exploration skill with default auto-load for planner agents.
-- Per-agent model variant configuration in opencode-hive.
+- Per-agent model variant configuration in opencode-pantheon.
 - Selective disable support for skills and MCPs.
 
 ### Changed

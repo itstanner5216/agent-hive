@@ -1,4 +1,4 @@
-import { PlanService, ContextService } from 'hive-core';
+import { PlanService, ContextService } from 'pantheon-core';
 import type { ToolRegistration } from './base';
 
 export function getPlanTools(workspaceRoot: string): ToolRegistration[] {

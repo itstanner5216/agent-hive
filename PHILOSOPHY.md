@@ -224,7 +224,7 @@ Task: Implement calculator
 
 Each subtask has its own `spec.md` (what to do) and `report.md` (what was done) — first-class audit trail.
 
-> **Implementation status**: Subtask infrastructure exists in `hive-core` (full CRUD in `subtaskService.ts` and `taskService.ts`), but agent-facing tools (`hive_subtask_*`) are not yet implemented. TDD patterns are currently enforced through prompt guidance and the verification keyword gate (P7).
+> **Implementation status**: Subtask infrastructure exists in `pantheon-core` (full CRUD in `subtaskService.ts` and `taskService.ts`), but agent-facing tools (`hive_subtask_*`) are not yet implemented. TDD patterns are currently enforced through prompt guidance and the verification keyword gate (P7).
 
 *Inspired by Boris's Tip 13: "Give Claude a way to verify its work. When Claude has a feedback loop, it will 2-3x the quality of the final result."*
 
@@ -269,7 +269,7 @@ Always:
 
 Subtasks enable granular tracking within a task, perfect for TDD workflows:
 
-> **Note**: Subtask CRUD operations exist in `hive-core` services. Agent-facing tools are planned but not yet implemented — workers currently follow TDD via prompt guidance.
+> **Note**: Subtask CRUD operations exist in `pantheon-core` services. Agent-facing tools are planned but not yet implemented — workers currently follow TDD via prompt guidance.
 
 ```
 .pantheon/features/user-auth/tasks/01-auth-service/

@@ -190,7 +190,7 @@ Use \`pantheon_merge\` to explicitly integrate changes. Worktrees persist until 
 
 \`pantheon_worktree_create\` creates worktree and spawns worker automatically:
 
-1. \`pantheon_worktree_create(task)\` → Creates worktree + spawns Forager (Worker/Coder) worker
+1. \`pantheon_worktree_create(task)\` → Creates worktree + spawns Kulla (Coder) worker
 2. Worker executes → calls \`pantheon_worktree_commit(status: "completed")\`
 3. Worker blocked → calls \`pantheon_worktree_commit(status: "blocked", blocker: {...})\`
 
@@ -852,16 +852,16 @@ Expand your Discovery section and try again.`;
             } : undefined,
           });
 
-          // Always use Forager (forager-worker) for task execution
-          // Forager knows Hive protocols (pantheon_worktree_commit, blocker protocol, Iron Laws)
-          // Forager can research via MCP tools (grep_app, context7, etc.)
-          const agent = 'forager-worker';
+          // Always use Kulla (kulla-coder) for task execution
+          // Kulla knows Pantheon protocols (pantheon_worktree_commit, blocker protocol, Iron Laws)
+          // Kulla can research via MCP tools (grep_app, context7, etc.)
+          const agent = 'kulla-coder';
 
           // Generate stable idempotency key for safe retries
           // Format: hive-<feature>-<task>-<attempt>
           const rawStatus = taskService.getRawStatus(feature, task);
           const attempt = (rawStatus?.workerSession?.attempt || 0) + 1;
-          const idempotencyKey = `hive-${feature}-${task}-${attempt}`;
+          const idempotencyKey = `pantheon-${feature}-${task}-${attempt}`;
 
           // Persist idempotencyKey early for debugging. The workerSession will be
           // populated by task tool with the REAL OpenCode session_id/task_id.
@@ -898,7 +898,7 @@ Expand your Discovery section and try again.`;
 
           const taskToolInstructions = `## Delegation Required
 
-Use OpenCode's built-in \`task\` tool to spawn a Forager (Worker/Coder) worker.
+Use OpenCode's built-in \`task\` tool to spawn a Kulla (Coder) worker.
 
 \`\`\`
 task({
@@ -1416,11 +1416,11 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
     },
 
     command: {
-      hive: {
-        description: "Create a new feature: /hive <feature-name>",
+      pantheon: {
+        description: "Create a new feature: /pantheon <feature-name>",
         async run(args: string) {
           const name = args.trim();
-          if (!name) return "Usage: /hive <feature-name>";
+          if (!name) return "Usage: /pantheon <feature-name>";
           return `Create feature "${name}" using pantheon_feature_create tool.`;
         },
       },
@@ -1518,6 +1518,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         permission: {
           task: "deny",
           delegate: "deny",
+          edit: "allow",
           skill: "allow",
         },
       };
@@ -1596,14 +1597,14 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
       };
 
       // --- Asalluhi (Prompt Engineer) — Pre-pipeline ---
-      const asalluhuUserConfig = configService.getAgentConfig('asalluhi-prompter');
-      const asalluhuAutoLoaded = await buildAutoLoadedSkillsContent('asalluhi-prompter', configService, directory);
-      const asalluhuConfig = {
-        model: asalluhuUserConfig.model,
-        variant: asalluhuUserConfig.variant,
-        temperature: asalluhuUserConfig.temperature ?? 0.5,
+      const asalluhiUserConfig = configService.getAgentConfig('asalluhi-prompter');
+      const asalluhiAutoLoaded = await buildAutoLoadedSkillsContent('asalluhi-prompter', configService, directory);
+      const asalluhiConfig = {
+        model: asalluhiUserConfig.model,
+        variant: asalluhiUserConfig.variant,
+        temperature: asalluhiUserConfig.temperature ?? 0.5,
         description: 'Asalluhi (Prompt Engineer) — Crafts and refines prompts. Meta-agent, pre-pipeline.',
-        prompt: ASALLUHI_PROMPT + asalluhuAutoLoaded,
+        prompt: ASALLUHI_PROMPT + asalluhiAutoLoaded,
         permission: {
           edit: "deny",
           question: "allow",
@@ -1629,7 +1630,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         allAgents['enbilulu-tester'] = enbiluluConfig;
         allAgents['mushdamma-phase-reviewer'] = mushdammaConfig;
         allAgents['isimud-ideator'] = isimudConfig;
-        allAgents['asalluhi-prompter'] = asalluhuConfig;
+        allAgents['asalluhi-prompter'] = asalluhiConfig;
       } else if (agentMode === 'core') {
         // 6 pipeline agents
         allAgents['enlil-validator'] = enlilConfig;
@@ -1669,8 +1670,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
       }
 
       // Set default agent based on mode
-      (opencodeConfig as Record<string, unknown>).default_agent = 
-        agentMode === 'lean' ? 'enki-planner' : 'enki-planner';
+      (opencodeConfig as Record<string, unknown>).default_agent = 'enki-planner';
 
       // Merge built-in MCP servers (OMO-style remote endpoints)
       const configMcp = opencodeConfig.mcp as Record<string, unknown> | undefined;

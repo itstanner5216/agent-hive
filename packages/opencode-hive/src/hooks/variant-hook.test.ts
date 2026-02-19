@@ -95,12 +95,16 @@ describe('createVariantHook', () => {
 
     it('applies variant to all Hive agents', async () => {
       const configService = createMockConfigService({
-        'enki-planner': 'max',
+        'enlil-validator': 'max',
         'enki-planner': 'high',
         'nudimmud-orchestrator': 'medium',
         'adapa-explorer': 'low',
         'kulla-coder': 'high',
         'nanshe-reviewer': 'medium',
+        'enbilulu-tester': 'low',
+        'mushdamma-phase-reviewer': 'medium',
+        'isimud-ideator': 'high',
+        'asalluhi-prompter': 'max',
       });
 
       const hook = createVariantHook(configService as any);

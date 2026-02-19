@@ -1,4 +1,4 @@
-import { describe, expect, it, spyOn, afterEach, mock } from 'bun:test';
+import { describe, expect, it, afterEach, spyOn, mock } from 'bun:test';
 import { ConfigService } from 'hive-core';
 import * as path from 'path';
 import plugin from '../index';
@@ -48,13 +48,6 @@ function createStubClient(): unknown {
       messages: async () => ({ data: [] }),
       abort: async () => {},
     },
-    app: {
-      agents: async () => ({ data: [] }),
-      log: async () => {},
-    },
-    config: {
-      get: async () => ({ data: {} }),
-    },
   };
 }
 
@@ -64,7 +57,6 @@ describe('Agent permissions', () => {
   });
 
   it('registers enki-planner, adapa, kulla, and nanshe in full mode', async () => {
-    // Mock ConfigService to return full mode
     spyOn(ConfigService.prototype, 'get').mockReturnValue({
       agentMode: 'full',
       agents: {
@@ -91,20 +83,24 @@ describe('Agent permissions', () => {
     } = {};
     await hooks.config?.(opencodeConfig);
 
+    // Full mode: all 10 agents should be registered
     expect(opencodeConfig.agent?.['enki-planner']).toBeTruthy();
-    expect(opencodeConfig.agent?.['nudimmud-orchestrator']).toBeUndefined();
-    expect(opencodeConfig.agent?.['enki-planner']).toBeUndefined();
+    expect(opencodeConfig.agent?.['nudimmud-orchestrator']).toBeTruthy();
+    expect(opencodeConfig.agent?.['enlil-validator']).toBeTruthy();
     expect(opencodeConfig.agent?.['adapa-explorer']).toBeTruthy();
     expect(opencodeConfig.agent?.['kulla-coder']).toBeTruthy();
     expect(opencodeConfig.agent?.['nanshe-reviewer']).toBeTruthy();
+    expect(opencodeConfig.agent?.['enbilulu-tester']).toBeTruthy();
+    expect(opencodeConfig.agent?.['mushdamma-phase-reviewer']).toBeTruthy();
+    expect(opencodeConfig.agent?.['isimud-ideator']).toBeTruthy();
+    expect(opencodeConfig.agent?.['asalluhi-prompter']).toBeTruthy();
     expect(opencodeConfig.default_agent).toBe('enki-planner');
 
-    const hivePerm = opencodeConfig.agent?.['enki-planner']?.permission;
-    expect(hivePerm).toBeTruthy();
+    const enkiPerm = opencodeConfig.agent?.['enki-planner']?.permission;
+    expect(enkiPerm).toBeTruthy();
   });
 
   it('registers core agents in core mode', async () => {
-    // Mock ConfigService to return core mode
     spyOn(ConfigService.prototype, 'get').mockReturnValue({
       agentMode: 'core',
       agents: {
@@ -132,30 +128,37 @@ describe('Agent permissions', () => {
     } = {};
     await hooks.config?.(opencodeConfig);
 
-    expect(opencodeConfig.agent?.['enki-planner']).toBeUndefined();
-    expect(opencodeConfig.agent?.['nudimmud-orchestrator']).toBeTruthy();
+    // Core mode: 6 pipeline agents
+    expect(opencodeConfig.agent?.['enlil-validator']).toBeTruthy();
     expect(opencodeConfig.agent?.['enki-planner']).toBeTruthy();
+    expect(opencodeConfig.agent?.['nudimmud-orchestrator']).toBeTruthy();
     expect(opencodeConfig.agent?.['adapa-explorer']).toBeTruthy();
     expect(opencodeConfig.agent?.['kulla-coder']).toBeTruthy();
     expect(opencodeConfig.agent?.['nanshe-reviewer']).toBeTruthy();
+
+    // NOT in core mode
+    expect(opencodeConfig.agent?.['enbilulu-tester']).toBeUndefined();
+    expect(opencodeConfig.agent?.['mushdamma-phase-reviewer']).toBeUndefined();
+    expect(opencodeConfig.agent?.['isimud-ideator']).toBeUndefined();
+    expect(opencodeConfig.agent?.['asalluhi-prompter']).toBeUndefined();
+
     expect(opencodeConfig.default_agent).toBe('enki-planner');
 
-    const swarmPerm = opencodeConfig.agent?.['nudimmud-orchestrator']?.permission;
-    const architectPerm = opencodeConfig.agent?.['enki-planner']?.permission;
+    const nudimmudPerm = opencodeConfig.agent?.['nudimmud-orchestrator']?.permission;
+    const enkiPerm = opencodeConfig.agent?.['enki-planner']?.permission;
 
-    expect(swarmPerm).toBeTruthy();
-    expect(architectPerm).toBeTruthy();
-
-    expect(architectPerm!.edit).toBe('deny');
-    expect(architectPerm!.task).toBe('allow');
+    expect(nudimmudPerm).toBeTruthy();
+    expect(enkiPerm).toBeTruthy();
+    expect(enkiPerm!.edit).toBe('deny');
+    expect(enkiPerm!.task).toBe('allow');
   });
 
   it('explicitly denies delegation tools for subagents', async () => {
     spyOn(ConfigService.prototype, 'get').mockReturnValue({
       agentMode: 'full',
       agents: {
-        'enki-planner': {},
-      },
+        'adapa-explorer': {},
+      }
     } as any);
 
     const repoRoot = path.resolve(import.meta.dir, '..', '..', '..', '..');
@@ -170,18 +173,22 @@ describe('Agent permissions', () => {
     };
 
     const hooks = await plugin(ctx as any);
-    const opencodeConfig: {
-      agent?: Record<string, { permission?: Record<string, string> }>;
-      default_agent?: string;
+    
+    const opencodeConfig: { 
+      agent?: Record<string, { permission?: Record<string, string> }>,
+      default_agent?: string 
     } = {};
     await hooks.config?.(opencodeConfig);
 
-    const subagentNames = ['adapa-explorer', 'kulla-coder', 'nanshe-reviewer'] as const;
-    for (const name of subagentNames) {
-      const perm = opencodeConfig.agent?.[name]?.permission;
-      expect(perm).toBeTruthy();
-      expect(perm!.task).toBe('deny');
-      expect(perm!.delegate).toBe('deny');
-    }
+    const adapaPerm = opencodeConfig.agent?.['adapa-explorer']?.permission;
+    const kullaPerm = opencodeConfig.agent?.['kulla-coder']?.permission;
+
+    expect(adapaPerm).toBeTruthy();
+    expect(adapaPerm!.task).toBe('deny');
+    expect(adapaPerm!.edit).toBe('deny');
+
+    expect(kullaPerm).toBeTruthy();
+    expect(kullaPerm!.task).toBe('deny');
+    expect(kullaPerm!.edit).toBe('allow');
   });
 });

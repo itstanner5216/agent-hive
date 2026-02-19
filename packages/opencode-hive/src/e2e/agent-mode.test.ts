@@ -59,12 +59,17 @@ describe("agentMode gating", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
+    // Full mode: all 10 agents
+    expect(opencodeConfig.agent["enlil-validator"]).toBeDefined();
     expect(opencodeConfig.agent["enki-planner"]).toBeDefined();
-    expect(opencodeConfig.agent["enki-planner"]).toBeUndefined();
-    expect(opencodeConfig.agent["nudimmud-orchestrator"]).toBeUndefined();
+    expect(opencodeConfig.agent["nudimmud-orchestrator"]).toBeDefined();
     expect(opencodeConfig.agent["adapa-explorer"]).toBeDefined();
     expect(opencodeConfig.agent["kulla-coder"]).toBeDefined();
     expect(opencodeConfig.agent["nanshe-reviewer"]).toBeDefined();
+    expect(opencodeConfig.agent["enbilulu-tester"]).toBeDefined();
+    expect(opencodeConfig.agent["mushdamma-phase-reviewer"]).toBeDefined();
+    expect(opencodeConfig.agent["isimud-ideator"]).toBeDefined();
+    expect(opencodeConfig.agent["asalluhi-prompter"]).toBeDefined();
     expect(opencodeConfig.default_agent).toBe("enki-planner");
   });
 
@@ -90,12 +95,18 @@ describe("agentMode gating", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    expect(opencodeConfig.agent["enki-planner"]).toBeUndefined();
+    // Core mode: 6 pipeline agents
+    expect(opencodeConfig.agent["enlil-validator"]).toBeDefined();
     expect(opencodeConfig.agent["enki-planner"]).toBeDefined();
     expect(opencodeConfig.agent["nudimmud-orchestrator"]).toBeDefined();
     expect(opencodeConfig.agent["adapa-explorer"]).toBeDefined();
     expect(opencodeConfig.agent["kulla-coder"]).toBeDefined();
     expect(opencodeConfig.agent["nanshe-reviewer"]).toBeDefined();
+    // NOT in core mode
+    expect(opencodeConfig.agent["enbilulu-tester"]).toBeUndefined();
+    expect(opencodeConfig.agent["mushdamma-phase-reviewer"]).toBeUndefined();
+    expect(opencodeConfig.agent["isimud-ideator"]).toBeUndefined();
+    expect(opencodeConfig.agent["asalluhi-prompter"]).toBeUndefined();
     expect(opencodeConfig.default_agent).toBe("enki-planner");
   });
 });

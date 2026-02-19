@@ -2,7 +2,7 @@
   "name": "hive",
   "version": "1.0.1",
   "description": "Context-Driven Development",
-  "dataPath": "../../.hive",
+  "dataPath": "../../.pantheon",
   "commands": [
     {"name": "/pantheon", "description": "Create feature"}
   ],
@@ -18,7 +18,10 @@
     "pantheon_worktree_create",
     "pantheon_worktree_commit",
     "pantheon_worktree_discard",
+    "pantheon_merge",
     "pantheon_context_write",
-    "pantheon_status"
+    "pantheon_status",
+    "pantheon_skill",
+    "pantheon_agents_md"
   ]
 }

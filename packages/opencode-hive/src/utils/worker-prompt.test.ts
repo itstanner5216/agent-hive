@@ -153,7 +153,7 @@ UNIQUE_MARKER_12345
     expect(prompt).toContain('## Completion Protocol');
     expect(prompt).toContain('## Assignment Details');
     expect(prompt).toContain('CRITICAL');
-    expect(prompt).toContain('hive_worktree_commit');
+    expect(prompt).toContain('pantheon_worktree_commit');
   });
 
   it('requires terminal commit result before stopping', () => {

@@ -13,9 +13,9 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
-**Context:** Planning is read-only. Use `hive_feature_create` + `hive_plan_write` and avoid worktrees during planning.
+**Context:** Planning is read-only. Use `pantheon_feature_create` + `pantheon_plan_write` and avoid worktrees during planning.
 
-**Save plans to:** `hive_plan_write` (writes to `.hive/features/<feature>/plan.md`)
+**Save plans to:** `pantheon_plan_write` (writes to `.pantheon/features/<feature>/plan.md`)
 
 ## Bite-Sized Task Granularity
 
@@ -131,7 +131,7 @@ All verification MUST be agent-executable (no human intervention):
 
 After saving the plan, ask whether to consult Hygienic (Consultant/Reviewer/Debugger) before offering execution choice.
 
-Plan complete and saved to `.hive/features/<feature>/plan.md`.
+Plan complete and saved to `.pantheon/features/<feature>/plan.md`.
 
 Two execution options:
 1. Subagent-Driven (this session) - I dispatch fresh subagent per task, review between tasks, fast iteration
@@ -145,4 +145,4 @@ Which approach?
 
 **If Parallel Session chosen:**
 - Guide them to open new session in worktree
-- **REQUIRED SUB-SKILL:** New session uses hive_skill:executing-plans
+- **REQUIRED SUB-SKILL:** New session uses pantheon_skill:executing-plans

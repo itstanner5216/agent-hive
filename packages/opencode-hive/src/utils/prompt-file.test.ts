@@ -11,7 +11,7 @@ describe('isValidPromptFilePath', () => {
     });
     try {
       const workspaceRoot = path.join('C:', 'Repo', 'Project');
-      const filePath = path.join('c:', 'repo', 'project', '.hive', 'prompt.md');
+      const filePath = path.join('c:', 'repo', 'project', '.pantheon', 'prompt.md');
       expect(isValidPromptFilePath(filePath, workspaceRoot)).toBe(true);
     } finally {
       Object.defineProperty(process, 'platform', {
@@ -29,7 +29,7 @@ describe('isValidPromptFilePath', () => {
     });
     try {
       const workspaceRoot = path.join('C:', 'Repo', 'Project');
-      const filePath = path.join('c:', 'other', 'project', '.hive', 'prompt.md');
+      const filePath = path.join('c:', 'other', 'project', '.pantheon', 'prompt.md');
       expect(isValidPromptFilePath(filePath, workspaceRoot)).toBe(false);
     } finally {
       Object.defineProperty(process, 'platform', {
@@ -47,7 +47,7 @@ describe('isValidPromptFilePath', () => {
     });
     try {
       const workspaceRoot = path.join('/Repo', 'Project');
-      const filePath = path.join('/repo', 'project', '.hive', 'prompt.md');
+      const filePath = path.join('/repo', 'project', '.pantheon', 'prompt.md');
       expect(isValidPromptFilePath(filePath, workspaceRoot)).toBe(false);
     } finally {
       Object.defineProperty(process, 'platform', {

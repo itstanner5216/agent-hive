@@ -32,10 +32,10 @@ This enables tools like `grep_app_searchGitHub`, `context7_query-docs`, `websear
 
 ## The Workflow
 
-1. **Create Feature** — `hive_feature_create("dark-mode")`
+1. **Create Feature** — `pantheon_feature_create("dark-mode")`
 2. **Write Plan** — AI generates structured plan
 3. **Review** — You review in VS Code, add comments
-4. **Approve** — `hive_plan_approve()`
+4. **Approve** — `pantheon_plan_approve()`
 5. **Execute** — Tasks run in isolated git worktrees
 6. **Ship** — Clean commits, full audit trail
 
@@ -53,29 +53,29 @@ During planning, "don't execute" means "don't implement" (no code edits, no work
 ### Feature Management
 | Tool | Description |
 |------|-------------|
-| `hive_feature_create` | Create a new feature |
-| `hive_feature_complete` | Mark feature as complete |
+| `pantheon_feature_create` | Create a new feature |
+| `pantheon_feature_complete` | Mark feature as complete |
 
 ### Planning
 | Tool | Description |
 |------|-------------|
-| `hive_plan_write` | Write plan.md |
-| `hive_plan_read` | Read plan and comments |
-| `hive_plan_approve` | Approve plan for execution |
+| `pantheon_plan_write` | Write plan.md |
+| `pantheon_plan_read` | Read plan and comments |
+| `pantheon_plan_approve` | Approve plan for execution |
 
 ### Tasks
 | Tool | Description |
 |------|-------------|
-| `hive_tasks_sync` | Generate tasks from plan |
-| `hive_task_create` | Create manual task |
-| `hive_task_update` | Update task status/summary |
+| `pantheon_tasks_sync` | Generate tasks from plan |
+| `pantheon_task_create` | Create manual task |
+| `pantheon_task_update` | Update task status/summary |
 
 ### Worktree
 | Tool | Description |
 |------|-------------|
-| `hive_worktree_create` | Start work on task (creates worktree) |
-| `hive_worktree_commit` | Complete task (applies changes) |
-| `hive_worktree_discard` | Abort task (discard changes) |
+| `pantheon_worktree_create` | Start work on task (creates worktree) |
+| `pantheon_worktree_commit` | Complete task (applies changes) |
+| `pantheon_worktree_discard` | Abort task (discard changes) |
 
 ## Prompt Budgeting & Observability
 
@@ -94,7 +94,7 @@ When limits are exceeded, content is truncated with `...[truncated]` markers and
 
 ### Observability
 
-`hive_worktree_create` output includes metadata fields:
+`pantheon_worktree_create` output includes metadata fields:
 
 - **`promptMeta`**: Character counts for plan, context, previousTasks, spec, workerPrompt
 - **`payloadMeta`**: JSON payload size, whether prompt is inlined or referenced by file
@@ -103,7 +103,7 @@ When limits are exceeded, content is truncated with `...[truncated]` markers and
 
 ### Prompt Files
 
-Large prompts are written to `.hive/features/<feature>/tasks/<task>/worker-prompt.md` and passed by file reference (`workerPromptPath`) rather than inlined in tool output. This prevents truncation of large prompts.
+Large prompts are written to `.pantheon/features/<feature>/tasks/<task>/worker-prompt.md` and passed by file reference (`workerPromptPath`) rather than inlined in tool output. This prevents truncation of large prompts.
 
 ## Plan Format
 
@@ -160,7 +160,7 @@ Hive uses a config file at `~/.config/opencode/agent_hive.json`. You can customi
 
 ### Per-Agent Skills
 
-Each agent can have specific skills enabled. If configured, only those skills appear in `hive_skill()`:
+Each agent can have specific skills enabled. If configured, only those skills appear in `pantheon_skill()`:
 
 ```json
 {
@@ -217,9 +217,9 @@ Skill IDs must be safe directory names (no `/`, `\`, `..`, or `.`). Missing or i
 
 **How `skills` and `autoLoadSkills` interact:**
 
-- `skills` controls what appears in `hive_skill()` — the agent can manually load these on demand
+- `skills` controls what appears in `pantheon_skill()` — the agent can manually load these on demand
 - `autoLoadSkills` injects skills unconditionally at session start — no manual loading needed
-- These are **independent**: a skill can be auto-loaded but not appear in `hive_skill()`, or vice versa
+- These are **independent**: a skill can be auto-loaded but not appear in `pantheon_skill()`, or vice versa
 - User `autoLoadSkills` are **merged** with defaults (use global `disableSkills` to remove defaults)
 
 **Default auto-load skills by agent:**

@@ -602,6 +602,6 @@ export class WorktreeService {
 export function createWorktreeService(projectDir: string): WorktreeService {
   return new WorktreeService({
     baseDir: projectDir,
-    hiveDir: path.join(projectDir, ".hive"),
+    hiveDir: path.join(projectDir, ".pantheon"),
   });
 }

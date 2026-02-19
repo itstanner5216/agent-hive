@@ -104,7 +104,7 @@ Use #tool:runSubagent to delegate tasks:
 
 Use #tool:runSubagent to execute task "2-add-token-refresh":
 - Call execStart for the task
-- Read context files from .hive/features/<name>/contexts/
+- Read context files from .pantheon/features/<name>/contexts/
 - Implement the feature
 - Call execComplete with summary
 - Do NOT call merge
@@ -120,7 +120,7 @@ Execute in parallel using #tool:runSubagent for each:
 
 Each sub-agent:
 - execStart for their task
-- Read context files from .hive/
+- Read context files from .pantheon/
 - Do implementation
 - execComplete with summary
 - NOT merge (orchestrator decides)

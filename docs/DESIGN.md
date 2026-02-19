@@ -12,7 +12,7 @@ PROBLEM  -> CONTEXT  -> EXECUTION -> REPORT
 ## Architecture
 
 ```
-.hive/                    <- Shared data (all clients)
+.pantheon/                    <- Shared data (all clients)
 ├── features/             <- Feature-scoped work
 │   └── {feature}/
 │       ├── feature.json  <- Feature metadata and state
@@ -36,19 +36,19 @@ packages/
 
 ## Data Flow
 
-1. User creates feature via `hive_feature_create`
-2. Agent writes plan via `hive_plan_write`
+1. User creates feature via `pantheon_feature_create`
+2. Agent writes plan via `pantheon_plan_write`
 3. User reviews in VSCode, adds comments
-4. User approves via `hive_plan_approve`
-5. Tasks synced via `hive_tasks_sync` (generates spec.md for each)
-6. Each task executed via `hive_worktree_create` -> work -> `hive_worktree_commit`
+4. User approves via `pantheon_plan_approve`
+5. Tasks synced via `pantheon_tasks_sync` (generates spec.md for each)
+6. Each task executed via `pantheon_worktree_create` -> work -> `pantheon_worktree_commit`
 7. Changes applied from worktree to main repo
 8. Report generated with diff stats and file list
 
 ## Prompt Management
 
 - `spec.md` is the single source for plan/context/prior task summaries in worker prompts to avoid duplication.
-- `hive_worktree_create` writes the full prompt to `.hive/features/<feature>/tasks/<task>/worker-prompt.md` and returns `workerPromptPath` plus a short preview.
+- `pantheon_worktree_create` writes the full prompt to `.pantheon/features/<feature>/tasks/<task>/worker-prompt.md` and returns `workerPromptPath` plus a short preview.
 - Prompt budgets default to last 10 tasks, 2000 chars per summary, 20KB per context file, 60KB total; `promptMeta`, `payloadMeta`, and `warnings` report sizes.
 
 ## Feature Resolution (v0.5.0)
@@ -60,7 +60,7 @@ function resolveFeature(explicit?: string): string | null {
   // 1. Use explicit parameter if provided
   if (explicit) return explicit
   
-  // 2. Detect from worktree path (.hive/.worktrees/{feature}/{task}/)
+  // 2. Detect from worktree path (.pantheon/.worktrees/{feature}/{task}/)
   const detected = detectContext(cwd)
   if (detected?.feature) return detected.feature
   
@@ -125,17 +125,17 @@ Contains execution results:
 ## Worktree Isolation
 
 Each task executes in an isolated git worktree:
-- Full repo copy at `.hive/.worktrees/{feature}/{task}/`
+- Full repo copy at `.pantheon/.worktrees/{feature}/{task}/`
 - Agent makes changes freely without affecting main repo
-- On `hive_worktree_commit`: diff extracted and applied to main repo
-- On `hive_worktree_discard`: worktree discarded, no changes applied
+- On `pantheon_worktree_commit`: diff extracted and applied to main repo
+- On `pantheon_worktree_discard`: worktree discarded, no changes applied
 
 ## Key Principles
 
 - **No global state** — All tools accept explicit feature parameter
 - **Detection-first** — Worktree path reveals feature context
 - **Isolation** — Each task in own worktree, safe to discard
-- **Audit trail** — Every action logged to `.hive/`
+- **Audit trail** — Every action logged to `.pantheon/`
 - **Agent-friendly** — Minimal overhead during execution
 
 ## Source of Truth Rules
@@ -149,13 +149,13 @@ Hive uses file-based state with clear ownership boundaries:
 | `status.json` (task) | Worker | Hive Master (read), Poller (read-only) |
 | `plan.md` | Hive Master | VS Code (read + comment) |
 | `comments.json` | VS Code | Hive Master (read-only) |
-| `spec.md` | `hive_worktree_create` | Worker (read-only) |
+| `spec.md` | `pantheon_worktree_create` | Worker (read-only) |
 | `report.md` | Worker | All (read-only) |
 | `BLOCKED` | Beekeeper | All (read-only, blocks operations) |
 
 ### Poller Constraints
 
-The VSCode extension poller watches `.hive/` for changes:
+The VSCode extension poller watches `.pantheon/` for changes:
 - **Read-only**: Poller NEVER writes to any file
 - **Debounced**: File changes debounced to avoid thrashing
 - **Selective**: Only watches files it needs for UI
@@ -166,37 +166,37 @@ Task `status.json` fields and who writes them:
 
 | Field | Written By | When |
 |-------|-----------|------|
-| `status` | Worker via `hive_worktree_commit` | On completion/block |
-| `origin` | `hive_tasks_sync` | On task creation |
-| `planTitle` | `hive_tasks_sync` | On task creation |
-| `summary` | Worker via `hive_worktree_commit` | On completion |
-| `startedAt` | `hive_worktree_create` | On task start |
-| `completedAt` | `hive_worktree_commit` | On completion |
-| `baseCommit` | `hive_worktree_create` | On worktree creation |
-| `blocker` | Worker via `hive_worktree_commit` | When blocked |
+| `status` | Worker via `pantheon_worktree_commit` | On completion/block |
+| `origin` | `pantheon_tasks_sync` | On task creation |
+| `planTitle` | `pantheon_tasks_sync` | On task creation |
+| `summary` | Worker via `pantheon_worktree_commit` | On completion |
+| `startedAt` | `pantheon_worktree_create` | On task start |
+| `completedAt` | `pantheon_worktree_commit` | On completion |
+| `baseCommit` | `pantheon_worktree_create` | On worktree creation |
+| `blocker` | Worker via `pantheon_worktree_commit` | When blocked |
 
 ## Idempotency Expectations
 
 ### Idempotent Operations
 
 These operations are safe to retry:
-- `hive_plan_read` - Pure read
-- `hive_status` - Pure read
+- `pantheon_plan_read` - Pure read
+- `pantheon_status` - Pure read
 
 ### Non-Idempotent Operations
 
 These operations have side effects:
-- `hive_feature_create` - Creates feature directory (errors if exists)
-- `hive_plan_write` - Overwrites plan.md, clears comments
-- `hive_tasks_sync` - Reconciles tasks (additive, removes orphans)
-- `hive_worktree_create` - Creates worktree (reuses if exists for blocked resume)
-- `hive_worktree_commit` - Commits changes, writes report (once per completion)
-- `hive_merge` - Merges branch (fails if already merged)
+- `pantheon_feature_create` - Creates feature directory (errors if exists)
+- `pantheon_plan_write` - Overwrites plan.md, clears comments
+- `pantheon_tasks_sync` - Reconciles tasks (additive, removes orphans)
+- `pantheon_worktree_create` - Creates worktree (reuses if exists for blocked resume)
+- `pantheon_worktree_commit` - Commits changes, writes report (once per completion)
+- `pantheon_merge` - Merges branch (fails if already merged)
 
 ### Recovery Patterns
 
 If a tool call fails mid-operation:
-1. Check `hive_status` to see current state
+1. Check `pantheon_status` to see current state
 2. Most operations leave state consistent (atomic file writes)
-3. Worktrees can be cleaned up with `hive_worktree_discard`
+3. Worktrees can be cleaned up with `pantheon_worktree_discard`
 4. Partial merges require manual git intervention

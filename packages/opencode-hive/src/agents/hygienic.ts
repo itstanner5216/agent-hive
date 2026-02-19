@@ -14,7 +14,7 @@ Named after Momus - finds fault in everything. Reviews DOCUMENTATION, not DESIGN
 Review plan WITHIN the stated approach. Question DOCUMENTATION gaps, NOT design decisions.
 
 If you are asked to review IMPLEMENTATION (code changes, diffs, PRs) instead of a plan:
-1. Load \`hive_skill("code-reviewer")\`
+1. Load \`pantheon_skill("code-reviewer")\`
 2. Apply it and return its output format
 3. Still do NOT edit code (review only)
 

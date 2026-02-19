@@ -37,7 +37,7 @@ Vibe coding is powerful but chaotic. Without structure:
 | Subagents go wild | **Batched parallelism** — Coordinated execution with context flow |
 | Scope creep | **Plan approval gate** — Human shapes, agent builds |
 | Messes to clean up | **Worktree isolation** — Each task isolated, easy discard |
-| No audit trail | **Automatic tracking** — Every task logged to `.hive/` |
+| No audit trail | **Automatic tracking** — Every task logged to `.pantheon/` |
 | Agent hallucination | **Context files** — Research and decisions ground agent work |
 
 **Hive doesn't change how you work. It makes what happens traceable, auditable, and grounded.**
@@ -52,7 +52,7 @@ We studied what actually works in the AI coding community and built upon it:
 |--------|-----------------|---------------------|
 | **[Boris Cherny's 13 Tips](https://www.anthropic.com/research/claude-code-best-practices)** | Feedback loops = 2-3x quality | Task-level verification with tests |
 | **[Spec Kit](https://github.com/github/spec-kit)** | Specs are valuable | Specs emerge from dialogue, not upfront |
-| **[Conductor](https://github.com/gemini-cli-extensions/conductor)** | Context persistence matters | Feature-scoped `.hive/context/` |
+| **[Conductor](https://github.com/gemini-cli-extensions/conductor)** | Context persistence matters | Feature-scoped `.pantheon/context/` |
 | **[Ralph Wiggum](https://awesomeclaude.ai/ralph-wiggum)** | Retry loops work for verification | TDD loops, not infinite retries |
 | **[Oh My OpenCode](https://github.com/code-yeongyu/oh-my-opencode)** | Agent delegation scales | OMO as Hive Queen, Hive as workflow |
 | **Antigravity** | Plan gates build trust | Plan → Approve → Execute workflow |
@@ -120,7 +120,7 @@ Run Agent Hive once to auto-generate a default configuration at `~/.config/openc
 | Option | Values | Description |
 |--------|--------|-------------|
 | `agentMode` | `unified` (default), `dedicated` | `unified`: Single `hive-master` agent handles planning + orchestration. `dedicated`: Separate `architect-planner` and `swarm-orchestrator` agents. |
-| `disableSkills` | `string[]` | Globally disable specific skills (won't appear in `hive_skill` tool). |
+| `disableSkills` | `string[]` | Globally disable specific skills (won't appear in `pantheon_skill` tool). |
 | `disableMcps` | `string[]` | Globally disable MCP servers. Options: `websearch`, `context7`, `grep_app`, `ast_grep`. |
 
 #### Agent Models
@@ -142,7 +142,7 @@ All agents: `hive-master`, `architect-planner`, `swarm-orchestrator`, `scout-res
 
 #### Skills
 
-Skills provide specialized workflows that agents can load on-demand via `hive_skill`.
+Skills provide specialized workflows that agents can load on-demand via `pantheon_skill`.
 
 | Skill | Description |
 |-------|-------------|
@@ -158,7 +158,7 @@ Skills provide specialized workflows that agents can load on-demand via `hive_sk
 | `docker-mastery` | Docker container expertise — debugging, docker-compose, optimization |
 | `agents-md-mastery` | AGENTS.md quality review — signal vs noise, when to prune |
 
-**Per-agent skills:** Restrict which skills appear in `hive_skill()` tool:
+**Per-agent skills:** Restrict which skills appear in `pantheon_skill()` tool:
 
 ```json
 {
@@ -192,9 +192,9 @@ Skills provide specialized workflows that agents can load on-demand via `hive_sk
 Missing or invalid skills emit a warning and are skipped—startup continues without failure.
 
 **How these interact:**
-- `skills` controls what's available in `hive_skill()` — the agent can manually load these
+- `skills` controls what's available in `pantheon_skill()` — the agent can manually load these
 - `autoLoadSkills` injects skills unconditionally at session start — no manual loading needed
-- These are **independent**: a skill can be auto-loaded but not appear in `hive_skill()`, or vice versa
+- These are **independent**: a skill can be auto-loaded but not appear in `pantheon_skill()`, or vice versa
 - Default `autoLoadSkills` are merged with user config (use `disableSkills` to remove defaults)
 
 #### MCP Research Tools
@@ -334,7 +334,7 @@ When done, you have:
 - **Full audit trail** — What was done, when, by which agent
 
 ```
-.hive/features/user-auth/
+.pantheon/features/user-auth/
 ├── feature.json         # Feature metadata
 ├── plan.md              # Your approved plan
 ├── tasks.json           # Task list with status
@@ -365,7 +365,7 @@ When done, you have:
 ┌─────────────────────────────────────────────────────────────┐
 │  1. PLAN                                                    │
 │  Chat with your agent about what to build                   │
-│  Agent creates structured plan in .hive/                    │
+│  Agent creates structured plan in .pantheon/                    │
 ├─────────────────────────────────────────────────────────────┤
 │  2. REVIEW (in VS Code)                                     │
 │  See the plan in sidebar                                    │
@@ -390,7 +390,7 @@ Visual management without leaving your editor:
 - **Sidebar** — See all features and progress at a glance
 - **Inline Comments** — Add review comments directly on plan.md
 - **Approve Button** — One-click plan approval
-- **Real-time Updates** — Watches `.hive/` for changes
+- **Real-time Updates** — Watches `.pantheon/` for changes
 - **Launch Tasks** — Open tasks in OpenCode from VS Code
 - **Expandable Tasks** — Click to view spec.md and report.md for each task
 
@@ -431,11 +431,11 @@ Visual management without leaving your editor:
 2. **opencode-hive plugin** — Installed in your OpenCode configuration
 3. **vscode-hive extension** — For visual management in VS Code
 
-The extension watches your `.hive/` directory and displays the current state. All planning and execution happens through OpenCode.
+The extension watches your `.pantheon/` directory and displays the current state. All planning and execution happens through OpenCode.
 
 ### Using the Extension
 
-1. **Open your project** in VS Code (must have `.hive/` directory)
+1. **Open your project** in VS Code (must have `.pantheon/` directory)
 2. **Click the Hive icon** in the Activity Bar (left sidebar)
 3. **Browse features** — Expand to see tasks, context, sessions
 4. **Review plans** — Click on plan.md to open with inline commenting
@@ -468,7 +468,7 @@ Break work into isolated tasks. Subagents work in parallel without conflicts. Ba
 
 ### 📊 Easy Audit
 
-Every decision, every change, every agent action — automatically captured in `.hive/`
+Every decision, every change, every agent action — automatically captured in `.pantheon/`
 
 ### 🚀 Easy Ship
 

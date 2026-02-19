@@ -42,7 +42,7 @@ Use MCP tools for focused research; for multi-domain exploration, use parallel S
 | `ast_grep_search` | AST-aware code search |
 | `task()` | Parallel exploration via Scout fan-out | 
 
-For exploratory fan-out, load `hive_skill("parallel-exploration")` for the full playbook.
+For exploratory fan-out, load `pantheon_skill("parallel-exploration")` for the full playbook.
 
 ---
 
@@ -74,7 +74,7 @@ Classify Intent → Discovery → Plan → Review → Execute → Merge
 
 ### Research First (Greenfield/Complex)
 
-For parallel exploration, load `hive_skill("parallel-exploration")`.
+For parallel exploration, load `pantheon_skill("parallel-exploration")`.
 
 ### Question Tool
 
@@ -111,13 +111,13 @@ ANY NO → Ask the unclear thing
 ### Create Feature
 
 ```
-hive_feature_create({ name: "feature-name" })
+pantheon_feature_create({ name: "feature-name" })
 ```
 
 ### Save Context (Royal Jelly)
 
 ```
-hive_context_write({
+pantheon_context_write({
   name: "research",
   content: "# Findings\n- Pattern at src/lib/auth:45-78..."
 })
@@ -126,7 +126,7 @@ hive_context_write({
 ### Write Plan
 
 ```
-hive_plan_write({ content: "..." })
+pantheon_plan_write({ content: "..." })
 ```
 
 ### Plan Structure (REQUIRED)
@@ -231,9 +231,9 @@ In this example, tasks 2 and 3 can run in parallel (both only depend on 1), whil
 ## Phase 3: Review
 
 1. User reviews in VS Code
-2. Check comments: `hive_plan_read()`
+2. Check comments: `pantheon_plan_read()`
 3. Revise if needed
-4. User approves via: `hive_plan_approve()`
+4. User approves via: `pantheon_plan_approve()`
 
 ---
 
@@ -242,20 +242,20 @@ In this example, tasks 2 and 3 can run in parallel (both only depend on 1), whil
 ### Sync Tasks
 
 ```
-hive_tasks_sync()
+pantheon_tasks_sync()
 ```
 
 ### Execute Each Task
 
 ```
-hive_worktree_create({ task: "01-task-name" })  // Creates worktree; returns delegation instructions
+pantheon_worktree_create({ task: "01-task-name" })  // Creates worktree; returns delegation instructions
 task({ ...taskCall })  // Only when delegationRequired is true
   ↓
 [Forager Bee implements in worktree]
   ↓
-hive_worktree_commit({ task, summary, status: "completed" })
+pantheon_worktree_commit({ task, summary, status: "completed" })
   ↓
-hive_merge({ task: "01-task-name", strategy: "squash" })
+pantheon_merge({ task: "01-task-name", strategy: "squash" })
 ```
 
 ### Parallel Execution (Swarming)
@@ -279,9 +279,9 @@ When multiple tasks have their dependencies satisfied (runnable), the orchestrat
 If `delegationRequired` is returned for a task, call `task` to spawn that worker.
 
 ```
-hive_worktree_create({ task: "02-task-a" })
-hive_worktree_create({ task: "03-task-b" })
-hive_status()  // Monitor all
+pantheon_worktree_create({ task: "02-task-a" })
+pantheon_worktree_create({ task: "03-task-b" })
+pantheon_status()  // Monitor all
 ```
 
 ---
@@ -292,9 +292,9 @@ When worker returns `status: 'blocked'`:
 
 ### Quick Decision (No Plan Change)
 
-1. `hive_status()` - get details
+1. `pantheon_status()` - get details
 2. Ask user via question tool
-3. Resume: `hive_worktree_create({ task, continueFrom: "blocked", decision: "..." })`
+3. Resume: `pantheon_worktree_create({ task, continueFrom: "blocked", decision: "..." })`
 
 ### Plan Gap Detected
 
@@ -315,9 +315,9 @@ If blocker suggests plan is incomplete:
 ```
 
 If "Revise Plan":
-1. `hive_worktree_discard({ task })`
-2. `hive_context_write({ name: "learnings", content: "..." })`
-3. `hive_plan_write({ content: "..." })` (updated plan)
+1. `pantheon_worktree_discard({ task })`
+2. `pantheon_context_write({ name: "learnings", content: "..." })`
+3. `pantheon_plan_write({ content: "..." })` (updated plan)
 4. Wait for re-approval
 
 ---
@@ -327,19 +327,19 @@ If "Revise Plan":
 | Phase | Tool | Purpose |
 |-------|------|---------|
 | Discovery | `grep_app_searchGitHub` / `context7_query-docs` / `task()` | Research delegation (parallel exploration) |
-| Plan | `hive_feature_create` | Start feature |
-| Plan | `hive_context_write` | Save research |
-| Plan | `hive_plan_write` | Write plan |
-| Plan | `hive_plan_read` | Check comments |
-| Plan | `hive_plan_approve` | Approve plan |
-| Execute | `hive_tasks_sync` | Generate tasks |
-| Execute | `hive_worktree_create` | Spawn Forager Bee worker |
-| Execute | `hive_worktree_commit` | Finish task |
-| Execute | `hive_worktree_discard` | Discard task |
-| Execute | `hive_merge` | Integrate task |
-| Execute | `hive_status` | Check workers/blockers |
-| Complete | `hive_feature_complete` | Mark done |
-| Status | `hive_status` | Overall progress |
+| Plan | `pantheon_feature_create` | Start feature |
+| Plan | `pantheon_context_write` | Save research |
+| Plan | `pantheon_plan_write` | Write plan |
+| Plan | `pantheon_plan_read` | Check comments |
+| Plan | `pantheon_plan_approve` | Approve plan |
+| Execute | `pantheon_tasks_sync` | Generate tasks |
+| Execute | `pantheon_worktree_create` | Spawn Forager Bee worker |
+| Execute | `pantheon_worktree_commit` | Finish task |
+| Execute | `pantheon_worktree_discard` | Discard task |
+| Execute | `pantheon_merge` | Integrate task |
+| Execute | `pantheon_status` | Check workers/blockers |
+| Complete | `pantheon_feature_complete` | Mark done |
+| Status | `pantheon_status` | Overall progress |
 
 ---
 
@@ -365,8 +365,8 @@ If "Revise Plan":
 
 ### Task Failed
 ```
-hive_worktree_discard({ task })  # Discard
-hive_worktree_create({ task })  # Fresh start
+pantheon_worktree_discard({ task })  # Discard
+pantheon_worktree_create({ task })  # Fresh start
 ```
 
 ### After 3 Failures
@@ -377,4 +377,4 @@ hive_worktree_create({ task })  # Fresh start
 ### Merge Conflicts
 1. Resolve in worktree
 2. Commit resolution
-3. `hive_merge` again
+3. `pantheon_merge` again

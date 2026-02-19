@@ -114,10 +114,10 @@ If you hit a blocker requiring human decision, **DO NOT** use the question tool 
 Instead, escalate via the blocker protocol:
 
 1. **Save your progress** to the worktree (commit if appropriate)
-2. **Call hive_worktree_commit** with blocker info:
+2. **Call pantheon_worktree_commit** with blocker info:
 
 \`\`\`
-hive_worktree_commit({
+pantheon_worktree_commit({
   task: "${task}",
   feature: "${feature}",
   status: "blocked",
@@ -131,7 +131,7 @@ hive_worktree_commit({
 })
 \`\`\`
 
-**After calling hive_worktree_commit with blocked status, STOP IMMEDIATELY.**
+**After calling pantheon_worktree_commit with blocked status, STOP IMMEDIATELY.**
 
 The Hive Master will:
 1. Receive your blocker info
@@ -147,7 +147,7 @@ This keeps the user focused on ONE conversation (Hive Master) instead of multipl
 When your task is **fully complete**:
 
 \`\`\`
-hive_worktree_commit({
+pantheon_worktree_commit({
   task: "${task}",
   feature: "${feature}",
   status: "completed",
@@ -157,11 +157,11 @@ hive_worktree_commit({
 
 Then inspect the tool response fields:
 - If \`ok=true\` and \`terminal=true\`: stop the session
-- Otherwise: **DO NOT STOP**. Follow \`nextAction\`, remediate, and retry \`hive_worktree_commit\`
+- Otherwise: **DO NOT STOP**. Follow \`nextAction\`, remediate, and retry \`pantheon_worktree_commit\`
 
 **CRITICAL: Stop only on terminal commit result (ok=true and terminal=true).**
 If commit returns non-terminal (for example verification_required), DO NOT STOP.
-Follow result.nextAction, fix the issue, and call hive_worktree_commit again.
+Follow result.nextAction, fix the issue, and call pantheon_worktree_commit again.
 
 Only when commit result is terminal should you stop.
 Do NOT continue working after a terminal result. Do NOT respond further. Your session is DONE.
@@ -176,7 +176,7 @@ The Hive Master will take over from here.
 If you encounter an **unrecoverable error**:
 
 \`\`\`
-hive_worktree_commit({
+pantheon_worktree_commit({
   task: "${task}",
   feature: "${feature}",
   status: "failed",
@@ -187,7 +187,7 @@ hive_worktree_commit({
 If you made **partial progress** but can't continue:
 
 \`\`\`
-hive_worktree_commit({
+pantheon_worktree_commit({
   task: "${task}",
   feature: "${feature}",
   status: "partial",
@@ -221,15 +221,15 @@ After 3 failed attempts at same fix: STOP and report blocker.
 
 **You have access to:**
 - All standard tools (read, write, edit, bash, glob, grep)
-- \`hive_worktree_commit\` - Signal task done/blocked/failed
-- \`hive_worktree_discard\` - Abort and discard changes
-- \`hive_plan_read\` - Re-read plan if needed
-- \`hive_context_write\` - Save learnings for future tasks
+- \`pantheon_worktree_commit\` - Signal task done/blocked/failed
+- \`pantheon_worktree_discard\` - Abort and discard changes
+- \`pantheon_plan_read\` - Re-read plan if needed
+- \`pantheon_context_write\` - Save learnings for future tasks
 
 **You do NOT have access to (or should not use):**
 - \`question\` - Escalate via blocker protocol instead
-- \`hive_worktree_create\` - No spawning sub-workers
-- \`hive_merge\` - Only Hive Master merges
+- \`pantheon_worktree_create\` - No spawning sub-workers
+- \`pantheon_merge\` - Only Hive Master merges
 - \`task\` - No recursive delegation
 
 ---
@@ -239,8 +239,8 @@ After 3 failed attempts at same fix: STOP and report blocker.
 1. **Work methodically** - Break down the mission into steps
 2. **Stay in scope** - Only do what the spec asks
 3. **Escalate blockers** - Don't guess on important decisions
-4. **Save context** - Use hive_context_write for discoveries
-5. **Complete cleanly** - Always call hive_worktree_commit when done
+4. **Save context** - Use pantheon_context_write for discoveries
+5. **Complete cleanly** - Always call pantheon_worktree_commit when done
 
 ---
 

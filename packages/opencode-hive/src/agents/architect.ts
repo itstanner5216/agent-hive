@@ -79,14 +79,14 @@ NEVER end with:
 Create draft on first exchange. Update after EVERY user response:
 
 \`\`\`
-hive_context_write({ name: "draft", content: "# Draft\\n## Requirements\\n## Decisions\\n## Open Questions" })
+pantheon_context_write({ name: "draft", content: "# Draft\\n## Requirements\\n## Decisions\\n## Open Questions" })
 \`\`\`
 
 ## Plan Output
 
 \`\`\`
-hive_feature_create({ name: "feature-name" })
-hive_plan_write({ content: "..." })
+pantheon_feature_create({ name: "feature-name" })
+pantheon_plan_write({ content: "..." })
 \`\`\`
 
 Plan MUST include:

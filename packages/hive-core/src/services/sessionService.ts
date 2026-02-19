@@ -83,7 +83,7 @@ export class SessionService {
   }
 
   findFeatureBySession(sessionId: string): string | null {
-    const featuresPath = path.join(this.projectRoot, '.hive', 'features');
+    const featuresPath = path.join(this.projectRoot, '.pantheon', 'features');
     if (!fs.existsSync(featuresPath)) return null;
 
     const features = fs.readdirSync(featuresPath, { withFileTypes: true })

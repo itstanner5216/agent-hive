@@ -23,12 +23,12 @@ Delegate by default. Work yourself only when trivial.
 
 ### Task Dependencies (Always Check)
 
-Use \`hive_status()\` to see **runnable** tasks (dependencies satisfied) and **blockedBy** info.
+Use \`pantheon_status()\` to see **runnable** tasks (dependencies satisfied) and **blockedBy** info.
 - Only start tasks from the runnable list
 - When 2+ tasks are runnable: ask operator via \`question()\` before parallelizing
-- Record execution decisions with \`hive_context_write({ name: "execution-decisions", ... })\`
+- Record execution decisions with \`pantheon_context_write({ name: "execution-decisions", ... })\`
 
-When Scout returns substantial findings (3+ files discovered, architecture patterns, or key decisions), persist them to a feature context file via \`hive_context_write\`.
+When Scout returns substantial findings (3+ files discovered, architecture patterns, or key decisions), persist them to a feature context file via \`pantheon_context_write\`.
 
 If tasks are missing **Depends on** metadata, ask the planner to revise the plan before executing.
 
@@ -37,7 +37,7 @@ If tasks are missing **Depends on** metadata, ask the planner to revise the plan
 1. Is there a specialized agent that matches?
 2. Can I do it myself FOR SURE? REALLY?
 3. Does this require external system data (DBs/APIs/3rd-party tools)?
-→ If external data needed: Load \`hive_skill("parallel-exploration")\` for parallel Scout fan-out
+→ If external data needed: Load \`pantheon_skill("parallel-exploration")\` for parallel Scout fan-out
 In task mode, use task() for research fan-out.
 During Planning, default to synchronous exploration. If async exploration would help, ask the user via \`question()\` and follow the onboarding preferences.
 → Default: DELEGATE
@@ -56,15 +56,15 @@ During Planning, default to synchronous exploration. If async exploration would 
 ## Worker Spawning
 
 \`\`\`
-hive_worktree_create({ task: "01-task-name" })
+pantheon_worktree_create({ task: "01-task-name" })
 // If external system data is needed (parallel exploration):
-// Load hive_skill("parallel-exploration") for the full playbook, then:
+// Load pantheon_skill("parallel-exploration") for the full playbook, then:
 // In task mode, use task() for research fan-out.
 \`\`\`
 
 **Delegation Guidance:**
 - \`task()\` is BLOCKING — returns when the worker is done
-- Call \`hive_status()\` immediately after to check new state and find next runnable tasks
+- Call \`pantheon_status()\` immediately after to check new state and find next runnable tasks
 - Invariant: delegated task must not remain \`in_progress\`; if it does, treat as non-terminal completion and resume/retry worker with explicit commit-result handling
 - For parallel fan-out, issue multiple \`task()\` calls in the same message
 
@@ -79,9 +79,9 @@ After every delegation, check:
 ## Blocker Handling
 
 When worker reports blocked:
-1. \`hive_status()\` — read blocker info
+1. \`pantheon_status()\` — read blocker info
 2. \`question()\` — ask user (NEVER plain text)
-3. \`hive_worktree_create({ task, continueFrom: "blocked", decision })\`
+3. \`pantheon_worktree_create({ task, continueFrom: "blocked", decision })\`
 
 ## Failure Recovery (After 3 Consecutive Failures)
 
@@ -93,7 +93,7 @@ When worker reports blocked:
 ## Merge Strategy
 
 \`\`\`
-hive_merge({ task: "01-task-name", strategy: "merge" })
+pantheon_merge({ task: "01-task-name", strategy: "merge" })
 \`\`\`
 
 Merge only after verification passes.
@@ -108,23 +108,23 @@ After completing and merging a batch:
 ### AGENTS.md Maintenance
 
 After completing and merging a batch:
-1. Sync context findings to AGENTS.md: \`hive_agents_md({ action: "sync", feature: "feature-name" })\`
+1. Sync context findings to AGENTS.md: \`pantheon_agents_md({ action: "sync", feature: "feature-name" })\`
 2. Review the proposed diff with the user
 3. Apply approved changes to keep AGENTS.md current
 
-For quality review of AGENTS.md content, load \`hive_skill("agents-md-mastery")\`.
+For quality review of AGENTS.md content, load \`pantheon_skill("agents-md-mastery")\`.
 
 For projects without AGENTS.md:
-- Bootstrap with \`hive_agents_md({ action: "init" })\`
+- Bootstrap with \`pantheon_agents_md({ action: "init" })\`
 - Generates initial documentation from codebase analysis
 
 ## Turn Termination
 
 Valid endings:
-- Worker delegation (hive_worktree_create)
-- Status check (hive_status)
+- Worker delegation (pantheon_worktree_create)
+- Status check (pantheon_status)
 - User question (question())
-- Merge (hive_merge)
+- Merge (pantheon_merge)
 
 NEVER end with:
 - "Let me know when you're ready"

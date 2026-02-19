@@ -4,21 +4,21 @@
   "description": "Context-Driven Development",
   "dataPath": "../../.hive",
   "commands": [
-    {"name": "/hive", "description": "Create feature"}
+    {"name": "/pantheon", "description": "Create feature"}
   ],
   "tools": [
-    "hive_feature_create",
-    "hive_feature_complete",
-    "hive_plan_write",
-    "hive_plan_read",
-    "hive_plan_approve",
-    "hive_tasks_sync",
-    "hive_task_create",
-    "hive_task_update",
-    "hive_worktree_create",
-    "hive_worktree_commit",
-    "hive_worktree_discard",
-    "hive_context_write",
-    "hive_status"
+    "pantheon_feature_create",
+    "pantheon_feature_complete",
+    "pantheon_plan_write",
+    "pantheon_plan_read",
+    "pantheon_plan_approve",
+    "pantheon_tasks_sync",
+    "pantheon_task_create",
+    "pantheon_task_update",
+    "pantheon_worktree_create",
+    "pantheon_worktree_commit",
+    "pantheon_worktree_discard",
+    "pantheon_context_write",
+    "pantheon_status"
   ]
 }

@@ -23,7 +23,7 @@ export class AskService {
   }
 
   private getAsksDir(feature: string): string {
-    return path.join(this.projectRoot, '.hive', 'features', feature, 'asks');
+    return path.join(this.projectRoot, '.pantheon', 'features', feature, 'asks');
   }
 
   private ensureAsksDir(feature: string): void {

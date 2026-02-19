@@ -13,7 +13,7 @@ function cleanup() {
 }
 
 function setupFeature(featureName: string): void {
-  const featurePath = path.join(TEST_DIR, '.hive', 'features', featureName);
+  const featurePath = path.join(TEST_DIR, '.pantheon', 'features', featureName);
   fs.mkdirSync(featurePath, { recursive: true });
   fs.writeFileSync(
     path.join(featurePath, 'feature.json'),
@@ -93,7 +93,7 @@ describe('ContextService', () => {
       service.write(featureName, 'third', 'c'.repeat(300));
       
       // Manually adjust timestamps to ensure ordering
-      const contextPath = path.join(TEST_DIR, '.hive', 'features', featureName, 'context');
+      const contextPath = path.join(TEST_DIR, '.pantheon', 'features', featureName, 'context');
       const now = Date.now();
       
       fs.utimesSync(path.join(contextPath, 'first.md'), (now - 2000) / 1000, (now - 2000) / 1000); // oldest

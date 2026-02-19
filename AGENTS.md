@@ -127,7 +127,7 @@ feat!: change plan format to support subtasks
 
 ### Core Philosophy
 
-1. **Context Persists** - Write to `.hive/` files; memory is ephemeral
+1. **Context Persists** - Write to `.pantheon/` files; memory is ephemeral
 2. **Plan → Approve → Execute** - No code without approved plan
 3. **Human Shapes, Agent Builds** - Humans decide direction, agents implement
 4. **Good Enough Wins** - Ship working code, iterate later
@@ -148,9 +148,9 @@ feat!: change plan format to support subtasks
 
 ### Data Model
 
-Features stored in `.hive/features/<name>/`:
+Features stored in `.pantheon/features/<name>/`:
 ```
-.hive/features/my-feature/
+.pantheon/features/my-feature/
 ├── feature.json       # Feature metadata
 ├── plan.md            # Implementation plan
 ├── tasks.json         # Generated tasks
@@ -245,27 +245,27 @@ Plan-first development: Write plan → User reviews → Approve → Execute task
 
 | Domain | Tools |
 |--------|-------|
-| Feature | hive_feature_create, hive_feature_complete |
-| Plan | hive_plan_write, hive_plan_read, hive_plan_approve |
-| Task | hive_tasks_sync, hive_task_create, hive_task_update |
-| Worktree | hive_worktree_create, hive_worktree_commit, hive_worktree_discard |
-| Merge | hive_merge |
-| Context | hive_context_write |
-| AGENTS.md | hive_agents_md |
-| Status | hive_status |
+| Feature | pantheon_feature_create, pantheon_feature_complete |
+| Plan | pantheon_plan_write, pantheon_plan_read, pantheon_plan_approve |
+| Task | pantheon_tasks_sync, pantheon_task_create, pantheon_task_update |
+| Worktree | pantheon_worktree_create, pantheon_worktree_commit, pantheon_worktree_discard |
+| Merge | pantheon_merge |
+| Context | pantheon_context_write |
+| AGENTS.md | pantheon_agents_md |
+| Status | pantheon_status |
 
 ### Workflow
 
-1. `hive_feature_create(name)` - Create feature
-2. `hive_plan_write(content)` - Write plan.md
-3. User adds comments in VSCode → `hive_plan_read` to see them
+1. `pantheon_feature_create(name)` - Create feature
+2. `pantheon_plan_write(content)` - Write plan.md
+3. User adds comments in VSCode → `pantheon_plan_read` to see them
 4. Revise plan → User approves
-5. `hive_tasks_sync()` - Generate tasks from plan
-6. `hive_worktree_create(task)` → work in worktree → `hive_worktree_commit(task, summary)`
-7. `hive_merge(task)` - Merge task branch into main (when ready)
+5. `pantheon_tasks_sync()` - Generate tasks from plan
+6. `pantheon_worktree_create(task)` → work in worktree → `pantheon_worktree_commit(task, summary)`
+7. `pantheon_merge(task)` - Merge task branch into main (when ready)
 
-**Important:** `hive_worktree_commit` commits changes to task branch but does NOT merge.
-Use `hive_merge` to explicitly integrate changes. Worktrees persist until manually removed.
+**Important:** `pantheon_worktree_commit` commits changes to task branch but does NOT merge.
+Use `pantheon_merge` to explicitly integrate changes. Worktrees persist until manually removed.
 
 ### Sandbox Configuration
 

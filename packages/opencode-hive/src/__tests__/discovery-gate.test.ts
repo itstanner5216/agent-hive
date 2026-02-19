@@ -7,7 +7,7 @@ import { describe, test, expect } from 'bun:test';
  * documentation before proceeding to implementation planning.
  */
 
-// Mock the hive_plan_write tool logic
+// Mock the pantheon_plan_write tool logic
 function validateDiscoverySection(content: string): string | null {
   // GATE: Check for discovery section with substantive content
   const discoveryMatch = content.match(/^##\s+Discovery\s*$/im);

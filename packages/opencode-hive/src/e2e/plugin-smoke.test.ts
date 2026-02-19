@@ -17,21 +17,21 @@ type ToolContext = {
 };
 
 const EXPECTED_TOOLS = [
-  "hive_feature_create",
-  "hive_feature_complete",
-  "hive_plan_write",
-  "hive_plan_read",
-  "hive_plan_approve",
-  "hive_tasks_sync",
-  "hive_task_create",
-  "hive_task_update",
-  "hive_worktree_create",
-  "hive_worktree_commit",
-  "hive_worktree_discard",
-  "hive_merge",
-  "hive_context_write",
-  "hive_status",
-  "hive_skill",
+  "pantheon_feature_create",
+  "pantheon_feature_complete",
+  "pantheon_plan_write",
+  "pantheon_plan_read",
+  "pantheon_plan_approve",
+  "pantheon_tasks_sync",
+  "pantheon_task_create",
+  "pantheon_task_update",
+  "pantheon_worktree_create",
+  "pantheon_worktree_commit",
+  "pantheon_worktree_discard",
+  "pantheon_merge",
+  "pantheon_context_write",
+  "pantheon_status",
+  "pantheon_skill",
 ] as const;
 
 const TEST_ROOT_BASE = "/tmp/hive-e2e-plugin";
@@ -134,7 +134,7 @@ describe("e2e: opencode-hive plugin (in-process)", () => {
     const sessionID = "sess_plugin_smoke";
     const toolContext = createToolContext(sessionID);
 
-    const createOutput = await hooks.tool!.hive_feature_create.execute(
+    const createOutput = await hooks.tool!.pantheon_feature_create.execute(
       { name: "smoke-feature" },
       toolContext
     );
@@ -156,21 +156,21 @@ Test
 ### 1. First Task
 Do it
 `;
-    const planOutput = await hooks.tool!.hive_plan_write.execute(
+    const planOutput = await hooks.tool!.pantheon_plan_write.execute(
       { content: plan, feature: "smoke-feature" },
       toolContext
     );
     expect(planOutput).toContain("Plan written");
 
-    const approveOutput = await hooks.tool!.hive_plan_approve.execute({ feature: "smoke-feature" }, toolContext);
+    const approveOutput = await hooks.tool!.pantheon_plan_approve.execute({ feature: "smoke-feature" }, toolContext);
     expect(approveOutput).toContain("Plan approved");
 
-    const syncOutput = await hooks.tool!.hive_tasks_sync.execute({ feature: "smoke-feature" }, toolContext);
+    const syncOutput = await hooks.tool!.pantheon_tasks_sync.execute({ feature: "smoke-feature" }, toolContext);
     expect(syncOutput).toContain("Tasks synced");
 
     const taskFolder = path.join(
       testRoot,
-      ".hive",
+      ".pantheon",
       "features",
       "smoke-feature",
       "tasks",
@@ -182,7 +182,7 @@ Do it
     // Session is tracked on the feature metadata
     const featureJsonPath = path.join(
       testRoot,
-      ".hive",
+      ".pantheon",
       "features",
       "smoke-feature",
       "feature.json"
@@ -194,7 +194,7 @@ Do it
 
     expect(featureJson.sessionId).toBe(sessionID);
 
-    const statusRaw = await hooks.tool!.hive_status.execute(
+    const statusRaw = await hooks.tool!.pantheon_status.execute(
       { feature: "smoke-feature" },
       toolContext
     );
@@ -216,7 +216,7 @@ Do it
     expect(hiveStatus.tasks?.runnable).toContain("01-first-task");
     expect(hiveStatus.tasks?.blockedBy).toEqual({});
 
-    const execStartOutput = await hooks.tool!.hive_worktree_create.execute(
+    const execStartOutput = await hooks.tool!.pantheon_worktree_create.execute(
       { feature: "smoke-feature", task: "01-first-task" },
       toolContext
     );
@@ -228,7 +228,7 @@ Do it
 
     const specPath = path.join(
       testRoot,
-      ".hive",
+      ".pantheon",
       "features",
       "smoke-feature",
       "tasks",
@@ -238,7 +238,7 @@ Do it
     const specContent = fs.readFileSync(specPath, "utf-8");
     expect(specContent).toContain("## Dependencies");
 
-    const statusOutput = await hooks.tool!.hive_status.execute(
+    const statusOutput = await hooks.tool!.pantheon_status.execute(
       { feature: "smoke-feature" },
       toolContext
     );
@@ -264,7 +264,7 @@ Do it
     const hooks = await plugin(ctx);
     const toolContext = createToolContext("sess_task_mode");
 
-    await hooks.tool!.hive_feature_create.execute(
+    await hooks.tool!.pantheon_feature_create.execute(
       { name: "task-mode-feature" },
       toolContext
     );
@@ -285,20 +285,20 @@ Test
 ### 1. First Task
 Do it
 `;
-    await hooks.tool!.hive_plan_write.execute(
+    await hooks.tool!.pantheon_plan_write.execute(
       { content: plan, feature: "task-mode-feature" },
       toolContext
     );
-    await hooks.tool!.hive_plan_approve.execute(
+    await hooks.tool!.pantheon_plan_approve.execute(
       { feature: "task-mode-feature" },
       toolContext
     );
-    await hooks.tool!.hive_tasks_sync.execute(
+    await hooks.tool!.pantheon_tasks_sync.execute(
       { feature: "task-mode-feature" },
       toolContext
     );
 
-    const execStartOutput = await hooks.tool!.hive_worktree_create.execute(
+    const execStartOutput = await hooks.tool!.pantheon_worktree_create.execute(
       { feature: "task-mode-feature", task: "01-first-task" },
       toolContext
     );
@@ -312,7 +312,7 @@ Do it
     };
 
     const expectedPromptPath = path.posix.join(
-      ".hive",
+      ".pantheon",
       "features",
       "task-mode-feature",
       "tasks",
@@ -326,7 +326,7 @@ Do it
     expect(execStart.taskToolCall?.prompt).toContain(`@${expectedPromptPath}`);
     expect(execStart.instructions).toContain("task({");
     expect(execStart.instructions).toContain(
-      "prompt: \"Follow instructions in @.hive/features/task-mode-feature/tasks/01-first-task/worker-prompt.md\""
+      "prompt: \"Follow instructions in @.pantheon/features/task-mode-feature/tasks/01-first-task/worker-prompt.md\""
     );
     expect(execStart.instructions).toContain(
       "Use the `@path` attachment syntax in the prompt to reference the file. Do not inline the file contents."
@@ -358,7 +358,7 @@ Do it
 
     const hooks = await plugin(ctx);
 
-    await hooks.tool!.hive_feature_create.execute({ name: "active" }, createToolContext("sess"));
+    await hooks.tool!.pantheon_feature_create.execute({ name: "active" }, createToolContext("sess"));
 
     // system.transform should still inject HIVE_SYSTEM_PROMPT and status hint
     const output = { system: [] as string[] };
@@ -367,7 +367,7 @@ Do it
 
     const joined = output.system.join("\n");
     expect(joined).toContain("## Hive - Feature Development System");
-    expect(joined).toContain("hive_feature_create");
+    expect(joined).toContain("pantheon_feature_create");
     
     // Auto-loaded skills are now injected via config hook (prompt field), NOT system.transform
     // Verify by checking the agent's prompt field in config
@@ -386,7 +386,7 @@ Do it
     expect(joined).toContain("### Current Hive Status");
   });
 
-  it("blocks hive_worktree_create when dependencies are not done", async () => {
+  it("blocks pantheon_worktree_create when dependencies are not done", async () => {
     const ctx: PluginInput = {
       directory: testRoot,
       worktree: testRoot,
@@ -399,7 +399,7 @@ Do it
     const hooks = await plugin(ctx);
     const toolContext = createToolContext("sess_dependency_block");
 
-    await hooks.tool!.hive_feature_create.execute(
+    await hooks.tool!.pantheon_feature_create.execute(
       { name: "dep-block-feature" },
       toolContext
     );
@@ -427,20 +427,20 @@ Do it
 Do it later
 `;
 
-    await hooks.tool!.hive_plan_write.execute(
+    await hooks.tool!.pantheon_plan_write.execute(
       { content: plan, feature: "dep-block-feature" },
       toolContext
     );
-    await hooks.tool!.hive_plan_approve.execute(
+    await hooks.tool!.pantheon_plan_approve.execute(
       { feature: "dep-block-feature" },
       toolContext
     );
-    await hooks.tool!.hive_tasks_sync.execute(
+    await hooks.tool!.pantheon_tasks_sync.execute(
       { feature: "dep-block-feature" },
       toolContext
     );
 
-    const execStartOutput = await hooks.tool!.hive_worktree_create.execute(
+    const execStartOutput = await hooks.tool!.pantheon_worktree_create.execute(
       { feature: "dep-block-feature", task: "02-second-task" },
       toolContext
     );
@@ -467,7 +467,7 @@ Do it later
     const hooks = await plugin(ctx);
     const toolContext = createToolContext("sess_commit_gate");
 
-    await hooks.tool!.hive_feature_create.execute(
+    await hooks.tool!.pantheon_feature_create.execute(
       { name: "commit-gate-feature" },
       toolContext
     );
@@ -485,25 +485,25 @@ A: Yes, this test validates non-terminal completion responses when verification 
 Do it
 `;
 
-    await hooks.tool!.hive_plan_write.execute(
+    await hooks.tool!.pantheon_plan_write.execute(
       { content: plan, feature: "commit-gate-feature" },
       toolContext
     );
-    await hooks.tool!.hive_plan_approve.execute(
+    await hooks.tool!.pantheon_plan_approve.execute(
       { feature: "commit-gate-feature" },
       toolContext
     );
-    await hooks.tool!.hive_tasks_sync.execute(
+    await hooks.tool!.pantheon_tasks_sync.execute(
       { feature: "commit-gate-feature" },
       toolContext
     );
 
-    await hooks.tool!.hive_worktree_create.execute(
+    await hooks.tool!.pantheon_worktree_create.execute(
       { feature: "commit-gate-feature", task: "01-first-task" },
       toolContext
     );
 
-    const commitRaw = await hooks.tool!.hive_worktree_commit.execute(
+    const commitRaw = await hooks.tool!.pantheon_worktree_commit.execute(
       {
         feature: "commit-gate-feature",
         task: "01-first-task",
@@ -543,7 +543,7 @@ Do it
     const hooks = await plugin(ctx);
     const toolContext = createToolContext("sess_commit_success");
 
-    await hooks.tool!.hive_feature_create.execute(
+    await hooks.tool!.pantheon_feature_create.execute(
       { name: "commit-success-feature" },
       toolContext
     );
@@ -561,20 +561,20 @@ A: Yes, this test validates terminal completion responses when commit succeeds.
 Do it
 `;
 
-    await hooks.tool!.hive_plan_write.execute(
+    await hooks.tool!.pantheon_plan_write.execute(
       { content: plan, feature: "commit-success-feature" },
       toolContext
     );
-    await hooks.tool!.hive_plan_approve.execute(
+    await hooks.tool!.pantheon_plan_approve.execute(
       { feature: "commit-success-feature" },
       toolContext
     );
-    await hooks.tool!.hive_tasks_sync.execute(
+    await hooks.tool!.pantheon_tasks_sync.execute(
       { feature: "commit-success-feature" },
       toolContext
     );
 
-    const worktreeRaw = await hooks.tool!.hive_worktree_create.execute(
+    const worktreeRaw = await hooks.tool!.pantheon_worktree_create.execute(
       { feature: "commit-success-feature", task: "01-first-task" },
       toolContext
     );
@@ -586,7 +586,7 @@ Do it
     const worktreePath = worktreeResult.worktreePath!;
     fs.writeFileSync(path.join(worktreePath, "task-note.txt"), "commit test\n");
 
-    const commitRaw = await hooks.tool!.hive_worktree_commit.execute(
+    const commitRaw = await hooks.tool!.pantheon_worktree_commit.execute(
       {
         feature: "commit-success-feature",
         task: "01-first-task",
@@ -610,7 +610,7 @@ Do it
     expect(commitResult.status).toBe("completed");
     expect(commitResult.taskState).toBe("done");
     expect(commitResult.commit?.sha).toBeDefined();
-    expect(commitResult.nextAction).toContain("hive_merge");
+    expect(commitResult.nextAction).toContain("pantheon_merge");
   });
 
   it("auto-loads parallel exploration for planner agents by default", async () => {
@@ -675,7 +675,7 @@ Do it
     const hooks = await plugin(ctx);
     const toolContext = createToolContext("sess_task_prompt_mode");
 
-    await hooks.tool!.hive_feature_create.execute(
+    await hooks.tool!.pantheon_feature_create.execute(
       { name: "prompt-mode-feature" },
       toolContext
     );
@@ -693,20 +693,20 @@ A: Yes, this integration test validates task prompt mode functionality. Ensures 
 Do it
 `;
 
-    await hooks.tool!.hive_plan_write.execute(
+    await hooks.tool!.pantheon_plan_write.execute(
       { content: plan, feature: "prompt-mode-feature" },
       toolContext
     );
-    await hooks.tool!.hive_plan_approve.execute(
+    await hooks.tool!.pantheon_plan_approve.execute(
       { feature: "prompt-mode-feature" },
       toolContext
     );
-    await hooks.tool!.hive_tasks_sync.execute(
+    await hooks.tool!.pantheon_tasks_sync.execute(
       { feature: "prompt-mode-feature" },
       toolContext
     );
 
-    const execStartOutput = await hooks.tool!.hive_worktree_create.execute(
+    const execStartOutput = await hooks.tool!.pantheon_worktree_create.execute(
       { feature: "prompt-mode-feature", task: "01-first-task" },
       toolContext
     );

@@ -7,7 +7,7 @@ import { DockerSandboxService } from 'hive-core';
  * 
  * The hook should:
  * - Only intercept bash tool calls
- * - Only wrap commands with explicit workdir inside .hive/.worktrees/
+ * - Only wrap commands with explicit workdir inside .pantheon/.worktrees/
  * - Respect sandbox config mode ('none' = no wrapping, 'docker' = wrap)
  * - Support HOST: prefix escape hatch
  * - Clear workdir after wrapping (docker runs on host)
@@ -17,7 +17,7 @@ import { DockerSandboxService } from 'hive-core';
 
 describe('tool.execute.before bash interception hook logic', () => {
   const mockDirectory = '/mock/project';
-  const hiveWorktreeBase = path.join(mockDirectory, '.hive', '.worktrees');
+  const hiveWorktreeBase = path.join(mockDirectory, '.pantheon', '.worktrees');
   const worktreePath = path.join(hiveWorktreeBase, 'feature-x', 'task-1');
 
   /**
@@ -48,7 +48,7 @@ describe('tool.execute.before bash interception hook logic', () => {
     const workdir = output.args?.workdir;
     if (!workdir) return;
     
-    const hiveWorktreeBase = path.join(directory, '.hive', '.worktrees');
+    const hiveWorktreeBase = path.join(directory, '.pantheon', '.worktrees');
     if (!workdir.startsWith(hiveWorktreeBase)) return;
     
     // Wrap command using static method
@@ -58,7 +58,7 @@ describe('tool.execute.before bash interception hook logic', () => {
   };
 
   describe('sandbox mode: docker', () => {
-    test('wraps bash command with explicit workdir inside .hive/.worktrees/', () => {
+    test('wraps bash command with explicit workdir inside .pantheon/.worktrees/', () => {
       const sandboxConfig = { mode: 'docker' as const, image: 'node:22-slim' };
       
       const input = {
@@ -105,7 +105,7 @@ describe('tool.execute.before bash interception hook logic', () => {
       expect(output.args.command).not.toContain('docker run');
     });
 
-    test('passes through bash command with workdir outside .hive/.worktrees/', () => {
+    test('passes through bash command with workdir outside .pantheon/.worktrees/', () => {
       const sandboxConfig = { mode: 'docker' as const, image: 'node:22-slim' };
       
       const input = {

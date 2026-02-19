@@ -55,7 +55,7 @@ websearch_web_search_exa({ query: "Next.js 15 new features 2026", numResults: 5 
 
 In task mode, use task() for research fan-out; in hive mode, use hive_background_task.
 
-For exploratory research, load `hive_skill("parallel-exploration")` for the full playbook.
+For exploratory research, load `pantheon_skill("parallel-exploration")` for the full playbook.
 
 Quick pattern:
 ```
@@ -80,4 +80,4 @@ Use `hive_background_output({ task_id })` to retrieve results when notified.
 | Understand a library | `context7_query-docs` |
 | Current events/info | `websearch_web_search_exa` |
 | Structural refactoring | `ast_grep_replace` |
-| Multi-domain exploration | `hive_skill("parallel-exploration")` + `hive_background_task` |
+| Multi-domain exploration | `pantheon_skill("parallel-exploration")` + `hive_background_task` |

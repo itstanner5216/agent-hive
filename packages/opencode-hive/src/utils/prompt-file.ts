@@ -32,7 +32,7 @@ export function findWorkspaceRoot(startDir: string): string | null {
   try {
     let current = path.resolve(startDir);
     while (true) {
-      const hivePath = path.join(current, '.hive');
+      const hivePath = path.join(current, '.pantheon');
       if (fs.existsSync(hivePath) && fs.statSync(hivePath).isDirectory()) {
         return current;
       }

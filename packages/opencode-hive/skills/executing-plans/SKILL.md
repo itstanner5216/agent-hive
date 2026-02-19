@@ -23,20 +23,20 @@ Load plan, review critically, execute tasks in batches, report for review betwee
 
 ### Step 2: Identify Runnable Tasks
 
-Use `hive_status()` to get the **runnable** list — tasks with all dependencies satisfied.
+Use `pantheon_status()` to get the **runnable** list — tasks with all dependencies satisfied.
 
 Only `done` satisfies dependencies (not `blocked`, `failed`, `partial`, `cancelled`).
 
 **When 2+ tasks are runnable:**
 - **Ask the operator** via `question()`: "Multiple tasks are runnable: [list]. Run in parallel, sequential, or a specific subset?"
-- Record the decision with `hive_context_write({ name: "execution-decisions", content: "..." })` for future reference
+- Record the decision with `pantheon_context_write({ name: "execution-decisions", content: "..." })` for future reference
 
 **When 1 task is runnable:** Proceed directly.
 
 ### Step 3: Execute Batch
 
 For each task in the batch:
-1. Mark as in_progress via `hive_worktree_create()`
+1. Mark as in_progress via `pantheon_worktree_create()`
 2. Follow each step exactly (plan has bite-sized steps)
 3. Run verifications as specified
 4. Mark as completed
@@ -62,7 +62,7 @@ Based on feedback:
 
 After all tasks complete and verified:
 - Announce: "I'm using the verification-before-completion skill to complete this work."
-- **REQUIRED SUB-SKILL:** Use hive_skill:verification-before-completion
+- **REQUIRED SUB-SKILL:** Use pantheon_skill:verification-before-completion
 - Follow that skill to verify tests, present options, execute choice
 
 ## When to Stop and Ask for Help

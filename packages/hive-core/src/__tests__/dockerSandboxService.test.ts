@@ -130,7 +130,7 @@ describe('DockerSandboxService', () => {
       await fs.writeFile(path.join(tempDir, 'package.json'), '{}');
       const execSyncSpy = spyOn(child_process, 'execSync').mockImplementation(() => '' as any);
       
-      const worktreePath = '/repo/.hive/.worktrees/my-feature/my-task';
+      const worktreePath = '/repo/.pantheon/.worktrees/my-feature/my-task';
       const result = DockerSandboxService.wrapCommand(worktreePath, 'npm test', { mode: 'docker', persistent: true });
       
       // Should contain docker exec instead of docker run
@@ -149,13 +149,13 @@ describe('DockerSandboxService', () => {
 
   describe('containerName', () => {
     test('extracts feature and task from worktree path', () => {
-      const worktreePath = '/home/user/project/.hive/.worktrees/my-feature/my-task';
+      const worktreePath = '/home/user/project/.pantheon/.worktrees/my-feature/my-task';
       const result = DockerSandboxService.containerName(worktreePath);
       expect(result).toBe('hive-my-feature-my-task');
     });
 
     test('handles complex feature and task names', () => {
-      const worktreePath = '/repo/.hive/.worktrees/v1.2.0-tighten-gates/07-implement-persistent-sandbox';
+      const worktreePath = '/repo/.pantheon/.worktrees/v1.2.0-tighten-gates/07-implement-persistent-sandbox';
       const result = DockerSandboxService.containerName(worktreePath);
       expect(result).toBe('hive-v1-2-0-tighten-gates-07-implement-persistent-sandbox');
     });
@@ -167,7 +167,7 @@ describe('DockerSandboxService', () => {
     });
 
     test('truncates names longer than 63 characters', () => {
-      const worktreePath = '/repo/.hive/.worktrees/very-long-feature-name-that-goes-on-and-on/another-very-long-task-name';
+      const worktreePath = '/repo/.pantheon/.worktrees/very-long-feature-name-that-goes-on-and-on/another-very-long-task-name';
       const result = DockerSandboxService.containerName(worktreePath);
       expect(result.length).toBeLessThanOrEqual(63);
     });
@@ -182,7 +182,7 @@ describe('DockerSandboxService', () => {
         return '' as any;
       });
 
-      const worktreePath = '/repo/.hive/.worktrees/my-feature/my-task';
+      const worktreePath = '/repo/.pantheon/.worktrees/my-feature/my-task';
       const result = DockerSandboxService.ensureContainer(worktreePath, 'node:22-slim');
       
       expect(result).toBe('hive-my-feature-my-task');
@@ -202,7 +202,7 @@ describe('DockerSandboxService', () => {
         return '' as any;
       });
 
-      const worktreePath = '/repo/.hive/.worktrees/my-feature/my-task';
+      const worktreePath = '/repo/.pantheon/.worktrees/my-feature/my-task';
       const result = DockerSandboxService.ensureContainer(worktreePath, 'node:22-slim');
       
       expect(result).toBe('hive-my-feature-my-task');
@@ -240,7 +240,7 @@ describe('DockerSandboxService', () => {
     test('calls docker rm -f with correct container name', () => {
       const execSyncSpy = spyOn(child_process, 'execSync').mockImplementation(() => '' as any);
 
-      const worktreePath = '/repo/.hive/.worktrees/my-feature/my-task';
+      const worktreePath = '/repo/.pantheon/.worktrees/my-feature/my-task';
       DockerSandboxService.stopContainer(worktreePath);
       
       expect(execSyncSpy).toHaveBeenCalledWith(
@@ -256,7 +256,7 @@ describe('DockerSandboxService', () => {
         throw new Error('container not found');
       });
 
-      const worktreePath = '/repo/.hive/.worktrees/my-feature/my-task';
+      const worktreePath = '/repo/.pantheon/.worktrees/my-feature/my-task';
       expect(() => DockerSandboxService.stopContainer(worktreePath)).not.toThrow();
       
       execSyncSpy.mockRestore();

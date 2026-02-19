@@ -15,7 +15,7 @@ function cleanup() {
 }
 
 function setupFeature(featureName: string): void {
-  const featurePath = path.join(TEST_DIR, ".hive", "features", featureName);
+  const featurePath = path.join(TEST_DIR, ".pantheon", "features", featureName);
   fs.mkdirSync(featurePath, { recursive: true });
 
   // Create a minimal feature.json
@@ -32,7 +32,7 @@ function setupFeature(featureName: string): void {
 }
 
 function setupTask(featureName: string, taskFolder: string, status: Partial<TaskStatus> = {}): void {
-  const taskPath = path.join(TEST_DIR, ".hive", "features", featureName, "tasks", taskFolder);
+  const taskPath = path.join(TEST_DIR, ".pantheon", "features", featureName, "tasks", taskFolder);
   fs.mkdirSync(taskPath, { recursive: true });
 
   const taskStatus: TaskStatus = {
@@ -75,7 +75,7 @@ describe("TaskService", () => {
       // Verify no lock file remains
       const statusPath = path.join(
         TEST_DIR,
-        ".hive",
+        ".pantheon",
         "features",
         featureName,
         "tasks",
@@ -106,7 +106,7 @@ describe("TaskService", () => {
       setupFeature(featureName);
       const missingTaskPath = path.join(
         TEST_DIR,
-        ".hive",
+        ".pantheon",
         "features",
         featureName,
         "tasks",
@@ -240,7 +240,7 @@ describe("TaskService", () => {
 
       const statusPath = path.join(
         TEST_DIR,
-        ".hive",
+        ".pantheon",
         "features",
         featureName,
         "tasks",
@@ -358,7 +358,7 @@ describe("TaskService", () => {
   describe("sync() - dependency parsing", () => {
     it("parses explicit Depends on: annotations and resolves to folder names", () => {
       const featureName = "test-feature";
-      const featurePath = path.join(TEST_DIR, ".hive", "features", featureName);
+      const featurePath = path.join(TEST_DIR, ".pantheon", "features", featureName);
       fs.mkdirSync(featurePath, { recursive: true });
 
       fs.writeFileSync(
@@ -410,7 +410,7 @@ Build the UI layer.
 
     it("parses Depends on: none and produces empty dependency list", () => {
       const featureName = "test-feature";
-      const featurePath = path.join(TEST_DIR, ".hive", "features", featureName);
+      const featurePath = path.join(TEST_DIR, ".pantheon", "features", featureName);
       fs.mkdirSync(featurePath, { recursive: true });
 
       fs.writeFileSync(
@@ -445,7 +445,7 @@ Also independent.
 
     it("applies implicit sequential dependencies when Depends on: is missing", () => {
       const featureName = "test-feature";
-      const featurePath = path.join(TEST_DIR, ".hive", "features", featureName);
+      const featurePath = path.join(TEST_DIR, ".pantheon", "features", featureName);
       fs.mkdirSync(featurePath, { recursive: true });
 
       fs.writeFileSync(
@@ -488,7 +488,7 @@ Do the third thing.
 
     it("generates spec.md with dependency section", () => {
       const featureName = "test-feature";
-      const featurePath = path.join(TEST_DIR, ".hive", "features", featureName);
+      const featurePath = path.join(TEST_DIR, ".pantheon", "features", featureName);
       fs.mkdirSync(featurePath, { recursive: true });
 
       fs.writeFileSync(
@@ -523,7 +523,7 @@ Build task.
 
     it("generates spec.md with Dependencies: none when explicitly empty", () => {
       const featureName = "test-feature";
-      const featurePath = path.join(TEST_DIR, ".hive", "features", featureName);
+      const featurePath = path.join(TEST_DIR, ".pantheon", "features", featureName);
       fs.mkdirSync(featurePath, { recursive: true });
 
       fs.writeFileSync(
@@ -552,7 +552,7 @@ Independent task.
 
     it("handles mixed explicit and implicit dependencies", () => {
       const featureName = "test-feature";
-      const featurePath = path.join(TEST_DIR, ".hive", "features", featureName);
+      const featurePath = path.join(TEST_DIR, ".pantheon", "features", featureName);
       fs.mkdirSync(featurePath, { recursive: true });
 
       fs.writeFileSync(
@@ -598,7 +598,7 @@ Explicitly depends only on 1, not 2.
   describe("sync() - dependency validation", () => {
     it("throws error for unknown task numbers in dependencies", () => {
       const featureName = "test-feature";
-      const featurePath = path.join(TEST_DIR, ".hive", "features", featureName);
+      const featurePath = path.join(TEST_DIR, ".pantheon", "features", featureName);
       fs.mkdirSync(featurePath, { recursive: true });
 
       fs.writeFileSync(
@@ -626,7 +626,7 @@ Second task depends on unknown task 99.
 
     it("throws error for self-dependency", () => {
       const featureName = "test-feature";
-      const featurePath = path.join(TEST_DIR, ".hive", "features", featureName);
+      const featurePath = path.join(TEST_DIR, ".pantheon", "features", featureName);
       fs.mkdirSync(featurePath, { recursive: true });
 
       fs.writeFileSync(
@@ -654,7 +654,7 @@ This task depends on itself.
 
     it("throws error for cyclic dependencies (simple A->B->A)", () => {
       const featureName = "test-feature";
-      const featurePath = path.join(TEST_DIR, ".hive", "features", featureName);
+      const featurePath = path.join(TEST_DIR, ".pantheon", "features", featureName);
       fs.mkdirSync(featurePath, { recursive: true });
 
       fs.writeFileSync(
@@ -684,7 +684,7 @@ Task B depends on A.
 
     it("throws error for cyclic dependencies (longer chain A->B->C->A)", () => {
       const featureName = "test-feature";
-      const featurePath = path.join(TEST_DIR, ".hive", "features", featureName);
+      const featurePath = path.join(TEST_DIR, ".pantheon", "features", featureName);
       fs.mkdirSync(featurePath, { recursive: true });
 
       fs.writeFileSync(
@@ -720,7 +720,7 @@ Task C depends on B.
 
     it("error message for unknown deps points to plan.md", () => {
       const featureName = "test-feature";
-      const featurePath = path.join(TEST_DIR, ".hive", "features", featureName);
+      const featurePath = path.join(TEST_DIR, ".pantheon", "features", featureName);
       fs.mkdirSync(featurePath, { recursive: true });
 
       fs.writeFileSync(
@@ -743,7 +743,7 @@ Depends on non-existent task 5.
 
     it("error message for cycle points to plan.md", () => {
       const featureName = "test-feature";
-      const featurePath = path.join(TEST_DIR, ".hive", "features", featureName);
+      const featurePath = path.join(TEST_DIR, ".pantheon", "features", featureName);
       fs.mkdirSync(featurePath, { recursive: true });
 
       fs.writeFileSync(
@@ -772,7 +772,7 @@ Cycle with A.
 
     it("accepts valid dependency graphs without cycles", () => {
       const featureName = "test-feature";
-      const featurePath = path.join(TEST_DIR, ".hive", "features", featureName);
+      const featurePath = path.join(TEST_DIR, ".pantheon", "features", featureName);
       fs.mkdirSync(featurePath, { recursive: true });
 
       fs.writeFileSync(
@@ -841,7 +841,7 @@ Merge both branches.
       // File should be valid JSON
       const statusPath = path.join(
         TEST_DIR,
-        ".hive",
+        ".pantheon",
         "features",
         featureName,
         "tasks",
@@ -855,7 +855,7 @@ Merge both branches.
   describe("sync() - dependency parsing edge cases", () => {
     it("handles whitespace variations in Depends on line", () => {
       const featureName = "test-feature";
-      const featurePath = path.join(TEST_DIR, ".hive", "features", featureName);
+      const featurePath = path.join(TEST_DIR, ".pantheon", "features", featureName);
       fs.mkdirSync(featurePath, { recursive: true });
 
       fs.writeFileSync(
@@ -899,7 +899,7 @@ Task with spaces around comma.
 
     it("handles non-bold Depends on format", () => {
       const featureName = "test-feature";
-      const featurePath = path.join(TEST_DIR, ".hive", "features", featureName);
+      const featurePath = path.join(TEST_DIR, ".pantheon", "features", featureName);
       fs.mkdirSync(featurePath, { recursive: true });
 
       fs.writeFileSync(
@@ -930,7 +930,7 @@ Second depends on first (non-bold format).
 
     it("handles case insensitive none keyword", () => {
       const featureName = "test-feature";
-      const featurePath = path.join(TEST_DIR, ".hive", "features", featureName);
+      const featurePath = path.join(TEST_DIR, ".pantheon", "features", featureName);
       fs.mkdirSync(featurePath, { recursive: true });
 
       fs.writeFileSync(
@@ -959,7 +959,7 @@ Independent task with capital None.
   describe("sync() - dependency validation edge cases", () => {
     it("allows forward dependencies (later task depending on earlier)", () => {
       const featureName = "test-feature";
-      const featurePath = path.join(TEST_DIR, ".hive", "features", featureName);
+      const featurePath = path.join(TEST_DIR, ".pantheon", "features", featureName);
       fs.mkdirSync(featurePath, { recursive: true });
 
       fs.writeFileSync(
@@ -997,7 +997,7 @@ Test depends on build.
 
     it("throws error for diamond with cycle", () => {
       const featureName = "test-feature";
-      const featurePath = path.join(TEST_DIR, ".hive", "features", featureName);
+      const featurePath = path.join(TEST_DIR, ".pantheon", "features", featureName);
       fs.mkdirSync(featurePath, { recursive: true });
 
       fs.writeFileSync(
@@ -1039,7 +1039,7 @@ End depends on both branches.
 
     it("provides clear error for multiple unknown dependencies", () => {
       const featureName = "test-feature";
-      const featurePath = path.join(TEST_DIR, ".hive", "features", featureName);
+      const featurePath = path.join(TEST_DIR, ".pantheon", "features", featureName);
       fs.mkdirSync(featurePath, { recursive: true });
 
       fs.writeFileSync(

@@ -33,7 +33,7 @@ If an entry doesn't:
 | Trigger | Action |
 |---------|--------|
 | New project bootstrap | Write initial AGENTS.md with build/test/style basics |
-| Feature completion | Sync new learnings via `hive_agents_md` tool |
+| Feature completion | Sync new learnings via `pantheon_agents_md` tool |
 | Periodic review | Audit for stale/redundant entries (quarterly) |
 | Quality issues | Agent repeating mistakes? Check if AGENTS.md has the fix |
 
@@ -119,7 +119,7 @@ After completing a feature, sync learnings to AGENTS.md:
 
 1. **Trigger sync:**
    ```typescript
-   hive_agents_md({ action: 'sync', feature: 'feature-name' })
+   pantheon_agents_md({ action: 'sync', feature: 'feature-name' })
    ```
 
 2. **Review each proposal:**
@@ -133,7 +133,7 @@ After completing a feature, sync learnings to AGENTS.md:
 
 4. **Apply approved changes:**
    ```typescript
-   hive_agents_md({ action: 'apply' })
+   pantheon_agents_md({ action: 'apply' })
    ```
 
 **Warning:** Don't auto-approve all proposals. One bad entry pollutes all future sessions.
@@ -156,7 +156,7 @@ Remove entries when they become:
 
 **Describing code:**
 - "TaskService manages tasks" → Agent can read `TaskService` class
-- "Worktrees are in `.hive/.worktrees/`" → Observable from filesystem
+- "Worktrees are in `.pantheon/.worktrees/`" → Observable from filesystem
 
 **Proven unnecessary:**
 - Entry added 6 months ago, but agents haven't hit that issue since

@@ -96,7 +96,7 @@ describe('AgentsMdService', () => {
   describe('sync()', () => {
     beforeEach(() => {
       // Create a feature with contexts directory
-      const featurePath = path.join(testDir, '.hive', 'features', 'test-feature');
+      const featurePath = path.join(testDir, '.pantheon', 'features', 'test-feature');
       fs.mkdirSync(featurePath, { recursive: true });
     });
 

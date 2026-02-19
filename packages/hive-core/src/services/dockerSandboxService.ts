@@ -68,7 +68,7 @@ export class DockerSandboxService {
 
   /**
    * Generates a container name from a worktree path.
-   * Extracts feature and task from .hive/.worktrees/<feature>/<task> pattern.
+   * Extracts feature and task from .pantheon/.worktrees/<feature>/<task> pattern.
    * 
    * @param worktreePath - Path to the worktree directory
    * @returns Container name (e.g., 'hive-my-feature-my-task')

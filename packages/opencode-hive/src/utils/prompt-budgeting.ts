@@ -194,7 +194,7 @@ export function applyTaskBudget(
 
     // Generate hint for accessing dropped tasks
     if (feature) {
-      droppedTasksHint = `Dropped tasks: ${droppedTasks.join(', ')}. Full reports available at .hive/features/${feature}/tasks/<task>/report.md`;
+      droppedTasksHint = `Dropped tasks: ${droppedTasks.join(', ')}. Full reports available at .pantheon/features/${feature}/tasks/<task>/report.md`;
     } else {
       droppedTasksHint = `Dropped tasks: ${droppedTasks.join(', ')}. Full reports available in task directories.`;
     }
@@ -261,7 +261,7 @@ export function applyContextBudget(
 
   for (const file of files) {
     const pathHint = feature
-      ? `.hive/features/${feature}/context/${file.name}.md`
+      ? `.pantheon/features/${feature}/context/${file.name}.md`
       : `context/${file.name}.md`;
 
     // Check if we've exceeded total budget - switch to names only

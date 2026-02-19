@@ -69,7 +69,7 @@ export interface TaskStatus {
   /**
    * Task dependencies expressed as task folder names (e.g., '01-setup', '02-core-api').
    * A task cannot start until all its dependencies have status 'done'.
-   * Resolved from plan.md dependency annotations during hive_tasks_sync.
+   * Resolved from plan.md dependency annotations during pantheon_tasks_sync.
    */
   dependsOn?: string[];
 }
@@ -162,7 +162,7 @@ export interface HiveConfig {
   $schema?: string;
   /** Enable hive tools for specific features */
   enableToolsFor?: string[];
-  /** Globally disable specific skills (won't appear in hive_skill tool) */
+  /** Globally disable specific skills (won't appear in pantheon_skill tool) */
   disableSkills?: string[];
   /** Globally disable specific MCP servers. Available: websearch, context7, grep_app, ast_grep */
   disableMcps?: string[];

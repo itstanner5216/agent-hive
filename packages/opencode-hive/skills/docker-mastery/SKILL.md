@@ -341,6 +341,6 @@ Before marking Docker work complete:
 
 ## Related Skills
 
-- **hive_skill:systematic-debugging** - When container behavior is unexpected
-- **hive_skill:test-driven-development** - Write tests that run in containers
-- **hive_skill:verification-before-completion** - Verify tests pass in container before claiming done
+- **pantheon_skill:systematic-debugging** - When container behavior is unexpected
+- **pantheon_skill:test-driven-development** - Write tests that run in containers
+- **pantheon_skill:verification-before-completion** - Verify tests pass in container before claiming done

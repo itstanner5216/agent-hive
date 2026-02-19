@@ -15,7 +15,7 @@ This is exactly what we want from AI agents:
 |------------|------------|
 | Queen coordinates, doesn't micromanage | Planner orchestrates, workers execute autonomously |
 | Each worker knows their role | Each task agent has clear spec.md instructions |
-| Honeycomb stores everything efficiently | `.hive/` structure organizes all artifacts |
+| Honeycomb stores everything efficiently | `.pantheon/` structure organizes all artifacts |
 | Waggle dance communicates plans | Plan → Review → Approve workflow |
 | Royal jelly nourishes development | Context files ground agents in reality |
 | Honey is the valuable output | Documentation emerges naturally from work |
@@ -42,7 +42,7 @@ The answer became this platform.
 | **Scout Bee** | Researcher | Researches codebase and external docs in parallel. Uses MCP tools. |
 | **Forager Bee** | Executor | Executes tasks in isolated worktrees. Does the actual coding. |
 | **Hygienic Bee** | Reviewer | Reviews plan documentation quality. Returns OKAY/REJECT verdict. |
-| **Nest** | Feature | A feature. Self-contained with its own plan, context, and tasks. (`.hive/features/<name>/`) |
+| **Nest** | Feature | A feature. Self-contained with its own plan, context, and tasks. (`.pantheon/features/<name>/`) |
 | **Comb** | Task Structure | The organized grid of cells (tasks) within a nest. The work breakdown structure. |
 | **Cells** | Tasks | Individual tasks within a comb. Each cell is isolated (worktree) and produces one unit of work. |
 | **Royal Jelly** | Context | Context files that nourish workers — research, decisions, references. Without it, workers hallucinate. |
@@ -105,7 +105,7 @@ Hive's design is grounded in proven practices from the AI coding community, part
 
 | Boris's Tip | Hive Implementation |
 |-------------|---------------------|
-| **Tip 4: Team CLAUDE.md** | Context persists per-feature in `.hive/context/` |
+| **Tip 4: Team CLAUDE.md** | Context persists per-feature in `.pantheon/context/` |
 | **Tip 6: Start in Plan mode** | Plan → Approve → Execute workflow |
 | **Tip 8: Leverage subagents** | Batched parallelism with worktree isolation |
 | **Tip 13: Give feedback loops** | TDD subtasks — tests define done |
@@ -201,7 +201,7 @@ Batch 1 (parallel):     Batch 2 (parallel):
 
 This solves multi-agent coordination without complex orchestration. Each task gets a worktree. Glue tasks merge and synthesize.
 
-> **Implementation status**: Task dependencies (`dependsOn` field) enable parallel execution of independent tasks. Orchestrators handle batch synthesis and context flow manually via `hive_context_write`. Formal batch tracking and automated glue tasks are aspirational.
+> **Implementation status**: Task dependencies (`dependsOn` field) enable parallel execution of independent tasks. Orchestrators handle batch synthesis and context flow manually via `pantheon_context_write`. Formal batch tracking and automated glue tasks are aspirational.
 
 *Inspired by Boris's Tip 8: "Use a few subagents regularly to automate common workflows."*
 
@@ -249,8 +249,8 @@ Always:
 **Hard Gates** (tools refuse without prerequisites):
 | Tool | Gate | Error |
 |------|------|-------|
-| `hive_plan_write` | `## Discovery` section required | "BLOCKED: Discovery required" |
-| `hive_worktree_commit` | Verification keywords in summary | "BLOCKED: No verification" |
+| `pantheon_plan_write` | `## Discovery` section required | "BLOCKED: Discovery required" |
+| `pantheon_worktree_commit` | Verification keywords in summary | "BLOCKED: No verification" |
 
 **Phase Injection** (right context at right time):
 | Phase | Injection |
@@ -272,7 +272,7 @@ Subtasks enable granular tracking within a task, perfect for TDD workflows:
 > **Note**: Subtask CRUD operations exist in `hive-core` services. Agent-facing tools are planned but not yet implemented — workers currently follow TDD via prompt guidance.
 
 ```
-.hive/features/user-auth/tasks/01-auth-service/
+.pantheon/features/user-auth/tasks/01-auth-service/
 ├── spec.md
 ├── report.md
 └── subtasks/
@@ -326,7 +326,7 @@ Everything is a task. Even fixes. Keeps the model consistent.
 When a Forager encounters a decision it can't make:
 - Worker reports `status: "blocked"` with blocker info (reason, options, recommendation)
 - Swarm Bee asks user via `question()` tool — NEVER plain text
-- Swarm resumes with `hive_worktree_create(continueFrom: "blocked", decision: answer)`
+- Swarm resumes with `pantheon_worktree_create(continueFrom: "blocked", decision: answer)`
 - New worker spawns in SAME worktree with decision context
 
 This is different from "loop until done":
@@ -428,7 +428,7 @@ Hive didn't emerge in a vacuum. We studied existing tools, took what worked, and
 - Parallel execution needs coordination, not just parallelism
 
 **What we built:**
-- Feature-scoped context in `.hive/context/`
+- Feature-scoped context in `.pantheon/context/`
 - Git worktrees for true isolation (not just logical tracks)
 - Batched parallelism with context flow between batches
 
@@ -475,7 +475,7 @@ Hive didn't emerge in a vacuum. We studied existing tools, took what worked, and
 - Tip 13: Feedback loops — 2-3x quality improvement
 
 **What we built:**
-- `.hive/context/` for feature-scoped CLAUDE.md equivalent
+- `.pantheon/context/` for feature-scoped CLAUDE.md equivalent
 - Plan approval gate enforces "plan mode first"
 - Batched parallelism with worktree isolation
 - TDD subtasks with spec.md/report.md for feedback loops
@@ -578,7 +578,7 @@ Human shapes at the top. Agent builds at the bottom. Gate in the middle. Tests v
 **Theme:** Less infrastructure, smarter agents. Trust the model, not the tooling.
 
 - **Tool consolidation (22 → 16 tools)**: Removed the entire background task infrastructure (~5,000 lines). Direct worktree execution proved simpler and more reliable than the async queue-poll-result pattern. Renamed `hive_exec_*` → `hive_worktree_*` to reflect the actual execution model
-- **Journal infrastructure removed**: Journals were write-only artifacts nobody read. Context files (`hive_context_write`) replaced them — persistent, queryable, and actually consumed by downstream workers
+- **Journal infrastructure removed**: Journals were write-only artifacts nobody read. Context files (`pantheon_context_write`) replaced them — persistent, queryable, and actually consumed by downstream workers
 - **Worker Orient Phase**: Workers now run a pre-flight checklist before coding — read references, check existing patterns, verify assumptions. This came from observing workers that jumped straight into implementation and missed critical context. Orient aligns with P1 (Context Persists) and P7 (Iron Laws)
 - **Task-type auto-inference**: `buildSpecContent()` infers whether a task is greenfield, testing, modification, bugfix, or refactoring from the task name and plan section. This is orchestrator-level intelligence — the worker gets better context without the planner having to annotate every task
 - **Richer worker summaries**: Instead of parsing structured notepad entries, we trust the model to write useful summaries. Guidance now asks for files changed, key decisions, gotchas, and what's left. "Models are smart" — structure the ask, not the answer
@@ -592,12 +592,12 @@ Human shapes at the top. Agent builds at the bottom. Gate in the middle. Tests v
 
 **Theme:** Behavioral enforcement through prompt engineering, plus agents that bootstrap and maintain their own operating manual.
 
-We studied [Oh My OpenCode](https://github.com/code-yeongyu/oh-my-opencode) (omo) to learn prompt engineering patterns. Key insight: omo is prompt-composition-based (dynamic assembly), Hive is tool-based (`hive_status`, `hive_plan_write`, etc.). We borrowed selectively, not wholesale.
+We studied [Oh My OpenCode](https://github.com/code-yeongyu/oh-my-opencode) (omo) to learn prompt engineering patterns. Key insight: omo is prompt-composition-based (dynamic assembly), Hive is tool-based (`pantheon_status`, `pantheon_plan_write`, etc.). We borrowed selectively, not wholesale.
 
 **What changed across all 6 agent prompts:**
 
 - **Architect**: Expanded intent classification with Strategy column, 6-item clearance checklist before plan submission, Test Strategy section for planning test approaches, Turn Termination rules to prevent dangling turns
-- **Forager**: "Resolve Before Blocking" guidance (try 3+ approaches before reporting blocked), expanded Orient pre-flight checklist, 6-item Completion Checklist before `hive_worktree_commit`
+- **Forager**: "Resolve Before Blocking" guidance (try 3+ approaches before reporting blocked), expanded Orient pre-flight checklist, 6-item Completion Checklist before `pantheon_worktree_commit`
 - **Scout**: Fixed leaked persistence example (truncated research dump was polluting output), added year awareness to Iron Laws so agents know the current date
 - **Swarm**: Removed reference to non-existent "oracle" subagent, added "After Delegation — VERIFY" checklist, Turn Termination section
 - **Hive**: Turn Termination in Universal section (valid/invalid turn endings), Hard Blocks table replacing vague "Iron Laws" prose, AI-Slop Flags for detecting scope inflation and premature abstraction
@@ -613,7 +613,7 @@ We studied [Oh My OpenCode](https://github.com/code-yeongyu/oh-my-opencode) (omo
 
 **New capabilities:**
 
-- **AGENTS.md integration**: Self-maintaining bootstrap that evolves with the project. New `hive_agents_md` tool with two operations: `init` (codebase scan → AGENTS.md template) and `sync` (context findings → AGENTS.md proposals). Sync respects P2 (Plan → Approve → Execute) — agents propose updates, humans approve. Context files flow into living documentation instead of becoming stale write-only artifacts
+- **AGENTS.md integration**: Self-maintaining bootstrap that evolves with the project. New `pantheon_agents_md` tool with two operations: `init` (codebase scan → AGENTS.md template) and `sync` (context findings → AGENTS.md proposals). Sync respects P2 (Plan → Approve → Execute) — agents propose updates, humans approve. Context files flow into living documentation instead of becoming stale write-only artifacts
 - **Docker sandbox**: Lightweight container isolation for TDD (P6 + P7 alignment). Workers execute tests in sandboxed Docker containers via bash interception hook — transparent to agents, no code changes needed. Escape hatch: `HOST: <command>` prefix bypasses sandbox for host-level operations. Level 1 implementation (docker run) with auto-detection of project runtime (node:22-slim, python:3.12-slim, etc.). Aligns with "Good Enough Wins" (P4) — most projects need clean test environments, not full devcontainer complexity
 
 **Design insight:** Both features address the same meta-problem: *How do agents learn from their own work?* Prompts are contracts, not suggestions — concrete tables, checklists, and ✅/❌ examples survive model interpretation (P7). AGENTS.md captures project-level learnings (conventions, patterns, gotchas). Docker sandbox ensures those learnings are tested in isolation. Together they create a self-improving loop: agents document what they learn, test in clean environments, and future agents benefit from both.
@@ -622,11 +622,11 @@ We studied [Oh My OpenCode](https://github.com/code-yeongyu/oh-my-opencode) (omo
 
 **Theme:** Make agents smarter about their infrastructure, tighten enforcement.
 
-- **Docker Mastery Skill**: On-demand skill teaching agents to think in containers — debugging, docker-compose, Dockerfile authoring, image optimization. Docker is a platform for sandboxes (testing, integration, deployment), not just transparent wrapping. Primary user: Forager. Loaded via `hive_skill("docker-mastery")`
-- **AGENTS.md Mastery Skill**: On-demand skill teaching agents what makes effective pseudo-memory. AGENTS.md isn't documentation — it's the first briefing every session. Quality > quantity. Signal entries change agent behavior; noise entries waste context window. Loaded via `hive_skill("agents-md-mastery")`
+- **Docker Mastery Skill**: On-demand skill teaching agents to think in containers — debugging, docker-compose, Dockerfile authoring, image optimization. Docker is a platform for sandboxes (testing, integration, deployment), not just transparent wrapping. Primary user: Forager. Loaded via `pantheon_skill("docker-mastery")`
+- **AGENTS.md Mastery Skill**: On-demand skill teaching agents what makes effective pseudo-memory. AGENTS.md isn't documentation — it's the first briefing every session. Quality > quantity. Signal entries change agent behavior; noise entries waste context window. Loaded via `pantheon_skill("agents-md-mastery")`
 - **Tighter Discovery gate**: Replaced substring match with regex + content length check (minimum 100 chars). Empty or hidden Discovery sections now rejected. Aligns with P7 (Hard Gates)
 - **Sandbox bypass audit**: All HOST: commands logged with `[hive:sandbox]` prefix. Escape hatch removed from agent prompts — agents must ask users when host access needed. P7 enforcement without removing the mechanism
-- **Atomic AGENTS.md apply**: New `apply` action on `hive_agents_md` tool. Agents propose → user approves → apply writes atomically. Eliminates manual edit errors during approval flow
+- **Atomic AGENTS.md apply**: New `apply` action on `pantheon_agents_md` tool. Agents propose → user approves → apply writes atomically. Eliminates manual edit errors during approval flow
 - **Persistent sandbox containers [Planned]**: Designed but not yet implemented. Goal: one container per worktree, reused across commands (`docker run -d` + `docker exec` replacing ephemeral `docker run --rm`)
 - **Context lifecycle management**: Archive method moves stale contexts to timestamped archive/. Stats method reports context health. Size warning at 20K chars. Prevents unbounded context growth
 

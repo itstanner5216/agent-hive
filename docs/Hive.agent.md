@@ -117,7 +117,7 @@ Use `runSubagent` to delegate tasks to sub-agents. Each runs in isolation with a
 runSubagent({
   prompt: `Execute Hive task "02-add-token-refresh":
   1. hiveExecStart({ task: "02-add-token-refresh" })
-  2. Read context files from .hive/features/<name>/contexts/
+  2. Read context files from .pantheon/features/<name>/contexts/
   3. Implement token refresh using read/edit/execute
   4. hiveExecComplete({ task: "02-add-token-refresh", summary: "..." })
   5. Do NOT call hiveMerge
@@ -146,7 +146,7 @@ hiveMerge({ task: "03-update-api-routes" })
 ### Sub-Agent Rules
 
 Each sub-agent MUST:
-1. Read context files from `.hive/features/<name>/contexts/`
+1. Read context files from `.pantheon/features/<name>/contexts/`
 2. Do implementation using `read`, `edit`, `execute`
 3. `hiveExecComplete` with summary
 4. **NOT call hiveMerge** - orchestrator decides
@@ -187,7 +187,7 @@ hiveContextWrite({
 })
 ```
 
-**Why context files?** Hive context persists as actual files in `.hive/features/<name>/contexts/`. This provides:
+**Why context files?** Hive context persists as actual files in `.pantheon/features/<name>/contexts/`. This provides:
 - Reliable persistence across sessions
 - Readable by sub-agents
 - Git-trackable audit trail
@@ -221,7 +221,7 @@ Hive automatically bounds worker prompt sizes to prevent context overflow:
 - **Task history**: Last 10 completed tasks included (older tasks referenced by path)
 - **Task summaries**: Truncated to 2000 chars each with `...[truncated]` marker
 - **Context files**: Individual files capped at 20KB, total at 60KB
-- **Full access**: Workers can always read full content from `.hive/` file paths
+- **Full access**: Workers can always read full content from `.pantheon/` file paths
 
 ### Observability
 
@@ -236,7 +236,7 @@ Hive automatically bounds worker prompt sizes to prevent context overflow:
 
 ### Prompt Files
 
-Large prompts are written to `.hive/features/<feature>/tasks/<task>/worker-prompt.md` and passed by reference rather than inlined, preventing tool output truncation.
+Large prompts are written to `.pantheon/features/<feature>/tasks/<task>/worker-prompt.md` and passed by reference rather than inlined, preventing tool output truncation.
 
 ## Rules
 

@@ -133,8 +133,8 @@ describe('Swarm (Orchestrator) prompt', () => {
       expect(SWARM_BEE_PROMPT).toContain('returns when');
     });
 
-    it('tells to check hive_status() after task() returns', () => {
-      expect(SWARM_BEE_PROMPT).toContain('hive_status()');
+    it('tells to check pantheon_status() after task() returns', () => {
+      expect(SWARM_BEE_PROMPT).toContain('pantheon_status()');
     });
 
     it('enforces delegated task state invariant', () => {
@@ -253,8 +253,8 @@ describe('README.md documentation', () => {
 
 describe('AGENTS.md tool guidance', () => {
   describe('Hive (Hybrid) prompt', () => {
-    it('contains guidance to use hive_agents_md tool', () => {
-      expect(QUEEN_BEE_PROMPT).toContain('hive_agents_md');
+    it('contains guidance to use pantheon_agents_md tool', () => {
+      expect(QUEEN_BEE_PROMPT).toContain('pantheon_agents_md');
     });
 
     it('instructs to sync AGENTS.md after feature completion', () => {
@@ -269,8 +269,8 @@ describe('AGENTS.md tool guidance', () => {
   });
 
   describe('Swarm (Orchestrator) prompt', () => {
-    it('contains guidance to use hive_agents_md tool', () => {
-      expect(SWARM_BEE_PROMPT).toContain('hive_agents_md');
+    it('contains guidance to use pantheon_agents_md tool', () => {
+      expect(SWARM_BEE_PROMPT).toContain('pantheon_agents_md');
     });
 
     it('instructs to sync AGENTS.md after batch completion', () => {

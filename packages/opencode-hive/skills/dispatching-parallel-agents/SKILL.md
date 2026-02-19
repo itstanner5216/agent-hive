@@ -13,7 +13,7 @@ When you have multiple unrelated failures (different test files, different subsy
 
 ## Prerequisite: Check Runnable Tasks
 
-Before dispatching, use `hive_status()` to get the **runnable** list — tasks whose dependencies are all satisfied.
+Before dispatching, use `pantheon_status()` to get the **runnable** list — tasks whose dependencies are all satisfied.
 
 **Only dispatch tasks that are runnable.** Never start tasks with unmet dependencies.
 
@@ -21,7 +21,7 @@ Only `done` satisfies dependencies (not `blocked`, `failed`, `partial`, `cancell
 
 **Ask the operator first:**
 - Use `question()`: "These tasks are runnable and independent: [list]. Execute in parallel?"
-- Record the decision with `hive_context_write({ name: "execution-decisions", content: "..." })`
+- Record the decision with `pantheon_context_write({ name: "execution-decisions", content: "..." })`
 - Proceed only after operator approval
 
 ## When to Use
@@ -78,9 +78,9 @@ Each agent gets:
 
 ```typescript
 // Using Hive tools for parallel execution
-hive_worktree_create({ task: "01-fix-abort-tests" })
-hive_worktree_create({ task: "02-fix-batch-tests" })
-hive_worktree_create({ task: "03-fix-race-condition-tests" })
+pantheon_worktree_create({ task: "01-fix-abort-tests" })
+pantheon_worktree_create({ task: "02-fix-batch-tests" })
+pantheon_worktree_create({ task: "03-fix-race-condition-tests" })
 // All three run concurrently in isolated worktrees
 ```
 
@@ -97,7 +97,7 @@ When agents return:
 - Read each summary
 - Verify fixes don't conflict
 - Run full test suite
-- Integrate all changes with `hive_merge`
+- Integrate all changes with `pantheon_merge`
 
 ## Agent Prompt Structure
 

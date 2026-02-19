@@ -160,48 +160,48 @@ Plan-first development: Write plan → User reviews → Approve → Execute task
 
 | Domain | Tools |
 |--------|-------|
-| Feature | hive_feature_create, hive_feature_complete |
-| Plan | hive_plan_write, hive_plan_read, hive_plan_approve |
-| Task | hive_tasks_sync, hive_task_create, hive_task_update |
-| Worktree | hive_worktree_create, hive_worktree_commit, hive_worktree_discard |
-| Merge | hive_merge |
-| Context | hive_context_write |
-| Status | hive_status |
-| Skill | hive_skill |
+| Feature | pantheon_feature_create, pantheon_feature_complete |
+| Plan | pantheon_plan_write, pantheon_plan_read, pantheon_plan_approve |
+| Task | pantheon_tasks_sync, pantheon_task_create, pantheon_task_update |
+| Worktree | pantheon_worktree_create, pantheon_worktree_commit, pantheon_worktree_discard |
+| Merge | pantheon_merge |
+| Context | pantheon_context_write |
+| Status | pantheon_status |
+| Skill | pantheon_skill |
 
 ### Workflow
 
-1. \`hive_feature_create(name)\` - Create feature
-2. \`hive_plan_write(content)\` - Write plan.md
-3. User adds comments in VSCode → \`hive_plan_read\` to see them
+1. \`pantheon_feature_create(name)\` - Create feature
+2. \`pantheon_plan_write(content)\` - Write plan.md
+3. User adds comments in VSCode → \`pantheon_plan_read\` to see them
 4. Revise plan → User approves
-5. \`hive_tasks_sync()\` - Generate tasks from plan
-6. \`hive_worktree_create(task)\` → work in worktree → \`hive_worktree_commit(task, summary)\`
-7. \`hive_merge(task)\` - Merge task branch into main (when ready)
+5. \`pantheon_tasks_sync()\` - Generate tasks from plan
+6. \`pantheon_worktree_create(task)\` → work in worktree → \`pantheon_worktree_commit(task, summary)\`
+7. \`pantheon_merge(task)\` - Merge task branch into main (when ready)
 
-**Important:** \`hive_worktree_commit\` commits changes to task branch but does NOT merge.
-Use \`hive_merge\` to explicitly integrate changes. Worktrees persist until manually removed.
+**Important:** \`pantheon_worktree_commit\` commits changes to task branch but does NOT merge.
+Use \`pantheon_merge\` to explicitly integrate changes. Worktrees persist until manually removed.
 
 ### Delegated Execution
 
-\`hive_worktree_create\` creates worktree and spawns worker automatically:
+\`pantheon_worktree_create\` creates worktree and spawns worker automatically:
 
-1. \`hive_worktree_create(task)\` → Creates worktree + spawns Forager (Worker/Coder) worker
-2. Worker executes → calls \`hive_worktree_commit(status: "completed")\`
-3. Worker blocked → calls \`hive_worktree_commit(status: "blocked", blocker: {...})\`
+1. \`pantheon_worktree_create(task)\` → Creates worktree + spawns Forager (Worker/Coder) worker
+2. Worker executes → calls \`pantheon_worktree_commit(status: "completed")\`
+3. Worker blocked → calls \`pantheon_worktree_commit(status: "blocked", blocker: {...})\`
 
 **Handling blocked workers:**
-1. Check blockers with \`hive_status()\`
+1. Check blockers with \`pantheon_status()\`
 2. Read the blocker info (reason, options, recommendation, context)
 3. Ask user via \`question()\` tool - NEVER plain text
-4. Resume with \`hive_worktree_create(task, continueFrom: "blocked", decision: answer)\`
+4. Resume with \`pantheon_worktree_create(task, continueFrom: "blocked", decision: answer)\`
 
 **CRITICAL**: When resuming, a NEW worker spawns in the SAME worktree.
 The previous worker's progress is preserved. Include the user's decision in the \`decision\` parameter.
 
 **After task() Returns:**
 - task() is BLOCKING — when it returns, the worker is DONE
-- Call \`hive_status()\` immediately to check the new task state and find next runnable tasks
+- Call \`pantheon_status()\` immediately to check the new task state and find next runnable tasks
 - No notifications or polling needed — the result is already available
 
 **For research**, use MCP tools or parallel exploration:
@@ -209,11 +209,11 @@ The previous worker's progress is preserved. Include the user's decision in the 
 - \`context7_query-docs\` - Library documentation
 - \`websearch_web_search_exa\` - Web search via Exa
 - \`ast_grep_search\` - AST-based search
-- For exploratory fan-out, load \`hive_skill("parallel-exploration")\` and use multiple \`task()\` calls in the same message
+- For exploratory fan-out, load \`pantheon_skill("parallel-exploration")\` and use multiple \`task()\` calls in the same message
 
 ### Planning Phase - Context Management REQUIRED
 
-As you research and plan, CONTINUOUSLY save findings using \`hive_context_write\`:
+As you research and plan, CONTINUOUSLY save findings using \`pantheon_context_write\`:
 - Research findings (API patterns, library docs, codebase structure)
 - User preferences ("we use Zustand, not Redux")
 - Rejected alternatives ("tried X, too complex")
@@ -221,11 +221,11 @@ As you research and plan, CONTINUOUSLY save findings using \`hive_context_write\
 
 **Update existing context files** when new info emerges - dont create duplicates.
 
-\`hive_tasks_sync\` parses \`### N. Task Name\` headers.
+\`pantheon_tasks_sync\` parses \`### N. Task Name\` headers.
 
 ### Execution Phase - Stay Aligned
 
-During execution, call \`hive_status\` periodically to:
+During execution, call \`pantheon_status\` periodically to:
 - Check current progress and pending work
 - See context files to read
 - Get reminded of next actions
@@ -257,7 +257,7 @@ const plugin: Plugin = async (ctx) => {
   const effectiveAutoLoadSkills = configService.getAgentConfig('hive-master').autoLoadSkills ?? [];
   const worktreeService = new WorktreeService({
     baseDir: directory,
-    hiveDir: path.join(directory, '.hive'),
+    hiveDir: path.join(directory, '.pantheon'),
   });
 
   /**
@@ -294,13 +294,13 @@ const plugin: Plugin = async (ctx) => {
    * Check if a feature is blocked by the Beekeeper.
    * Returns the block message if blocked, null otherwise.
    * 
-   * File protocol: .hive/features/<name>/BLOCKED
+   * File protocol: .pantheon/features/<name>/BLOCKED
    * - If file exists, feature is blocked
    * - File contents = reason for blocking
    */
   const checkBlocked = (feature: string): string | null => {
     const fs = require('fs');
-    const blockedPath = path.join(directory, '.hive', 'features', feature, 'BLOCKED');
+    const blockedPath = path.join(directory, '.pantheon', 'features', feature, 'BLOCKED');
     if (fs.existsSync(blockedPath)) {
       const reason = fs.readFileSync(blockedPath, 'utf-8').trim();
       return `⛔ BLOCKED by Beekeeper
@@ -308,7 +308,7 @@ const plugin: Plugin = async (ctx) => {
 ${reason || '(No reason provided)'}
 
 The human has blocked this feature. Wait for them to unblock it.
-To unblock: Remove .hive/features/${feature}/BLOCKED`;
+To unblock: Remove .pantheon/features/${feature}/BLOCKED`;
     }
     return null;
   };
@@ -423,7 +423,7 @@ To unblock: Remove .hive/features/${feature}/BLOCKED`;
           statusHint += `**Progress**: ${info.tasks.filter(t => t.status === 'done').length}/${info.tasks.length} tasks\n`;
 
           if (info.commentCount > 0) {
-            statusHint += `**Comments**: ${info.commentCount} unresolved - address with hive_plan_read\n`;
+            statusHint += `**Comments**: ${info.commentCount} unresolved - address with pantheon_plan_read\n`;
           }
 
           output.system.push(statusHint);
@@ -503,7 +503,7 @@ To unblock: Remove .hive/features/${feature}/BLOCKED`;
       const workdir = output.args?.workdir;
       if (!workdir) return;
       
-      const hiveWorktreeBase = path.join(directory, '.hive', '.worktrees');
+      const hiveWorktreeBase = path.join(directory, '.pantheon', '.worktrees');
       if (!workdir.startsWith(hiveWorktreeBase)) return;
       
       // Wrap command using static method (with persistent config)
@@ -515,9 +515,9 @@ To unblock: Remove .hive/features/${feature}/BLOCKED`;
     mcp: builtinMcps,
 
     tool: {
-      hive_skill: createHiveSkillTool(filteredSkills),
+      pantheon_skill: createHiveSkillTool(filteredSkills),
 
-      hive_feature_create: tool({
+      pantheon_feature_create: tool({
         description: 'Create a new feature and set it as active',
         args: {
           name: tool.schema.string().describe('Feature name'),
@@ -533,7 +533,7 @@ Before writing a plan, you MUST:
 1. Ask clarifying questions about the feature
 2. Document Q&A in plan.md with a \`## Discovery\` section
 3. Research the codebase (grep, read existing code)
-4. Save findings with hive_context_write
+4. Save findings with pantheon_context_write
 
 Example discovery section:
 \`\`\`markdown
@@ -562,7 +562,7 @@ NEXT: Ask your first clarifying question about this feature.`;
         },
       }),
 
-      hive_feature_complete: tool({
+      pantheon_feature_complete: tool({
         description: 'Mark feature as completed (irreversible)',
         args: { name: tool.schema.string().optional().describe('Feature name (defaults to active)') },
         async execute({ name }) {
@@ -573,7 +573,7 @@ NEXT: Ask your first clarifying question about this feature.`;
         },
       }),
 
-      hive_plan_write: tool({
+      pantheon_plan_write: tool({
         description: 'Write plan.md (clears existing comments)',
         args: {
           content: tool.schema.string().describe('Plan markdown content'),
@@ -620,7 +620,7 @@ Expand your Discovery section and try again.`;
         },
       }),
 
-      hive_plan_read: tool({
+      pantheon_plan_read: tool({
         description: 'Read plan.md and user comments',
         args: {
           feature: tool.schema.string().optional().describe('Feature name (defaults to detection or single feature)'),
@@ -635,7 +635,7 @@ Expand your Discovery section and try again.`;
         },
       }),
 
-      hive_plan_approve: tool({
+      pantheon_plan_approve: tool({
         description: 'Approve plan for execution',
         args: {
           feature: tool.schema.string().optional().describe('Feature name (defaults to detection or single feature)'),
@@ -649,11 +649,11 @@ Expand your Discovery section and try again.`;
             return `Error: Cannot approve - ${comments.length} unresolved comment(s). Address them first.`;
           }
           planService.approve(feature);
-          return "Plan approved. Run hive_tasks_sync to generate tasks.";
+          return "Plan approved. Run pantheon_tasks_sync to generate tasks.";
         },
       }),
 
-      hive_tasks_sync: tool({
+      pantheon_tasks_sync: tool({
         description: 'Generate tasks from approved plan',
         args: {
           feature: tool.schema.string().optional().describe('Feature name (defaults to detection or single feature)'),
@@ -673,7 +673,7 @@ Expand your Discovery section and try again.`;
         },
       }),
 
-      hive_task_create: tool({
+      pantheon_task_create: tool({
         description: 'Create manual task (not from plan)',
         args: {
           name: tool.schema.string().describe('Task name'),
@@ -684,11 +684,11 @@ Expand your Discovery section and try again.`;
           const feature = resolveFeature(explicitFeature);
           if (!feature) return "Error: No feature specified. Create a feature or provide feature param.";
           const folder = taskService.create(feature, name, order);
-          return `Manual task created: ${folder}\nReminder: start work with hive_worktree_create to use its worktree, and ensure any subagents work in that worktree too.`;
+          return `Manual task created: ${folder}\nReminder: start work with pantheon_worktree_create to use its worktree, and ensure any subagents work in that worktree too.`;
         },
       }),
 
-      hive_task_update: tool({
+      pantheon_task_update: tool({
         description: 'Update task status or summary',
         args: {
           task: tool.schema.string().describe('Task folder name'),
@@ -707,7 +707,7 @@ Expand your Discovery section and try again.`;
         },
       }),
 
-      hive_worktree_create: tool({
+      pantheon_worktree_create: tool({
         description: 'Create worktree and begin work on task. Spawns Forager worker automatically.',
         args: {
           task: tool.schema.string().describe('Task folder name'),
@@ -739,7 +739,7 @@ Expand your Discovery section and try again.`;
                 error: depCheck.error,
                 hints: [
                   'Complete the required dependencies before starting this task.',
-                  'Use hive_status to see current task states.',
+                  'Use pantheon_status to see current task states.',
                 ],
               });
             }
@@ -849,7 +849,7 @@ Expand your Discovery section and try again.`;
           });
 
           // Always use Forager (forager-worker) for task execution
-          // Forager knows Hive protocols (hive_worktree_commit, blocker protocol, Iron Laws)
+          // Forager knows Hive protocols (pantheon_worktree_commit, blocker protocol, Iron Laws)
           // Forager can research via MCP tools (grep_app, context7, etc.)
           const agent = 'forager-worker';
 
@@ -876,7 +876,7 @@ Expand your Discovery section and try again.`;
 
           // Write worker prompt to file to prevent tool output truncation (Task 05)
           // This keeps the tool output small while preserving full prompt content
-          const hiveDir = path.join(directory, '.hive');
+          const hiveDir = path.join(directory, '.pantheon');
           const workerPromptPath = writeWorkerPromptFile(feature, task, workerPrompt, hiveDir);
           
           // Convert to relative path for portability in output
@@ -971,7 +971,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         },
       }),
 
-      hive_worktree_commit: tool({
+      pantheon_worktree_commit: tool({
         description: 'Complete task: commit changes to branch, write report. Supports blocked/failed/partial status for worker communication. Returns JSON with ok/terminal semantics for worker control flow.',
         args: {
           task: tool.schema.string().describe('Task folder name'),
@@ -997,7 +997,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
               task,
               taskState: 'unknown',
               message: 'No feature specified. Create a feature or provide feature param.',
-              nextAction: 'Provide feature explicitly or create/select an active feature, then retry hive_worktree_commit.',
+              nextAction: 'Provide feature explicitly or create/select an active feature, then retry pantheon_worktree_commit.',
             });
           }
 
@@ -1012,7 +1012,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
               task,
               taskState: 'unknown',
               message: `Task "${task}" not found`,
-              nextAction: 'Verify task folder via hive_status and retry with the correct task id.',
+              nextAction: 'Verify task folder via pantheon_status and retry with the correct task id.',
             });
           }
           if (taskInfo.status !== 'in_progress' && taskInfo.status !== 'blocked') {
@@ -1051,7 +1051,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
                   'Run build (npm run build, cargo build, etc.)',
                   'Include verification results in summary',
                 ],
-                nextAction: 'Run verification commands and call hive_worktree_commit again with verification evidence in summary.',
+                nextAction: 'Run verification commands and call pantheon_worktree_commit again with verification evidence in summary.',
               });
             }
           }
@@ -1077,7 +1077,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
               blocker,
               worktreePath: worktree?.path,
               branch: worktree?.branch,
-              message: 'Task blocked. Hive Master will ask user and resume with hive_worktree_create(continueFrom: "blocked", decision: answer)',
+              message: 'Task blocked. Hive Master will ask user and resume with pantheon_worktree_create(continueFrom: "blocked", decision: answer)',
               nextAction: 'Wait for orchestrator to collect user decision and resume with continueFrom: "blocked".',
             });
           }
@@ -1101,7 +1101,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
                 message: commitResult.message,
               },
               message: `Commit failed: ${commitResult.message || 'unknown error'}`,
-              nextAction: 'Resolve git/worktree issue, then call hive_worktree_commit again.',
+              nextAction: 'Resolve git/worktree issue, then call pantheon_worktree_commit again.',
             });
           }
 
@@ -1170,12 +1170,12 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
             branch: worktree?.branch,
             reportPath,
             message: `Task "${task}" ${status}.`,
-            nextAction: 'Use hive_merge to integrate changes. Worktree is preserved for review.',
+            nextAction: 'Use pantheon_merge to integrate changes. Worktree is preserved for review.',
           });
         },
       }),
 
-      hive_worktree_discard: tool({
+      pantheon_worktree_discard: tool({
         description: 'Abort task: discard changes, reset status',
         args: {
           task: tool.schema.string().describe('Task folder name'),
@@ -1193,7 +1193,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
       }),
 
 
-      hive_merge: tool({
+      pantheon_merge: tool({
         description: 'Merge completed task branch into current branch (explicit integration)',
         args: {
           task: tool.schema.string().describe('Task folder name to merge'),
@@ -1206,7 +1206,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
 
           const taskInfo = taskService.get(feature, task);
           if (!taskInfo) return `Error: Task "${task}" not found`;
-          if (taskInfo.status !== 'done') return "Error: Task must be completed before merging. Use hive_worktree_commit first.";
+          if (taskInfo.status !== 'done') return "Error: Task must be completed before merging. Use pantheon_worktree_commit first.";
 
           const result = await worktreeService.merge(feature, task, strategy);
 
@@ -1222,7 +1222,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
       }),
 
       // Context Tools
-      hive_context_write: tool({
+      pantheon_context_write: tool({
         description: 'Write a context file for the feature. Context files store persistent notes, decisions, and reference material.',
         args: {
           name: tool.schema.string().describe('Context file name (e.g., "decisions", "architecture", "notes")'),
@@ -1239,7 +1239,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
       }),
 
       // Status Tool
-      hive_status: tool({
+      pantheon_status: tool({
         description: 'Get comprehensive status of a feature including plan, tasks, and context. Returns JSON with all relevant state for resuming work.',
         args: {
           feature: tool.schema.string().optional().describe('Feature name (defaults to active)'),
@@ -1249,7 +1249,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
           if (!feature) {
             return JSON.stringify({
               error: 'No feature specified and no active feature found',
-              hint: 'Use hive_feature_create to create a new feature',
+              hint: 'Use pantheon_feature_create to create a new feature',
             });
           }
 
@@ -1312,13 +1312,13 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
 
           const getNextAction = (planStatus: string | null, tasks: Array<{ status: string; folder: string }>, runnableTasks: string[]): string => {
             if (!planStatus || planStatus === 'draft') {
-              return 'Write or revise plan with hive_plan_write, then get approval';
+              return 'Write or revise plan with pantheon_plan_write, then get approval';
             }
             if (planStatus === 'review') {
               return 'Wait for plan approval or revise based on comments';
             }
             if (tasks.length === 0) {
-              return 'Generate tasks from plan with hive_tasks_sync';
+              return 'Generate tasks from plan with pantheon_tasks_sync';
             }
             const inProgress = tasks.find(t => t.status === 'in_progress');
             if (inProgress) {
@@ -1328,7 +1328,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
               return `${runnableTasks.length} tasks are ready to start in parallel: ${runnableTasks.join(', ')}`;
             }
             if (runnableTasks.length === 1) {
-              return `Start next task with hive_worktree_create: ${runnableTasks[0]}`;
+              return `Start next task with pantheon_worktree_create: ${runnableTasks[0]}`;
             }
             const pending = tasks.find(t => t.status === 'pending');
             if (pending) {
@@ -1372,7 +1372,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
       }),
 
       // AGENTS.md Tool
-      hive_agents_md: tool({
+      pantheon_agents_md: tool({
         description: 'Initialize or sync AGENTS.md. init: scan codebase and generate (preview only). sync: propose updates from feature contexts. apply: write approved content to disk.',
         args: {
           action: tool.schema.enum(['init', 'sync', 'apply']).describe('Action to perform'),
@@ -1417,7 +1417,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         async run(args: string) {
           const name = args.trim();
           if (!name) return "Usage: /hive <feature-name>";
-          return `Create feature "${name}" using hive_feature_create tool.`;
+          return `Create feature "${name}" using pantheon_feature_create tool.`;
         },
       },
     },

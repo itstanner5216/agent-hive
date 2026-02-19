@@ -113,7 +113,7 @@ describe('applyTaskBudget', () => {
     const result = applyTaskBudget(tasks, { maxTasks: 2, feature: 'test-feature' });
 
     expect(result.droppedTasksHint).toContain('01-task');
-    expect(result.droppedTasksHint).toContain('.hive/features/test-feature/tasks');
+    expect(result.droppedTasksHint).toContain('.pantheon/features/test-feature/tasks');
   });
 });
 
@@ -177,7 +177,7 @@ describe('applyContextBudget', () => {
 
     const result = applyContextBudget(files, { maxContextChars: 500, feature: 'my-feature' });
 
-    expect(result.files[0].pathHint).toContain('.hive/features/my-feature/context/decisions.md');
+    expect(result.files[0].pathHint).toContain('.pantheon/features/my-feature/context/decisions.md');
   });
 });
 

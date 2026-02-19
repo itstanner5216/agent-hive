@@ -9,11 +9,11 @@ import {
 } from "@opencode-ai/sdk";
 
 const EXPECTED_TOOLS = [
-  "hive_feature_create",
-  "hive_plan_write",
-  "hive_plan_read",
-  "hive_tasks_sync",
-  "hive_worktree_create",
+  "pantheon_feature_create",
+  "pantheon_plan_write",
+  "pantheon_plan_read",
+  "pantheon_tasks_sync",
+  "pantheon_worktree_create",
 ] as const;
 
 type DefaultModel = { providerID: string; modelID: string };
@@ -282,9 +282,9 @@ describe("e2e: OpenCode runtime loads opencode-hive", () => {
           body: {
             model: defaultModel,
             system:
-              "Call the tool hive_feature_create exactly once with {\"name\":\"rt-feature\"}.",
+              "Call the tool pantheon_feature_create exactly once with {\"name\":\"rt-feature\"}.",
             tools: {
-              hive_feature_create: true,
+              pantheon_feature_create: true,
             },
             parts: [
               {
@@ -305,7 +305,7 @@ describe("e2e: OpenCode runtime loads opencode-hive", () => {
 
       const hasToolPart = Array.isArray((promptResult as any)?.parts)
         ? ((promptResult as any).parts as unknown[]).some(
-            (p) => isRecord(p) && p.type === "tool" && p.tool === "hive_feature_create"
+            (p) => isRecord(p) && p.type === "tool" && p.tool === "pantheon_feature_create"
           )
         : false;
 
@@ -315,7 +315,7 @@ describe("e2e: OpenCode runtime loads opencode-hive", () => {
         return;
       }
 
-      const featureDir = path.join(projectDir, ".hive", "features", "rt-feature");
+      const featureDir = path.join(projectDir, ".pantheon", "features", "rt-feature");
       const deadline = Date.now() + 5000;
       while (Date.now() < deadline && !fs.existsSync(featureDir)) {
         await new Promise((r) => setTimeout(r, 200));

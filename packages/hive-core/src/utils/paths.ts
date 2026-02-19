@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 
-const HIVE_DIR = '.hive';
+const HIVE_DIR = '.pantheon';
 const FEATURES_DIR = 'features';
 const TASKS_DIR = 'tasks';
 const CONTEXT_DIR = 'context';

@@ -1,8 +1,8 @@
-# Agent Guidelines for agent-hive
+# Agent Guidelines for Pantheon
 
 ## Overview
 
-**agent-hive** is a context-driven development system for AI coding assistants. It implements a plan-first workflow: Plan → Approve → Execute.
+**Pantheon** is a context-driven development system for AI coding assistants. It implements a plan-first workflow: Plan → Approve → Execute.
 
 ## Build & Test Commands
 
@@ -92,7 +92,7 @@ packages/
 │   └── src/
 │       ├── agents/      # enlil, enki, nudimmud, isimud, asalluhi, adapa, kulla, nanshe, enbilulu, mushdamma
 │       ├── mcp/         # websearch, grep-app, context7, ast-grep
-│       ├── tools/       # Hive tool implementations
+│       ├── tools/       # Pantheon tool implementations
 │       ├── hooks/       # Event hooks
 │       └── skills/      # Skill definitions
 └── vscode-hive/         # VS Code extension

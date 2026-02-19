@@ -2,9 +2,9 @@
  * Unit tests for the chat.message hook variant injection.
  * 
  * Tests:
- * - Applies configured variant to Hive agents
+ * - Applies configured variant to Pantheon agents
  * - Does not override already-set variant
- * - Does not apply variants to non-Hive agents
+ * - Does not apply variants to non-Pantheon agents
  * - Handles empty/whitespace-only variants
  */
 
@@ -38,7 +38,7 @@ describe('normalizeVariant', () => {
 // ============================================================================
 
 describe('HIVE_AGENT_NAMES', () => {
-  it('contains all expected Hive agent names', () => {
+  it('contains all expected Pantheon agent names', () => {
     expect(HIVE_AGENT_NAMES).toContain('enki-planner');
     expect(HIVE_AGENT_NAMES).toContain('enki-planner');
     expect(HIVE_AGENT_NAMES).toContain('nudimmud-orchestrator');
@@ -70,7 +70,7 @@ describe('createVariantHook', () => {
     parts: [],
   });
 
-  describe('applies variant to Hive agents', () => {
+  describe('applies variant to Pantheon agents', () => {
     it('sets variant when message has no variant and agent has configured variant', async () => {
       const configService = createMockConfigService({
         'kulla-coder': 'high',
@@ -93,7 +93,7 @@ describe('createVariantHook', () => {
       expect(output.message.variant).toBe('high');
     });
 
-    it('applies variant to all Hive agents', async () => {
+    it('applies variant to all Pantheon agents', async () => {
       const configService = createMockConfigService({
         'enlil-validator': 'max',
         'enki-planner': 'high',
@@ -142,7 +142,7 @@ describe('createVariantHook', () => {
     });
   });
 
-  describe('does not apply to non-Hive agents', () => {
+  describe('does not apply to non-Pantheon agents', () => {
     it('does not set variant for unknown agent', async () => {
       const configService = createMockConfigService({
         'kulla-coder': 'high',

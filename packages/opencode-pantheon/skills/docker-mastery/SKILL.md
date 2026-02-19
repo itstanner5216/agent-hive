@@ -38,7 +38,7 @@ Use this skill when working with:
 - **Dockerfile authoring** - Writing efficient, maintainable Dockerfiles
 - **Image size optimization** - Reducing image size, layer caching
 - **Deployment** - Containerized application deployment
-- **Sandbox debugging** - Issues with Hive's Docker sandbox mode
+- **Sandbox debugging** - Issues with Pantheon's Docker sandbox mode
 
 **Use this ESPECIALLY when:**
 - Tests pass locally but fail in CI (environment mismatch)
@@ -73,12 +73,12 @@ Mount host directories into containers for persistence and code sharing:
 # Mount current directory to /app in container
 docker run -v $(pwd):/app myapp:latest
 
-# Hive worktrees are mounted automatically
+# Pantheon worktrees are mounted automatically
 # Your code edits (via Read/Write/Edit tools) affect the host
 # Container sees the same files at runtime
 ```
 
-**How Hive uses this:** Worktree is mounted into container, so file tools work on host, bash commands run in container.
+**How Pantheon uses this:** Worktree is mounted into container, so file tools work on host, bash commands run in container.
 
 ### Multi-Stage Builds
 
@@ -241,16 +241,16 @@ dist
    ```
 3. Or use a richer base image (e.g., `node:22` instead of `node:22-slim`).
 
-## Hive Sandbox Integration
+## Pantheon Sandbox Integration
 
-### How Hive Wraps Commands
+### How Pantheon Wraps Commands
 
 When sandbox mode is active (`sandbox: 'docker'` in config):
-1. Hive hook intercepts bash commands before execution
+1. Pantheon hook intercepts bash commands before execution
 2. Wraps with `docker run --rm -v <worktree>:/workspace -w /workspace <image> sh -c "<command>"`
 3. Command runs in container, but file edits (Read/Write/Edit) still affect host
 
-**Workers are unaware** — they issue normal bash commands, Hive handles containerization.
+**Workers are unaware** — they issue normal bash commands, Pantheon handles containerization.
 
 ### When Host Access is Needed
 
@@ -279,7 +279,7 @@ Example: `npm install lodash` in one command → not available in next command.
 
 ### Auto-Detected Images
 
-Hive detects runtime from project files:
+Pantheon detects runtime from project files:
 - `package.json` → `node:22-slim`
 - `requirements.txt` / `pyproject.toml` → `python:3.12-slim`
 - `go.mod` → `golang:1.22-slim`
@@ -337,7 +337,7 @@ Before marking Docker work complete:
 | **Multi-service tests** | `docker-compose up --abort-on-container-exit` |
 | **Check image contents** | `docker run --rm <image> ls /app` |
 | **Optimize build** | Add `.dockerignore`, use multi-stage, pin versions |
-| **Escape Hive sandbox** | Prefix with `HOST:` (e.g., `HOST: git status`) |
+| **Escape Pantheon sandbox** | Prefix with `HOST:` (e.g., `HOST: git status`) |
 
 ## Related Skills
 

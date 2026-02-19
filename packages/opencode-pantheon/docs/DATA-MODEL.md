@@ -1,4 +1,4 @@
-# Hive Data Model
+# Pantheon Data Model
 
 ## Structure
 
@@ -60,7 +60,7 @@
 
 **Dependency rules**:
 - Only status `done` satisfies a dependency.
-- If `dependsOn` is omitted (legacy/manual tasks), Hive applies implicit sequential ordering based on the numeric task prefix (N depends on N-1).
+- If `dependsOn` is omitted (legacy/manual tasks), Pantheon applies implicit sequential ordering based on the numeric task prefix (N depends on N-1).
 
 ## Status Values
 

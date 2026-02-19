@@ -2,22 +2,22 @@
   "name": "opencode-pantheon",
   "version": "1.2.0",
   "type": "module",
-  "description": "OpenCode plugin for Agent Hive - from vibe coding to hive coding",
+  "description": "OpenCode plugin for Pantheon - context-driven development with Sumerian deity agents",
   "license": "MIT WITH Commons-Clause",
   "author": "tctinh",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tctinh/agent-hive.git",
+    "url": "https://github.com/itstanner5216/agent-hive.git",
     "directory": "packages/opencode-pantheon"
   },
-  "homepage": "https://github.com/tctinh/agent-hive#readme",
+  "homepage": "https://github.com/itstanner5216/agent-hive#readme",
   "bugs": {
-    "url": "https://github.com/tctinh/agent-hive/issues"
+    "url": "https://github.com/itstanner5216/agent-hive/issues"
   },
   "keywords": [
     "opencode",
     "ai",
-    "hive",
+    "pantheon",
     "vibe-coding",
     "workflow",
     "planning",

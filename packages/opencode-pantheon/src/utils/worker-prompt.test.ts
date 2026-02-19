@@ -19,7 +19,7 @@ function createTestParams(overrides: Partial<WorkerPromptParams> = {}): WorkerPr
     task: '01-test-task',
     taskOrder: 1,
     worktreePath: '/tmp/worktree',
-    branch: 'hive/test-feature/01-test-task',
+    branch: 'pantheon/test-feature/01-test-task',
     plan: '# Test Plan\n\n## Discovery\n\nQ&A here\n\n## Tasks\n\n### 1. Test Task\n\nDo the thing.',
     contextFiles: [
       { name: 'decisions', content: 'We decided to use TypeScript.' },

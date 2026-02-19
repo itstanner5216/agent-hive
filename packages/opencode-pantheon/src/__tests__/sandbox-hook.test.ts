@@ -39,12 +39,12 @@ describe('tool.execute.before bash interception hook logic', () => {
     // Escape hatch: HOST: prefix (case-insensitive)
     if (/^HOST:\s*/i.test(command)) {
       const strippedCommand = command.replace(/^HOST:\s*/i, '');
-      console.warn(`[hive:sandbox] HOST bypass: ${strippedCommand.slice(0, 80)}${strippedCommand.length > 80 ? '...' : ''}`);
+      console.warn(`[pantheon:sandbox] HOST bypass: ${strippedCommand.slice(0, 80)}${strippedCommand.length > 80 ? '...' : ''}`);
       output.args.command = strippedCommand;
       return;
     }
     
-    // Only wrap commands with explicit workdir inside hive worktrees
+    // Only wrap commands with explicit workdir inside pantheon worktrees
     const workdir = output.args?.workdir;
     if (!workdir) return;
     
@@ -176,7 +176,7 @@ describe('tool.execute.before bash interception hook logic', () => {
       expect(output.args.command).not.toContain('docker run');
     });
 
-    test('logs console.warn with [hive:sandbox] prefix when HOST: is used', () => {
+    test('logs console.warn with [pantheon:sandbox] prefix when HOST: is used', () => {
       const sandboxConfig = { mode: 'docker' as const, image: 'node:22-slim' };
       
       const input = {
@@ -202,7 +202,7 @@ describe('tool.execute.before bash interception hook logic', () => {
       console.warn = originalWarn;
 
       expect(warnings.length).toBe(1);
-      expect(warnings[0]).toContain('[hive:sandbox]');
+      expect(warnings[0]).toContain('[pantheon:sandbox]');
       expect(warnings[0]).toContain('HOST bypass:');
       expect(warnings[0]).toContain('bun test');
     });
@@ -235,7 +235,7 @@ describe('tool.execute.before bash interception hook logic', () => {
 
       expect(warnings.length).toBe(1);
       const logMessage = warnings[0];
-      expect(logMessage).toContain('[hive:sandbox]');
+      expect(logMessage).toContain('[pantheon:sandbox]');
       expect(logMessage).toContain('...');
       // Verify it's truncated (should be ~80 chars + "..." after the prefix)
       const commandPart = logMessage.split('HOST bypass: ')[1];

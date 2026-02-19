@@ -5,7 +5,7 @@
  * and pass file references. This keeps tool output sizes bounded while
  * preserving full prompt content for workers.
  * 
- * Security: All file operations are restricted to workspace/.hive paths.
+ * Security: All file operations are restricted to workspace/.pantheon paths.
  */
 
 import * as fs from 'fs';
@@ -25,8 +25,8 @@ export interface PromptFileResult {
 /**
  * Find the workspace root by walking up from a start directory.
  *
- * The workspace root is identified as the directory that contains a .hive folder.
- * Returns null if no .hive directory is found.
+ * The workspace root is identified as the directory that contains a .pantheon folder.
+ * Returns null if no .pantheon directory is found.
  */
 export function findWorkspaceRoot(startDir: string): string | null {
   try {
@@ -132,7 +132,7 @@ export async function resolvePromptFromFile(
  * @param feature - Feature name
  * @param task - Task folder name
  * @param prompt - The full worker prompt content
- * @param hiveDir - The .hive directory path
+ * @param hiveDir - The .pantheon directory path
  * @returns The path to the written prompt file
  */
 export function writeWorkerPromptFile(

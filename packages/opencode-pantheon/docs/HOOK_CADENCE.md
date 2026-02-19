@@ -6,7 +6,7 @@ The hook cadence system allows you to control how frequently OpenCode plugin hoo
 
 ## Motivation
 
-The `experimental.chat.system.transform` hook injects the large `HIVE_SYSTEM_PROMPT` (~80 lines of markdown, ~2KB) into the system prompt on **every single LLM call**. This is the primary source of token waste in agent-hive.
+The `experimental.chat.system.transform` hook injects the large `PANTHEON_SYSTEM_PROMPT` (~80 lines of markdown, ~2KB) into the system prompt on **every single LLM call**. This is the primary source of token waste in opencode-pantheon.
 
 By configuring this hook to fire every 3rd turn instead of every turn, you can reduce token consumption by approximately 66% for this hook while maintaining context freshness.
 
@@ -36,7 +36,7 @@ Add a `hook_cadence` field to your `~/.config/opencode/agent_hive.json`:
 
 | Hook Name | Purpose | Default Cadence | Recommended Cadence |
 |-----------|---------|-----------------|---------------------|
-| `experimental.chat.system.transform` | Injects HIVE_SYSTEM_PROMPT + feature status hint | 1 | 3-5 (reduces token waste) |
+| `experimental.chat.system.transform` | Injects PANTHEON_SYSTEM_PROMPT + feature status hint | 1 | 3-5 (reduces token waste) |
 | `chat.message` | Sets agent variant | 1 | 1 (lightweight, keep default) |
 | `tool.execute.before` | Docker sandbox command wrapping | 1 | **1 (SAFETY-CRITICAL)** |
 
@@ -88,12 +88,12 @@ The implementation **programmatically enforces cadence=1** for this hook when th
 If you attempt to set `cadence > 1` for this hook, you'll see a warning:
 
 ```
-[hive:cadence] Ignoring cadence > 1 for safety-critical hook: tool.execute.before
+[pantheon:cadence] Ignoring cadence > 1 for safety-critical hook: tool.execute.before
 ```
 
 ## Token Savings Estimation
 
-Assuming `HIVE_SYSTEM_PROMPT` is ~2KB per injection:
+Assuming `PANTHEON_SYSTEM_PROMPT` is ~2KB per injection:
 
 | Cadence | Tokens per 10 turns | Savings vs. Default |
 |---------|---------------------|---------------------|
@@ -135,7 +135,7 @@ Each hook uses a cadence gate at the top of its callback:
   }
 
   // Hook logic only executes if gate passes
-  output.system.push(HIVE_SYSTEM_PROMPT);
+  output.system.push(PANTHEON_SYSTEM_PROMPT);
   // ...
 }
 ```
@@ -185,14 +185,14 @@ bun test src/__tests__/hook-cadence.test.ts
 
 1. Check your config file syntax: `cat ~/.config/opencode/agent_hive.json`
 2. Verify the hook name is spelled correctly (case-sensitive)
-3. Check console logs for validation warnings: `[hive:cadence]`
+3. Check console logs for validation warnings: `[pantheon:cadence]`
 4. Ensure cadence value is an integer >= 1
 
 ### Safety-critical hook warning
 
 If you see:
 ```
-[hive:cadence] Ignoring cadence > 1 for safety-critical hook: tool.execute.before
+[pantheon:cadence] Ignoring cadence > 1 for safety-critical hook: tool.execute.before
 ```
 
 This is expected behavior. The `tool.execute.before` hook must always fire (cadence=1) for security reasons.
@@ -201,7 +201,7 @@ This is expected behavior. The `tool.execute.before` hook must always fire (cade
 
 If you see:
 ```
-[hive:cadence] Invalid cadence <value> for <hook>, using 1
+[pantheon:cadence] Invalid cadence <value> for <hook>, using 1
 ```
 
 Your configured cadence value is invalid (not an integer >= 1). The system falls back to cadence=1.

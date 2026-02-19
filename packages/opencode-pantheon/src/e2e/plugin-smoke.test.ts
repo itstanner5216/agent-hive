@@ -34,7 +34,7 @@ const EXPECTED_TOOLS = [
   "pantheon_skill",
 ] as const;
 
-const TEST_ROOT_BASE = "/tmp/hive-e2e-plugin";
+const TEST_ROOT_BASE = "/tmp/pantheon-e2e-plugin";
 
 function createStubShell(): PluginInput["$"] {
   let shell: PluginInput["$"];

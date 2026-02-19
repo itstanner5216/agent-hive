@@ -3,7 +3,7 @@
  * 
  * This module provides the `chat.message` hook implementation that:
  * - Reads the target agent name from the message being created
- * - Looks up the configured variant for that Hive agent from ConfigService
+ * - Looks up the configured variant for that Pantheon agent from ConfigService
  * - If the message has no variant set, applies the configured variant
  * - Never overrides an already-set variant (respects explicit selection)
  */
@@ -11,7 +11,7 @@
 import type { ConfigService } from 'pantheon-core';
 
 /**
- * List of Hive agent names that can have variants configured.
+ * List of Pantheon agent names that can have variants configured.
  */
 export const HIVE_AGENT_NAMES = [
   'enlil-validator',
@@ -29,7 +29,7 @@ export const HIVE_AGENT_NAMES = [
 export type HiveAgentName = typeof HIVE_AGENT_NAMES[number];
 
 /**
- * Check if an agent name is a Hive agent.
+ * Check if an agent name is a Pantheon agent.
  */
 export function isHiveAgent(agent: string | undefined): agent is HiveAgentName {
   return agent !== undefined && HIVE_AGENT_NAMES.includes(agent as HiveAgentName);
@@ -75,7 +75,7 @@ export function createVariantHook(configService: ConfigService) {
     // Skip if no agent specified
     if (!agent) return;
 
-    // Skip if not a Hive agent
+    // Skip if not a Pantheon agent
     if (!isHiveAgent(agent)) return;
 
     // Skip if variant is already set (respect explicit selection)

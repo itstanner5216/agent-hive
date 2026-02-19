@@ -31,7 +31,7 @@ When you need to answer "where/how does X work?" across multiple domains (codeba
 - Investigation requires shared state or context between questions
 - It's a single focused question that is genuinely answerable with **one quick grep + one file read**
 - Questions are dependent (answer A materially changes what to ask for B)
-- Work involves file edits (use Hive tasks / Forager instead)
+- Work involves file edits (use Pantheon tasks / Kulla instead)
 
 **Important:** Do not treat "this is exploratory" as a reason to avoid delegation. This skill is specifically for exploratory research when fan-out makes it faster and cleaner.
 

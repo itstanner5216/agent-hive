@@ -16,7 +16,7 @@ describe('Hook Cadence Logic', () => {
     originalHome = process.env.HOME;
 
     // Create a temporary config directory for testing
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'hive-test-'));
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'pantheon-test-'));
     const configDir = path.join(tempDir, '.config', 'opencode');
     fs.mkdirSync(configDir, { recursive: true });
     configPath = path.join(configDir, 'agent_hive.json');

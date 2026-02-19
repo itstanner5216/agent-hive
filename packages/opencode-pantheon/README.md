@@ -3,15 +3,15 @@
 [![npm version](https://img.shields.io/npm/v/opencode-pantheon)](https://www.npmjs.com/package/opencode-pantheon)
 [![License: MIT with Commons Clause](https://img.shields.io/badge/License-MIT%20with%20Commons%20Clause-blue.svg)](../../LICENSE)
 
-**From Vibe Coding to Hive Coding** — The OpenCode plugin that brings structure to AI-assisted development.
+**From Vibe Coding to Pantheon Coding** — The OpenCode plugin that brings structure to AI-assisted development.
 
-## Why Hive?
+## Why Pantheon?
 
 Stop losing context. Stop repeating decisions. Start shipping with confidence.
 
 ```
 Vibe: "Just make it work"
-Hive: Plan → Review → Approve → Execute → Ship
+Pantheon: Plan → Review → Approve → Execute → Ship
 ```
 
 ## Installation
@@ -79,7 +79,7 @@ During planning, "don't execute" means "don't implement" (no code edits, no work
 
 ## Prompt Budgeting & Observability
 
-Hive automatically bounds worker prompt sizes to prevent context overflow and tool output truncation.
+Pantheon automatically bounds worker prompt sizes to prevent context overflow and tool output truncation.
 
 ### Budgeting Defaults
 
@@ -124,13 +124,13 @@ Description.
 
 ## Configuration
 
-Hive uses a config file at `~/.config/opencode/agent_hive.json`. You can customize agent models, variants, disable skills, and disable MCP servers.
+Pantheon uses a config file at `~/.config/opencode/agent_hive.json`. You can customize agent models, variants, disable skills, and disable MCP servers.
 
 ### Disable Skills or MCPs
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/tctinh/agent-hive/main/packages/opencode-pantheon/schema/agent_hive.schema.json",
+  "$schema": "https://raw.githubusercontent.com/itstanner5216/agent-hive/main/packages/opencode-pantheon/schema/agent_hive.schema.json",
   "disableSkills": ["brainstorming", "writing-plans"],
   "disableMcps": ["websearch", "ast_grep"]
 }
@@ -191,7 +191,7 @@ Use `autoLoadSkills` to automatically inject skills into an agent's system promp
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/tctinh/agent-hive/main/packages/opencode-pantheon/schema/agent_hive.schema.json",
+  "$schema": "https://raw.githubusercontent.com/itstanner5216/agent-hive/main/packages/opencode-pantheon/schema/agent_hive.schema.json",
   "agents": {
     "enki-planner": {
       "autoLoadSkills": ["parallel-exploration"]
@@ -205,9 +205,9 @@ Use `autoLoadSkills` to automatically inject skills into an agent's system promp
 
 **Supported skill sources:**
 
-`autoLoadSkills` accepts both Hive builtin skill IDs and file-based skill IDs. Resolution order:
+`autoLoadSkills` accepts both Pantheon builtin skill IDs and file-based skill IDs. Resolution order:
 
-1. **Hive builtin** — Skills bundled with opencode-pantheon (always win if ID matches)
+1. **Pantheon builtin** — Skills bundled with opencode-pantheon (always win if ID matches)
 2. **Project OpenCode** — `<project>/.opencode/skills/<id>/SKILL.md`
 3. **Global OpenCode** — `~/.config/opencode/skills/<id>/SKILL.md`
 4. **Project Claude** — `<project>/.claude/skills/<id>/SKILL.md`
@@ -234,11 +234,11 @@ Skill IDs must be safe directory names (no `/`, `\`, `..`, or `.`). Missing or i
 
 ### Per-Agent Model Variants
 
-You can set a `variant` for each Hive agent to control model reasoning/effort level. Variants are keys that map to model-specific option overrides defined in your `opencode.json`.
+You can set a `variant` for each Pantheon agent to control model reasoning/effort level. Variants are keys that map to model-specific option overrides defined in your `opencode.json`.
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/tctinh/agent-hive/main/packages/opencode-pantheon/schema/agent_hive.schema.json",
+  "$schema": "https://raw.githubusercontent.com/itstanner5216/agent-hive/main/packages/opencode-pantheon/schema/agent_hive.schema.json",
   "agents": {
     "enki-planner": {
       "model": "anthropic/claude-sonnet-4-20250514",

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/tctinh/agent-hive/main/packages/opencode-pantheon/schema/agent_pantheon.schema.json",
-  "title": "Agent Hive Configuration",
+  "$id": "https://raw.githubusercontent.com/itstanner5216/agent-hive/main/packages/opencode-pantheon/schema/agent_pantheon.schema.json",
+  "title": "Pantheon Configuration",
   "description": "Configuration schema for ~/.config/opencode/agent_pantheon.json",
   "type": "object",
   "additionalProperties": false,
@@ -30,7 +30,7 @@
       "items": {
         "type": "string"
       },
-      "description": "Enable hive tools for specific features"
+      "description": "Enable pantheon tools for specific features"
     },
     "disableSkills": {
       "type": "array",

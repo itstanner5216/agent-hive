@@ -77,7 +77,7 @@ Each agent gets:
 ### 3. Dispatch in Parallel
 
 ```typescript
-// Using Hive tools for parallel execution
+// Using Pantheon tools for parallel execution
 pantheon_worktree_create({ task: "01-fix-abort-tests" })
 pantheon_worktree_create({ task: "02-fix-batch-tests" })
 pantheon_worktree_create({ task: "03-fix-race-condition-tests" })

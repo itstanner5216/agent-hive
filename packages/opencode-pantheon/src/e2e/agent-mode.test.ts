@@ -6,7 +6,7 @@ import plugin from "../index";
 
 const OPENCODE_CLIENT = createOpencodeClient({ baseUrl: "http://localhost:1" });
 
-const TEST_ROOT_BASE = "/tmp/hive-agent-mode-test";
+const TEST_ROOT_BASE = "/tmp/pantheon-agent-mode-test";
 
 function createProject(worktree: string) {
   return {

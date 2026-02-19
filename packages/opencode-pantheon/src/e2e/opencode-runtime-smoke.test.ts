@@ -97,7 +97,7 @@ function safeRm(dir: string) {
   fs.rmSync(dir, { recursive: true, force: true });
 }
 
-function pickHivePluginEntry(): string {
+function pickPantheonPluginEntry(): string {
   const tsEntry = path.resolve(import.meta.dir, "..", "index.ts");
   if (fs.existsSync(tsEntry)) return tsEntry;
 
@@ -158,18 +158,18 @@ async function waitForTools(
 }
 
 describe("e2e: OpenCode runtime loads opencode-pantheon", () => {
-  it("exposes hive tools via /experimental/tool/ids", async () => {
-    const tmpBase = "/tmp/hive-e2e-runtime";
+  it("exposes pantheon tools via /experimental/tool/ids", async () => {
+    const tmpBase = "/tmp/pantheon-e2e-runtime";
     safeRm(tmpBase);
     fs.mkdirSync(tmpBase, { recursive: true });
 
     const projectDir = fs.mkdtempSync(path.join(tmpBase, "project-"));
     fs.mkdirSync(path.join(projectDir, ".opencode", "plugin"), { recursive: true });
 
-    const hivePluginEntry = pickHivePluginEntry();
+    const hivePluginEntry = pickPantheonPluginEntry();
 
-    const pluginFile = path.join(projectDir, ".opencode", "plugin", "hive.ts");
-    const pluginSource = `import hive from ${JSON.stringify(hivePluginEntry)}\nexport const HivePlugin = hive\n`;
+    const pluginFile = path.join(projectDir, ".opencode", "plugin", "pantheon.ts");
+    const pluginSource = `import pantheon from ${JSON.stringify(hivePluginEntry)}\nexport const PantheonPlugin = pantheon\n`;
     fs.writeFileSync(pluginFile, pluginSource);
 
     const previousCwd = process.cwd();
@@ -184,7 +184,7 @@ describe("e2e: OpenCode runtime loads opencode-pantheon", () => {
     try {
       port = await getFreePort();
     } catch (err) {
-      console.warn("[hive] Skipping runtime e2e test: unable to bind localhost port", err);
+      console.warn("[pantheon] Skipping runtime e2e test: unable to bind localhost port", err);
       return;
     }
 
@@ -201,7 +201,7 @@ describe("e2e: OpenCode runtime loads opencode-pantheon", () => {
         config,
       });
     } catch (err) {
-      console.warn("[hive] Skipping runtime e2e test: unable to start opencode server", err);
+      console.warn("[pantheon] Skipping runtime e2e test: unable to start opencode server", err);
       return;
     }
     if (!server) return;
@@ -260,7 +260,7 @@ describe("e2e: OpenCode runtime loads opencode-pantheon", () => {
       }
 
       const session = (await client.session.create({
-        body: { title: "hive runtime e2e" },
+        body: { title: "pantheon runtime e2e" },
         query: { directory: projectDir },
       })) as unknown;
 
@@ -289,13 +289,13 @@ describe("e2e: OpenCode runtime loads opencode-pantheon", () => {
             parts: [
               {
                 type: "text",
-                text: "Create a Hive feature named rt-feature.",
+                text: "Create a Pantheon feature named rt-feature.",
               },
             ],
           },
         });
       } catch (err) {
-        console.warn("[hive] Skipping runtime e2e test: prompt did not complete", err);
+        console.warn("[pantheon] Skipping runtime e2e test: prompt did not complete", err);
         abortController.abort();
         await permissionTask.catch(() => undefined);
         return;

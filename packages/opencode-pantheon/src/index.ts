@@ -155,7 +155,7 @@ import { writeWorkerPromptFile } from "./utils/prompt-file";
 import { formatRelativeTime } from "./utils/format";
 import { HIVE_AGENT_NAMES, isHiveAgent, normalizeVariant } from "./hooks/variant-hook.js";
 
-const HIVE_SYSTEM_PROMPT = `
+const PANTHEON_SYSTEM_PROMPT = `
 ## Pantheon - Feature Development System
 
 Plan-first development: Write plan → User reviews → Approve → Execute tasks
@@ -412,7 +412,7 @@ To unblock: Remove .pantheon/features/${feature}/BLOCKED`;
         return;
       }
 
-      output.system.push(HIVE_SYSTEM_PROMPT);
+      output.system.push(PANTHEON_SYSTEM_PROMPT);
 
       // NOTE: autoLoadSkills injection is now done in the config hook (prompt field)
       // to ensure skills are present from the first message. The system.transform hook

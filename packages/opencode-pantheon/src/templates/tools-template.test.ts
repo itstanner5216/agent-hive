@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import * as path from 'path';
 
 describe('tools template', () => {
-  it('documents task vs hive mode delegation', () => {
+  it('documents task vs pantheon mode delegation', () => {
     const toolsTemplatePath = path.resolve(
       import.meta.dir,
       '..',

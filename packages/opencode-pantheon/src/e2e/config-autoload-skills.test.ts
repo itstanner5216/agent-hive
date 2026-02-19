@@ -26,7 +26,7 @@ ${body}`;
 
 const OPENCODE_CLIENT = createOpencodeClient({ baseUrl: "http://localhost:1" });
 
-const TEST_ROOT_BASE = "/tmp/hive-config-autoload-skills-test";
+const TEST_ROOT_BASE = "/tmp/pantheon-config-autoload-skills-test";
 
 function createProject(worktree: string) {
   return {

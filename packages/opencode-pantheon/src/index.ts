@@ -18,6 +18,7 @@ import { MUSHDAMMA_PROMPT } from './agents/mushdamma.js';
 import { ISIMUD_PROMPT } from './agents/isimud.js';
 import { ASALLUHI_PROMPT } from './agents/asalluhi.js';
 import { createBuiltinMcps } from './mcp/index.js';
+import { shouldExecuteHook } from './utils/hook-cadence.js';
 
 // ============================================================================
 // Skill Tool - Uses generated registry (no file-based discovery)
@@ -154,6 +155,12 @@ import { applyTaskBudget, applyContextBudget, DEFAULT_BUDGET, type TruncationEve
 import { writeWorkerPromptFile } from "./utils/prompt-file";
 import { formatRelativeTime } from "./utils/format";
 import { HIVE_AGENT_NAMES, isHiveAgent, normalizeVariant } from "./hooks/variant-hook.js";
+
+/**
+ * Core hook cadence logic, extracted for testability.
+ * Determines whether a hook should execute based on its configured cadence.
+ */
+export { shouldExecuteHook } from './utils/hook-cadence.js';
 
 const PANTHEON_SYSTEM_PROMPT = `
 ## Pantheon - Feature Development System
@@ -329,27 +336,9 @@ To unblock: Remove .pantheon/features/${feature}/BLOCKED`;
 
   /**
    * Check if a hook should execute based on its configured cadence.
-   * 
-   * @param hookName - The OpenCode hook name
-   * @param options - Optional configuration
-   * @param options.safetyCritical - If true, enforces cadence=1 regardless of config
-   * @returns true if the hook should execute this turn, false otherwise
    */
-  const shouldExecuteHook = (hookName: string, options?: { safetyCritical?: boolean }): boolean => {
-    const cadence = configService.getHookCadence(hookName, options);
-    
-    // Increment turn counter
-    turnCounters[hookName] = (turnCounters[hookName] || 0) + 1;
-    const currentTurn = turnCounters[hookName];
-    
-    // Cadence of 1 means fire every turn (no gating needed)
-    if (cadence === 1) {
-      return true;
-    }
-    
-    // Fire on turns 1, (1+cadence), (1+2*cadence), ...
-    // Using (currentTurn - 1) % cadence === 0 ensures turn 1 always fires
-    return (currentTurn - 1) % cadence === 0;
+  const _shouldExecuteHook = (hookName: string, options?: { safetyCritical?: boolean }): boolean => {
+    return shouldExecuteHook(hookName, configService, turnCounters, options);
   };
 
   const checkDependencies = (feature: string, taskFolder: string): { allowed: boolean; error?: string } => {
@@ -408,7 +397,7 @@ To unblock: Remove .pantheon/features/${feature}/BLOCKED`;
       output: { system: string[] },
     ) => {
       // Cadence gate: check if this hook should execute this turn
-      if (!shouldExecuteHook("experimental.chat.system.transform")) {
+      if (!_shouldExecuteHook("experimental.chat.system.transform")) {
         return;
       }
 
@@ -452,11 +441,6 @@ To unblock: Remove .pantheon/features/${feature}/BLOCKED`;
         parts: unknown[];
       },
     ): Promise<void> => {
-      // Cadence gate: check if this hook should execute this turn
-      if (!shouldExecuteHook("chat.message")) {
-        return;
-      }
-
       const { agent } = input;
 
       // Skip if no agent specified
@@ -483,7 +467,7 @@ To unblock: Remove .pantheon/features/${feature}/BLOCKED`;
       // SAFETY-CRITICAL: This hook wraps commands for Docker sandbox isolation.
       // Setting cadence > 1 could allow unsafe commands through.
       // The safetyCritical flag enforces cadence=1 regardless of config.
-      if (!shouldExecuteHook("tool.execute.before", { safetyCritical: true })) {
+      if (!_shouldExecuteHook("tool.execute.before", { safetyCritical: true })) {
         return;
       }
 

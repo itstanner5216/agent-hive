@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
 import { ConfigService } from 'pantheon-core';
+import { shouldExecuteHook } from '../utils/hook-cadence.js';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
@@ -45,31 +46,16 @@ describe('Hook Cadence Logic', () => {
     }
   });
 
-  /**
-   * Simulates the shouldExecuteHook function from the plugin
-   */
-  const shouldExecuteHook = (hookName: string, options?: { safetyCritical?: boolean }): boolean => {
-    const cadence = configService.getHookCadence(hookName, options);
-
-    // Increment turn counter
-    turnCounters[hookName] = (turnCounters[hookName] || 0) + 1;
-    const currentTurn = turnCounters[hookName];
-
-    // Cadence of 1 means fire every turn (no gating needed)
-    if (cadence === 1) {
-      return true;
-    }
-
-    // Fire on turns 1, (1+cadence), (1+2*cadence), ...
-    // Using (currentTurn - 1) % cadence === 0 ensures turn 1 always fires
-    return (currentTurn - 1) % cadence === 0;
+  // Thin wrapper so existing tests don't need to change their call signature
+  const callShouldExecute = (hookName: string, options?: { safetyCritical?: boolean }): boolean => {
+    return shouldExecuteHook(hookName, configService, turnCounters, options);
   };
 
   describe('Default behavior (no config)', () => {
     it('fires every turn when hook_cadence is not configured', () => {
       const results = [];
       for (let i = 0; i < 10; i++) {
-        results.push(shouldExecuteHook('experimental.chat.system.transform'));
+        results.push(callShouldExecute('experimental.chat.system.transform'));
       }
       expect(results).toEqual([true, true, true, true, true, true, true, true, true, true]);
     });
@@ -90,7 +76,7 @@ describe('Hook Cadence Logic', () => {
     it('fires every turn', () => {
       const results = [];
       for (let i = 0; i < 10; i++) {
-        results.push(shouldExecuteHook('experimental.chat.system.transform'));
+        results.push(callShouldExecute('experimental.chat.system.transform'));
       }
       expect(results).toEqual([true, true, true, true, true, true, true, true, true, true]);
     });
@@ -111,7 +97,7 @@ describe('Hook Cadence Logic', () => {
     it('fires on turns 1, 4, 7, 10', () => {
       const results = [];
       for (let i = 0; i < 10; i++) {
-        results.push(shouldExecuteHook('experimental.chat.system.transform'));
+        results.push(callShouldExecute('experimental.chat.system.transform'));
       }
       expect(results).toEqual([
         true,  // turn 1
@@ -143,7 +129,7 @@ describe('Hook Cadence Logic', () => {
     it('fires on turns 1, 6, 11', () => {
       const results = [];
       for (let i = 0; i < 12; i++) {
-        results.push(shouldExecuteHook('experimental.chat.system.transform'));
+        results.push(callShouldExecute('experimental.chat.system.transform'));
       }
       expect(results).toEqual([
         true,  // turn 1
@@ -175,7 +161,7 @@ describe('Hook Cadence Logic', () => {
 
       const results = [];
       for (let i = 0; i < 5; i++) {
-        results.push(shouldExecuteHook('experimental.chat.system.transform'));
+        results.push(callShouldExecute('experimental.chat.system.transform'));
       }
       expect(results).toEqual([true, true, true, true, true]);
     });
@@ -192,7 +178,7 @@ describe('Hook Cadence Logic', () => {
 
       const results = [];
       for (let i = 0; i < 5; i++) {
-        results.push(shouldExecuteHook('experimental.chat.system.transform'));
+        results.push(callShouldExecute('experimental.chat.system.transform'));
       }
       expect(results).toEqual([true, true, true, true, true]);
     });
@@ -209,7 +195,7 @@ describe('Hook Cadence Logic', () => {
 
       const results = [];
       for (let i = 0; i < 5; i++) {
-        results.push(shouldExecuteHook('experimental.chat.system.transform'));
+        results.push(callShouldExecute('experimental.chat.system.transform'));
       }
       expect(results).toEqual([true, true, true, true, true]);
     });
@@ -230,7 +216,7 @@ describe('Hook Cadence Logic', () => {
     it('enforces cadence=1 when safetyCritical flag is set', () => {
       const results = [];
       for (let i = 0; i < 10; i++) {
-        results.push(shouldExecuteHook('tool.execute.before', { safetyCritical: true }));
+        results.push(callShouldExecute('tool.execute.before', { safetyCritical: true }));
       }
       expect(results).toEqual([true, true, true, true, true, true, true, true, true, true]);
     });
@@ -254,8 +240,8 @@ describe('Hook Cadence Logic', () => {
       const messageResults = [];
 
       for (let i = 0; i < 6; i++) {
-        systemResults.push(shouldExecuteHook('experimental.chat.system.transform'));
-        messageResults.push(shouldExecuteHook('chat.message'));
+        systemResults.push(callShouldExecute('experimental.chat.system.transform'));
+        messageResults.push(callShouldExecute('chat.message'));
       }
 
       // experimental.chat.system.transform with cadence=3: fires on turns 1, 4
@@ -349,9 +335,9 @@ describe('Hook Cadence Logic', () => {
       for (let turn = 0; turn < 10; turn++) {
         results.push({
           turn: turn + 1,
-          hookA: shouldExecuteHook('hook.a'),
-          hookB: shouldExecuteHook('hook.b'),
-          hookC: shouldExecuteHook('hook.c'),
+          hookA: callShouldExecute('hook.a'),
+          hookB: callShouldExecute('hook.b'),
+          hookC: callShouldExecute('hook.c'),
         });
       }
 

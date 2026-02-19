@@ -13,6 +13,7 @@ import type { SandboxConfig } from './dockerSandboxService.js';
  */
 export class ConfigService {
   private configPath: string;
+  private cachedConfig: HiveConfig | null = null;
 
   constructor() {
     const homeDir = process.env.HOME || process.env.USERPROFILE || '';
@@ -31,9 +32,13 @@ export class ConfigService {
    * Get the full config, merged with defaults.
    */
   get(): HiveConfig {
+    if (this.cachedConfig !== null) {
+      return this.cachedConfig;
+    }
     try {
       if (!fs.existsSync(this.configPath)) {
-        return { ...DEFAULT_HIVE_CONFIG };
+        this.cachedConfig = { ...DEFAULT_HIVE_CONFIG };
+        return this.cachedConfig;
       }
       const raw = fs.readFileSync(this.configPath, 'utf-8');
       const stored = JSON.parse(raw) as Partial<HiveConfig>;
@@ -88,8 +93,11 @@ export class ConfigService {
           },
         },
       };
+      this.cachedConfig = merged;
+      return this.cachedConfig;
     } catch {
-      return { ...DEFAULT_HIVE_CONFIG };
+      this.cachedConfig = { ...DEFAULT_HIVE_CONFIG };
+      return this.cachedConfig;
     }
   }
 
@@ -97,6 +105,7 @@ export class ConfigService {
    * Update config (partial merge).
    */
   set(updates: Partial<HiveConfig>): HiveConfig {
+    this.cachedConfig = null; // invalidate cache on write
     const current = this.get();
     
     const merged: HiveConfig = {

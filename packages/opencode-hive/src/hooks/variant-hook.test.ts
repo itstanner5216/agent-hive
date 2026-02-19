@@ -39,16 +39,16 @@ describe('normalizeVariant', () => {
 
 describe('HIVE_AGENT_NAMES', () => {
   it('contains all expected Hive agent names', () => {
-    expect(HIVE_AGENT_NAMES).toContain('hive-master');
-    expect(HIVE_AGENT_NAMES).toContain('architect-planner');
-    expect(HIVE_AGENT_NAMES).toContain('swarm-orchestrator');
-    expect(HIVE_AGENT_NAMES).toContain('scout-researcher');
-    expect(HIVE_AGENT_NAMES).toContain('forager-worker');
-    expect(HIVE_AGENT_NAMES).toContain('hygienic-reviewer');
+    expect(HIVE_AGENT_NAMES).toContain('enki-planner');
+    expect(HIVE_AGENT_NAMES).toContain('enki-planner');
+    expect(HIVE_AGENT_NAMES).toContain('nudimmud-orchestrator');
+    expect(HIVE_AGENT_NAMES).toContain('adapa-explorer');
+    expect(HIVE_AGENT_NAMES).toContain('kulla-coder');
+    expect(HIVE_AGENT_NAMES).toContain('nanshe-reviewer');
   });
 
-  it('has exactly 6 agents', () => {
-    expect(HIVE_AGENT_NAMES.length).toBe(6);
+  it('has exactly 10 agents', () => {
+    expect(HIVE_AGENT_NAMES.length).toBe(10);
   });
 });
 
@@ -73,14 +73,14 @@ describe('createVariantHook', () => {
   describe('applies variant to Hive agents', () => {
     it('sets variant when message has no variant and agent has configured variant', async () => {
       const configService = createMockConfigService({
-        'forager-worker': 'high',
+        'kulla-coder': 'high',
       });
 
       const hook = createVariantHook(configService as any);
 
       const input = {
         sessionID: 'session-123',
-        agent: 'forager-worker',
+        agent: 'kulla-coder',
         model: { providerID: 'anthropic', modelID: 'claude-sonnet' },
         messageID: 'msg-1',
         variant: undefined,
@@ -95,12 +95,12 @@ describe('createVariantHook', () => {
 
     it('applies variant to all Hive agents', async () => {
       const configService = createMockConfigService({
-        'hive-master': 'max',
-        'architect-planner': 'high',
-        'swarm-orchestrator': 'medium',
-        'scout-researcher': 'low',
-        'forager-worker': 'high',
-        'hygienic-reviewer': 'medium',
+        'enki-planner': 'max',
+        'enki-planner': 'high',
+        'nudimmud-orchestrator': 'medium',
+        'adapa-explorer': 'low',
+        'kulla-coder': 'high',
+        'nanshe-reviewer': 'medium',
       });
 
       const hook = createVariantHook(configService as any);
@@ -121,7 +121,7 @@ describe('createVariantHook', () => {
   describe('respects explicit variant', () => {
     it('does not override already-set variant', async () => {
       const configService = createMockConfigService({
-        'forager-worker': 'high',
+        'kulla-coder': 'high',
       });
 
       const hook = createVariantHook(configService as any);
@@ -129,7 +129,7 @@ describe('createVariantHook', () => {
       const output = createOutput('low'); // Already set
 
       await hook(
-        { sessionID: 'session-123', agent: 'forager-worker', variant: 'low' },
+        { sessionID: 'session-123', agent: 'kulla-coder', variant: 'low' },
         output,
       );
 
@@ -141,7 +141,7 @@ describe('createVariantHook', () => {
   describe('does not apply to non-Hive agents', () => {
     it('does not set variant for unknown agent', async () => {
       const configService = createMockConfigService({
-        'forager-worker': 'high',
+        'kulla-coder': 'high',
       });
 
       const hook = createVariantHook(configService as any);
@@ -158,7 +158,7 @@ describe('createVariantHook', () => {
 
     it('does not set variant for built-in OpenCode agents', async () => {
       const configService = createMockConfigService({
-        'forager-worker': 'high',
+        'kulla-coder': 'high',
       });
 
       const hook = createVariantHook(configService as any);
@@ -181,7 +181,7 @@ describe('createVariantHook', () => {
   describe('handles edge cases', () => {
     it('handles missing agent in input', async () => {
       const configService = createMockConfigService({
-        'forager-worker': 'high',
+        'kulla-coder': 'high',
       });
 
       const hook = createVariantHook(configService as any);
@@ -199,7 +199,7 @@ describe('createVariantHook', () => {
 
     it('handles empty variant config', async () => {
       const configService = createMockConfigService({
-        'forager-worker': '', // Empty string
+        'kulla-coder': '', // Empty string
       });
 
       const hook = createVariantHook(configService as any);
@@ -207,7 +207,7 @@ describe('createVariantHook', () => {
       const output = createOutput(undefined);
 
       await hook(
-        { sessionID: 'session-123', agent: 'forager-worker' },
+        { sessionID: 'session-123', agent: 'kulla-coder' },
         output,
       );
 
@@ -217,7 +217,7 @@ describe('createVariantHook', () => {
 
     it('handles whitespace-only variant config', async () => {
       const configService = createMockConfigService({
-        'forager-worker': '   ', // Whitespace only
+        'kulla-coder': '   ', // Whitespace only
       });
 
       const hook = createVariantHook(configService as any);
@@ -225,7 +225,7 @@ describe('createVariantHook', () => {
       const output = createOutput(undefined);
 
       await hook(
-        { sessionID: 'session-123', agent: 'forager-worker' },
+        { sessionID: 'session-123', agent: 'kulla-coder' },
         output,
       );
 
@@ -235,7 +235,7 @@ describe('createVariantHook', () => {
 
     it('handles undefined variant config', async () => {
       const configService = createMockConfigService({
-        'forager-worker': undefined,
+        'kulla-coder': undefined,
       });
 
       const hook = createVariantHook(configService as any);
@@ -243,7 +243,7 @@ describe('createVariantHook', () => {
       const output = createOutput(undefined);
 
       await hook(
-        { sessionID: 'session-123', agent: 'forager-worker' },
+        { sessionID: 'session-123', agent: 'kulla-coder' },
         output,
       );
 
@@ -253,7 +253,7 @@ describe('createVariantHook', () => {
 
     it('trims variant before applying', async () => {
       const configService = createMockConfigService({
-        'forager-worker': '  high  ', // Has whitespace
+        'kulla-coder': '  high  ', // Has whitespace
       });
 
       const hook = createVariantHook(configService as any);
@@ -261,7 +261,7 @@ describe('createVariantHook', () => {
       const output = createOutput(undefined);
 
       await hook(
-        { sessionID: 'session-123', agent: 'forager-worker' },
+        { sessionID: 'session-123', agent: 'kulla-coder' },
         output,
       );
 

@@ -14,12 +14,16 @@ import type { ConfigService } from 'hive-core';
  * List of Hive agent names that can have variants configured.
  */
 export const HIVE_AGENT_NAMES = [
-  'hive-master',
-  'architect-planner',
-  'swarm-orchestrator',
-  'scout-researcher',
-  'forager-worker',
-  'hygienic-reviewer',
+  'enlil-validator',
+  'enki-planner',
+  'nudimmud-orchestrator',
+  'adapa-explorer',
+  'kulla-coder',
+  'nanshe-reviewer',
+  'enbilulu-tester',
+  'mushdamma-phase-reviewer',
+  'isimud-ideator',
+  'asalluhi-prompter',
 ] as const;
 
 export type HiveAgentName = typeof HIVE_AGENT_NAMES[number];

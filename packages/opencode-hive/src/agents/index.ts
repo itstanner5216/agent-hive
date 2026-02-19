@@ -1,65 +1,96 @@
 /**
- * Hive Agents
+ * Pantheon Agents (Eridu Deity Suite)
  * 
- * The Hive Colony Model:
- * - Hive (Hybrid): Plans AND orchestrates based on phase
- * - Architect (Planner): Plans features, interviews, writes plans
- * - Swarm (Orchestrator): Delegates, spawns workers, verifies, merges
- * - Scout (Research/Collector): Explores codebase and external docs
- * - Forager (Worker/Coder): Executes tasks in isolation
- * - Hygienic (Consultant/Reviewer): Reviews plan quality
+ * The Eridu Pantheon Model:
+ * - Enlil (Validator): Validates plans against iron laws
+ * - Enki (Planner): Plans features through discovery and interviews
+ * - Nudimmud (Orchestrator): Orchestrates execution, delegates, spawns workers
+ * - Adapa (Explorer): Researches codebase and external docs/data
+ * - Kulla (Coder): Executes tasks in isolated worktrees
+ * - Nanshe (Reviewer): Reviews code quality and correctness
+ * - Enbilulu (Tester): Writes and runs tests
+ * - Mushdamma (Phase Reviewer): Reviews completed phases
+ * - Isimud (Ideator): Shapes raw ideas into implementable concepts
+ * - Asalluhi (Prompter): Crafts and refines prompts
  */
 
-// Bee agents (lean, focused)
-export { hiveBeeAgent, QUEEN_BEE_PROMPT } from './hive';
-export { architectBeeAgent, ARCHITECT_BEE_PROMPT } from './architect';
-export { swarmBeeAgent, SWARM_BEE_PROMPT } from './swarm';
-export { scoutBeeAgent, SCOUT_BEE_PROMPT } from './scout';
-export { foragerBeeAgent, FORAGER_BEE_PROMPT } from './forager';
-export { hygienicBeeAgent, HYGIENIC_BEE_PROMPT } from './hygienic';
+// Pantheon agents (Eridu deity suite)
+export { ENLIL_PROMPT } from './enlil';
+export { ENKI_PROMPT } from './enki';
+export { NUDIMMUD_PROMPT } from './nudimmud';
+export { ADAPA_PROMPT } from './adapa';
+export { KULLA_PROMPT } from './kulla';
+export { NANSHE_PROMPT } from './nanshe';
+export { ENBILULU_PROMPT } from './enbilulu';
+export { MUSHDAMMA_PROMPT } from './mushdamma';
+export { ISIMUD_PROMPT } from './isimud';
+export { ASALLUHI_PROMPT } from './asalluhi';
 
 
 /**
  * Agent registry for OpenCode plugin
  * 
- * Bee Agents (recommended):
- * - hive: Hybrid planner + orchestrator (detects phase, loads skills)
- * - architect: Discovery/planning (requirements, plan writing)
- * - swarm: Orchestration (delegates, verifies, merges)
- * - scout: Research/collection (codebase + external docs/data)
- * - forager: Worker/coder (executes tasks in worktrees)
- * - hygienic: Consultant/reviewer (plan quality)
+ * Pantheon Agents:
+ * - enlil-validator: Plan validator (APPROVE/REJECT)
+ * - enki-planner: Planner/architect (discovery, interviews, plans)
+ * - nudimmud-orchestrator: Orchestrator (delegates, verifies, merges)
+ * - adapa-explorer: Explorer/researcher (codebase + external docs)
+ * - kulla-coder: Coder/worker (executes tasks in worktrees)
+ * - nanshe-reviewer: Code reviewer (quality, correctness, standards)
+ * - enbilulu-tester: Tester (writes and runs tests)
+ * - mushdamma-phase-reviewer: Phase reviewer (validates phase completion)
+ * - isimud-ideator: Idea architect (shapes raw ideas)
+ * - asalluhi-prompter: Prompt engineer (crafts prompts)
  */
-export const hiveAgents = {
-  // Bee Agents (lean, focused - recommended)
-  hive: {
-    name: 'Hive (Hybrid)',
-    description: 'Hybrid planner + orchestrator. Detects phase, loads skills on-demand.',
+export const pantheonAgents = {
+  'enlil-validator': {
+    name: 'Enlil (Plan Validator)',
+    description: 'Validates plans against iron laws. APPROVE/REJECT verdict.',
+    mode: 'subagent' as const,
+  },
+  'enki-planner': {
+    name: 'Enki (Planner)',
+    description: 'Plans features through discovery and interviews. NEVER executes.',
     mode: 'primary' as const,
   },
-  architect: {
-    name: 'Architect (Planner)',
-    description: 'Plans features, interviews, writes plans. NEVER executes.',
-    mode: 'primary' as const,
-  },
-  swarm: {
-    name: 'Swarm (Orchestrator)',
+  'nudimmud-orchestrator': {
+    name: 'Nudimmud (Orchestrator)',
     description: 'Orchestrates execution. Delegates, spawns workers, verifies, merges.',
     mode: 'primary' as const,
   },
-  scout: {
-    name: 'Scout (Explorer/Researcher/Retrieval)',
-    description: 'Explores codebase, external docs, and retrieves external data.',
+  'adapa-explorer': {
+    name: 'Adapa (Explorer)',
+    description: 'Researches codebase and external docs/data.',
     mode: 'subagent' as const,
   },
-  forager: {
-    name: 'Forager (Worker/Coder)',
+  'kulla-coder': {
+    name: 'Kulla (Coder)',
     description: 'Executes tasks directly in isolated worktrees. Never delegates.',
     mode: 'subagent' as const,
   },
-  hygienic: {
-    name: 'Hygienic (Consultant/Reviewer/Debugger)',
-    description: 'Reviews plan documentation quality. OKAY/REJECT verdict.',
+  'nanshe-reviewer': {
+    name: 'Nanshe (Code Reviewer)',
+    description: 'Reviews code quality and correctness. OKAY/REJECT verdict.',
     mode: 'subagent' as const,
+  },
+  'enbilulu-tester': {
+    name: 'Enbilulu (Tester)',
+    description: 'Writes and runs tests, validates implementation correctness.',
+    mode: 'subagent' as const,
+  },
+  'mushdamma-phase-reviewer': {
+    name: 'Mushdamma (Phase Reviewer)',
+    description: 'Reviews completed phases before next phase begins.',
+    mode: 'subagent' as const,
+  },
+  'isimud-ideator': {
+    name: 'Isimud (Idea Architect)',
+    description: 'Shapes raw ideas into implementable concepts. Pre-pipeline.',
+    mode: 'primary' as const,
+  },
+  'asalluhi-prompter': {
+    name: 'Asalluhi (Prompt Engineer)',
+    description: 'Crafts and refines prompts. Meta-agent, pre-pipeline.',
+    mode: 'primary' as const,
   },
 };

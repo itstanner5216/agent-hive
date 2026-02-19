@@ -49,11 +49,12 @@
     "agentMode": {
       "type": "string",
       "enum": [
-        "unified",
-        "dedicated"
+        "full",
+        "core",
+        "lean"
       ],
-      "default": "unified",
-      "description": "Agent specialization mode. 'unified' (default) uses a single hybrid agent for all roles; 'dedicated' uses specialized agents for each role."
+      "default": "full",
+      "description": "Agent mode. 'full' (default) = all 10 agents; 'core' = 6 pipeline agents; 'lean' = 4 essential agents."
     },
     "hook_cadence": {
       "type": "object",
@@ -76,29 +77,45 @@
       "description": "Agent model configuration overrides",
       "additionalProperties": false,
       "properties": {
-        "hive-master": {
+        "enlil-validator": {
           "$ref": "#/$defs/agentConfig",
-          "description": "Hive Master (hybrid planner + orchestrator)"
+          "description": "Enlil - Plan Validator"
         },
-        "architect-planner": {
+        "enki-planner": {
           "$ref": "#/$defs/agentConfig",
-          "description": "Architect Planner (planning-only)"
+          "description": "Enki - Planner (Architect)"
         },
-        "swarm-orchestrator": {
+        "nudimmud-orchestrator": {
           "$ref": "#/$defs/agentConfig",
-          "description": "Swarm Orchestrator"
+          "description": "Nudimmud - Orchestrator"
         },
-        "scout-researcher": {
+        "adapa-explorer": {
           "$ref": "#/$defs/agentConfig",
-          "description": "Scout Researcher"
+          "description": "Adapa - Explorer / Researcher"
         },
-        "forager-worker": {
+        "kulla-coder": {
           "$ref": "#/$defs/agentConfig",
-          "description": "Forager Worker"
+          "description": "Kulla - Coder (Worker)"
         },
-        "hygienic-reviewer": {
+        "nanshe-reviewer": {
           "$ref": "#/$defs/agentConfig",
-          "description": "Hygienic Reviewer"
+          "description": "Nanshe - Code Reviewer"
+        },
+        "enbilulu-tester": {
+          "$ref": "#/$defs/agentConfig",
+          "description": "Enbilulu - Tester"
+        },
+        "mushdamma-phase-reviewer": {
+          "$ref": "#/$defs/agentConfig",
+          "description": "Mushdamma - Phase Reviewer"
+        },
+        "isimud-ideator": {
+          "$ref": "#/$defs/agentConfig",
+          "description": "Isimud - Idea Architect"
+        },
+        "asalluhi-prompter": {
+          "$ref": "#/$defs/agentConfig",
+          "description": "Asalluhi - Prompt Engineer"
         }
       }
     }

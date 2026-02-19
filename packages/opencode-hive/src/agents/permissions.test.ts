@@ -63,12 +63,12 @@ describe('Agent permissions', () => {
     mock.restore();
   });
 
-  it('registers hive-master, scout, forager, and hygienic in unified mode', async () => {
-    // Mock ConfigService to return unified mode
+  it('registers enki-planner, adapa, kulla, and nanshe in full mode', async () => {
+    // Mock ConfigService to return full mode
     spyOn(ConfigService.prototype, 'get').mockReturnValue({
-      agentMode: 'unified',
+      agentMode: 'full',
       agents: {
-        'hive-master': {},
+        'enki-planner': {},
       }
     } as any);
 
@@ -91,25 +91,25 @@ describe('Agent permissions', () => {
     } = {};
     await hooks.config?.(opencodeConfig);
 
-    expect(opencodeConfig.agent?.['hive-master']).toBeTruthy();
-    expect(opencodeConfig.agent?.['swarm-orchestrator']).toBeUndefined();
-    expect(opencodeConfig.agent?.['architect-planner']).toBeUndefined();
-    expect(opencodeConfig.agent?.['scout-researcher']).toBeTruthy();
-    expect(opencodeConfig.agent?.['forager-worker']).toBeTruthy();
-    expect(opencodeConfig.agent?.['hygienic-reviewer']).toBeTruthy();
-    expect(opencodeConfig.default_agent).toBe('hive-master');
+    expect(opencodeConfig.agent?.['enki-planner']).toBeTruthy();
+    expect(opencodeConfig.agent?.['nudimmud-orchestrator']).toBeUndefined();
+    expect(opencodeConfig.agent?.['enki-planner']).toBeUndefined();
+    expect(opencodeConfig.agent?.['adapa-explorer']).toBeTruthy();
+    expect(opencodeConfig.agent?.['kulla-coder']).toBeTruthy();
+    expect(opencodeConfig.agent?.['nanshe-reviewer']).toBeTruthy();
+    expect(opencodeConfig.default_agent).toBe('enki-planner');
 
-    const hivePerm = opencodeConfig.agent?.['hive-master']?.permission;
+    const hivePerm = opencodeConfig.agent?.['enki-planner']?.permission;
     expect(hivePerm).toBeTruthy();
   });
 
-  it('registers dedicated agents in dedicated mode', async () => {
-    // Mock ConfigService to return dedicated mode
+  it('registers core agents in core mode', async () => {
+    // Mock ConfigService to return core mode
     spyOn(ConfigService.prototype, 'get').mockReturnValue({
-      agentMode: 'dedicated',
+      agentMode: 'core',
       agents: {
-        'architect-planner': {},
-        'swarm-orchestrator': {},
+        'enki-planner': {},
+        'nudimmud-orchestrator': {},
       }
     } as any);
 
@@ -132,16 +132,16 @@ describe('Agent permissions', () => {
     } = {};
     await hooks.config?.(opencodeConfig);
 
-    expect(opencodeConfig.agent?.['hive-master']).toBeUndefined();
-    expect(opencodeConfig.agent?.['swarm-orchestrator']).toBeTruthy();
-    expect(opencodeConfig.agent?.['architect-planner']).toBeTruthy();
-    expect(opencodeConfig.agent?.['scout-researcher']).toBeTruthy();
-    expect(opencodeConfig.agent?.['forager-worker']).toBeTruthy();
-    expect(opencodeConfig.agent?.['hygienic-reviewer']).toBeTruthy();
-    expect(opencodeConfig.default_agent).toBe('architect-planner');
+    expect(opencodeConfig.agent?.['enki-planner']).toBeUndefined();
+    expect(opencodeConfig.agent?.['nudimmud-orchestrator']).toBeTruthy();
+    expect(opencodeConfig.agent?.['enki-planner']).toBeTruthy();
+    expect(opencodeConfig.agent?.['adapa-explorer']).toBeTruthy();
+    expect(opencodeConfig.agent?.['kulla-coder']).toBeTruthy();
+    expect(opencodeConfig.agent?.['nanshe-reviewer']).toBeTruthy();
+    expect(opencodeConfig.default_agent).toBe('enki-planner');
 
-    const swarmPerm = opencodeConfig.agent?.['swarm-orchestrator']?.permission;
-    const architectPerm = opencodeConfig.agent?.['architect-planner']?.permission;
+    const swarmPerm = opencodeConfig.agent?.['nudimmud-orchestrator']?.permission;
+    const architectPerm = opencodeConfig.agent?.['enki-planner']?.permission;
 
     expect(swarmPerm).toBeTruthy();
     expect(architectPerm).toBeTruthy();
@@ -152,9 +152,9 @@ describe('Agent permissions', () => {
 
   it('explicitly denies delegation tools for subagents', async () => {
     spyOn(ConfigService.prototype, 'get').mockReturnValue({
-      agentMode: 'unified',
+      agentMode: 'full',
       agents: {
-        'hive-master': {},
+        'enki-planner': {},
       },
     } as any);
 
@@ -176,7 +176,7 @@ describe('Agent permissions', () => {
     } = {};
     await hooks.config?.(opencodeConfig);
 
-    const subagentNames = ['scout-researcher', 'forager-worker', 'hygienic-reviewer'] as const;
+    const subagentNames = ['adapa-explorer', 'kulla-coder', 'nanshe-reviewer'] as const;
     for (const name of subagentNames) {
       const perm = opencodeConfig.agent?.[name]?.permission;
       expect(perm).toBeTruthy();

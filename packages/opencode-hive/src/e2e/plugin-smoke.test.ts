@@ -341,7 +341,7 @@ Do it
       configPath,
       JSON.stringify({
         agents: {
-          "hive-master": {
+          "enki-planner": {
             autoLoadSkills: ["brainstorming"],
           },
         },
@@ -362,7 +362,7 @@ Do it
 
     // system.transform should still inject HIVE_SYSTEM_PROMPT and status hint
     const output = { system: [] as string[] };
-    await hooks["experimental.chat.system.transform"]?.({ agent: "hive-master" }, output);
+    await hooks["experimental.chat.system.transform"]?.({ agent: "enki-planner" }, output);
     output.system.push("## Base Agent Prompt");
 
     const joined = output.system.join("\n");
@@ -374,7 +374,7 @@ Do it
     const opencodeConfig: Record<string, unknown> = { agent: {} };
     await hooks.config!(opencodeConfig);
     
-    const agentConfig = (opencodeConfig.agent as Record<string, { prompt?: string }>)["hive-master"];
+    const agentConfig = (opencodeConfig.agent as Record<string, { prompt?: string }>)["enki-planner"];
     expect(agentConfig).toBeDefined();
     expect(agentConfig.prompt).toBeDefined();
     
@@ -614,7 +614,7 @@ Do it
   });
 
   it("auto-loads parallel exploration for planner agents by default", async () => {
-    // Test unified mode agents
+    // Test full mode agents
     const ctx: PluginInput = {
       directory: testRoot,
       worktree: testRoot,
@@ -633,32 +633,32 @@ Do it
     expect(parallelExplorationSkill).toBeDefined();
 
     // Skills are now injected via config hook's prompt field, NOT system.transform
-    // Default mode is 'unified' which includes hive-master, scout, forager, hygienic
+    // Default mode is 'full' which includes enki-planner, scout, forager, hygienic
     const opencodeConfig: Record<string, unknown> = { agent: {} };
     await hooks.config!(opencodeConfig);
     const agents = opencodeConfig.agent as Record<string, { prompt?: string }>;
 
-    // hive-master should have parallel-exploration in prompt (unified mode)
-    expect(agents["hive-master"]?.prompt).toBeDefined();
-    expect(agents["hive-master"]?.prompt).toContain(
+    // enki-planner should have parallel-exploration in prompt (full mode)
+    expect(agents["enki-planner"]?.prompt).toBeDefined();
+    expect(agents["enki-planner"]?.prompt).toContain(
       parallelExplorationSkill!.template,
     );
-    expect(agents["hive-master"]?.prompt).not.toContain(onboardingSnippet);
+    expect(agents["enki-planner"]?.prompt).not.toContain(onboardingSnippet);
 
-    // scout-researcher should NOT have parallel-exploration in prompt (unified mode)
+    // adapa-explorer should NOT have parallel-exploration in prompt (full mode)
     // (removed to prevent recursive delegation - scout cannot spawn scouts)
-    expect(agents["scout-researcher"]?.prompt).toBeDefined();
-    expect(agents["scout-researcher"]?.prompt).not.toContain(
+    expect(agents["adapa-explorer"]?.prompt).toBeDefined();
+    expect(agents["adapa-explorer"]?.prompt).not.toContain(
       parallelExplorationSkill!.template,
     );
-    expect(agents["scout-researcher"]?.prompt).not.toContain(onboardingSnippet);
+    expect(agents["adapa-explorer"]?.prompt).not.toContain(onboardingSnippet);
 
-    // forager-worker should NOT have parallel-exploration in prompt
-    expect(agents["forager-worker"]?.prompt).toBeDefined();
-    expect(agents["forager-worker"]?.prompt).not.toContain(
+    // kulla-coder should NOT have parallel-exploration in prompt
+    expect(agents["kulla-coder"]?.prompt).toBeDefined();
+    expect(agents["kulla-coder"]?.prompt).not.toContain(
       parallelExplorationSkill!.template,
     );
-    expect(agents["forager-worker"]?.prompt).not.toContain(onboardingSnippet);
+    expect(agents["kulla-coder"]?.prompt).not.toContain(onboardingSnippet);
   });
 
   it("includes task prompt mode", async () => {

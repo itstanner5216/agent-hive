@@ -32,27 +32,31 @@ describe("ConfigService defaults", () => {
 
     expect(config).toEqual(DEFAULT_HIVE_CONFIG);
     expect(Object.keys(config.agents ?? {}).sort()).toEqual([
-      "architect-planner",
-      "forager-worker",
-      "hive-master",
-      "hygienic-reviewer",
-      "scout-researcher",
-      "swarm-orchestrator",
+      "adapa-explorer",
+      "asalluhi-prompter",
+      "enbilulu-tester",
+      "enki-planner",
+      "enlil-validator",
+      "isimud-ideator",
+      "kulla-coder",
+      "mushdamma-phase-reviewer",
+      "nanshe-reviewer",
+      "nudimmud-orchestrator",
     ]);
-    expect(config.agents?.["architect-planner"]?.model).toBe(
+    expect(config.agents?.["enki-planner"]?.model).toBe(
       "github-copilot/gpt-5.2-codex",
     );
-    expect(config.agents?.["hive-master"]?.model).toBe(
-      "github-copilot/claude-opus-4.5",
+    expect(config.agents?.["enlil-validator"]?.model).toBe(
+      "github-copilot/claude-sonnet-4-20250514",
     );
-    expect(config.agents?.["swarm-orchestrator"]?.model).toBe(
+    expect(config.agents?.["nudimmud-orchestrator"]?.model).toBe(
       "github-copilot/claude-opus-4.5",
     );
   });
 
-  it("returns 'unified' as default agentMode", () => {
+  it("returns 'full' as default agentMode", () => {
     const service = new ConfigService();
-    expect(service.get().agentMode).toBe('unified');
+    expect(service.get().agentMode).toBe('full');
   });
 
   it("deep-merges agent overrides with defaults", () => {
@@ -65,7 +69,7 @@ describe("ConfigService defaults", () => {
       JSON.stringify(
         {
           agents: {
-            "hive-master": { temperature: 0.8 },
+            "enki-planner": { temperature: 0.8 },
           },
         },
         null,
@@ -74,14 +78,14 @@ describe("ConfigService defaults", () => {
     );
 
     const config = service.get();
-    expect(config.agents?.["hive-master"]?.temperature).toBe(0.8);
-    expect(config.agents?.["hive-master"]?.model).toBe(
-      "github-copilot/claude-opus-4.5",
+    expect(config.agents?.["enki-planner"]?.temperature).toBe(0.8);
+    expect(config.agents?.["enki-planner"]?.model).toBe(
+      "github-copilot/gpt-5.2-codex",
     );
 
-    const agentConfig = service.getAgentConfig("hive-master");
+    const agentConfig = service.getAgentConfig("enki-planner");
     expect(agentConfig.temperature).toBe(0.8);
-    expect(agentConfig.model).toBe("github-copilot/claude-opus-4.5");
+    expect(agentConfig.model).toBe("github-copilot/gpt-5.2-codex");
   });
 
   it("deep-merges variant field from user config", () => {
@@ -94,8 +98,8 @@ describe("ConfigService defaults", () => {
       JSON.stringify(
         {
           agents: {
-            "forager-worker": { variant: "high" },
-            "scout-researcher": { variant: "low", temperature: 0.2 },
+            "kulla-coder": { variant: "high" },
+            "adapa-explorer": { variant: "low", temperature: 0.2 },
           },
         },
         null,
@@ -105,20 +109,20 @@ describe("ConfigService defaults", () => {
 
     const config = service.get();
     // variant should be merged from user config
-    expect(config.agents?.["forager-worker"]?.variant).toBe("high");
-    expect(config.agents?.["scout-researcher"]?.variant).toBe("low");
+    expect(config.agents?.["kulla-coder"]?.variant).toBe("high");
+    expect(config.agents?.["adapa-explorer"]?.variant).toBe("low");
     // other defaults should still be present
-    expect(config.agents?.["forager-worker"]?.model).toBe(
+    expect(config.agents?.["kulla-coder"]?.model).toBe(
       "github-copilot/gpt-5.2-codex",
     );
-    expect(config.agents?.["scout-researcher"]?.temperature).toBe(0.2);
+    expect(config.agents?.["adapa-explorer"]?.temperature).toBe(0.2);
 
     // getAgentConfig should also return variant
-    const foragerConfig = service.getAgentConfig("forager-worker");
+    const foragerConfig = service.getAgentConfig("kulla-coder");
     expect(foragerConfig.variant).toBe("high");
     expect(foragerConfig.model).toBe("github-copilot/gpt-5.2-codex");
 
-    const scoutConfig = service.getAgentConfig("scout-researcher");
+    const scoutConfig = service.getAgentConfig("adapa-explorer");
     expect(scoutConfig.variant).toBe("low");
     expect(scoutConfig.temperature).toBe(0.2);
   });
@@ -133,7 +137,7 @@ describe("ConfigService defaults", () => {
       JSON.stringify(
         {
           agents: {
-            "forager-worker": {
+            "kulla-coder": {
               autoLoadSkills: ["custom-skill", "verification-before-completion"],
             },
           },
@@ -143,7 +147,7 @@ describe("ConfigService defaults", () => {
       ),
     );
 
-    const config = service.getAgentConfig("forager-worker");
+    const config = service.getAgentConfig("kulla-coder");
     expect(config.autoLoadSkills).toEqual([
       "test-driven-development",
       "verification-before-completion",
@@ -162,7 +166,7 @@ describe("ConfigService defaults", () => {
         {
           disableSkills: ["parallel-exploration", "custom-skill"],
           agents: {
-            "hive-master": {
+            "enki-planner": {
               autoLoadSkills: ["custom-skill"],
             },
           },
@@ -172,7 +176,7 @@ describe("ConfigService defaults", () => {
       ),
     );
 
-    const config = service.getAgentConfig("hive-master");
+    const config = service.getAgentConfig("enki-planner");
     expect(config.autoLoadSkills).toEqual([]);
   });
 
@@ -191,7 +195,7 @@ describe("ConfigService defaults", () => {
     // Scout should not auto-load parallel-exploration to prevent recursive delegation.
     // Scouts are leaf agents that should not spawn further scouts.
     const service = new ConfigService();
-    const scoutConfig = service.getAgentConfig("scout-researcher");
+    const scoutConfig = service.getAgentConfig("adapa-explorer");
 
     expect(scoutConfig.autoLoadSkills).not.toContain("parallel-exploration");
   });

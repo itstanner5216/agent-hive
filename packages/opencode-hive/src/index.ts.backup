@@ -48,7 +48,7 @@ function formatSkillsXml(skills: SkillDefinition[]): string {
  * 3. Warn and skip if not found
  */
 async function buildAutoLoadedSkillsContent(
-  agentName: 'enlil-validator' | 'enki-planner' | 'nudimmud-orchestrator' | 'adapa-explorer' | 'kulla-coder' | 'nanshe-reviewer' | 'enbilulu-tester' | 'mushdamma-phase-reviewer' | 'isimud-ideator' | 'asalluhi-prompter',
+  agentName: 'hive-master' | 'architect-planner' | 'swarm-orchestrator' | 'scout-researcher' | 'forager-worker' | 'hygienic-reviewer',
   configService: ConfigService,
   projectRoot: string,
 ): Promise<string> {
@@ -258,7 +258,7 @@ const plugin: Plugin = async (ctx) => {
   // Get filtered skills (globally disabled skills removed)
   // Per-agent skill filtering could be added here based on agent context
   const filteredSkills = getFilteredSkills(disabledSkills);
-  const effectiveAutoLoadSkills = configService.getAgentConfig('enki-planner').autoLoadSkills ?? [];
+  const effectiveAutoLoadSkills = configService.getAgentConfig('hive-master').autoLoadSkills ?? [];
   const worktreeService = new WorktreeService({
     baseDir: directory,
     hiveDir: path.join(directory, '.pantheon'),
@@ -1428,38 +1428,36 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
 
     // Config hook - merge agents into opencodeConfig.agent
     config: async (opencodeConfig: Record<string, unknown>) => {
+      // Auto-generate config file with defaults if it doesn't exist
       configService.init();
 
-      // --- Enlil (Plan Validator) ---
-      const enlilUserConfig = configService.getAgentConfig('enlil-validator');
-      const enlilAutoLoaded = await buildAutoLoadedSkillsContent('enlil-validator', configService, directory);
-      const enlilConfig = {
-        model: enlilUserConfig.model,
-        variant: enlilUserConfig.variant,
-        temperature: enlilUserConfig.temperature ?? 0.3,
-        mode: 'subagent' as const,
-        description: 'Enlil (Plan Validator) — Validates plans against iron laws. APPROVE/REJECT verdict.',
-        prompt: ENLIL_PROMPT + enlilAutoLoaded,
+      // Build auto-loaded skill content for each agent
+      const hiveUserConfig = configService.getAgentConfig('hive-master');
+      const hiveAutoLoadedSkills = await buildAutoLoadedSkillsContent('hive-master', configService, directory);
+      const hiveConfig = {
+        model: hiveUserConfig.model,
+        variant: hiveUserConfig.variant,
+        temperature: hiveUserConfig.temperature ?? 0.5,
+        description: 'Hive (Hybrid) - Plans + orchestrates. Detects phase, loads skills on-demand.',
+        prompt: QUEEN_BEE_PROMPT + hiveAutoLoadedSkills,
         permission: {
-          edit: "deny",
-          task: "deny",
-          delegate: "deny",
+          question: "allow",
           skill: "allow",
+          todowrite: "allow",
           todoread: "allow",
         },
       };
 
-      // --- Enki (Planner) ---
-      const enkiUserConfig = configService.getAgentConfig('enki-planner');
-      const enkiAutoLoaded = await buildAutoLoadedSkillsContent('enki-planner', configService, directory);
-      const enkiConfig = {
-        model: enkiUserConfig.model,
-        variant: enkiUserConfig.variant,
-        temperature: enkiUserConfig.temperature ?? 0.7,
-        description: 'Enki (Planner) — Plans features through discovery and interviews. NEVER executes.',
-        prompt: ENKI_PROMPT + enkiAutoLoaded,
+      const architectUserConfig = configService.getAgentConfig('architect-planner');
+      const architectAutoLoadedSkills = await buildAutoLoadedSkillsContent('architect-planner', configService, directory);
+      const architectConfig = {
+        model: architectUserConfig.model,
+        variant: architectUserConfig.variant,
+        temperature: architectUserConfig.temperature ?? 0.7,
+        description: 'Architect (Planner) - Plans features, interviews, writes plans. NEVER executes.',
+        prompt: ARCHITECT_BEE_PROMPT + architectAutoLoadedSkills,
         permission: {
-          edit: "deny",
+          edit: "deny",  // Planners don't edit code
           task: "allow",
           question: "allow",
           skill: "allow",
@@ -1469,15 +1467,14 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         },
       };
 
-      // --- Nudimmud (Orchestrator) ---
-      const nudimmudUserConfig = configService.getAgentConfig('nudimmud-orchestrator');
-      const nudimmudAutoLoaded = await buildAutoLoadedSkillsContent('nudimmud-orchestrator', configService, directory);
-      const nudimmudConfig = {
-        model: nudimmudUserConfig.model,
-        variant: nudimmudUserConfig.variant,
-        temperature: nudimmudUserConfig.temperature ?? 0.5,
-        description: 'Nudimmud (Orchestrator) — Orchestrates execution. Delegates, spawns workers, verifies, merges.',
-        prompt: NUDIMMUD_PROMPT + nudimmudAutoLoaded,
+      const swarmUserConfig = configService.getAgentConfig('swarm-orchestrator');
+      const swarmAutoLoadedSkills = await buildAutoLoadedSkillsContent('swarm-orchestrator', configService, directory);
+      const swarmConfig = {
+        model: swarmUserConfig.model,
+        variant: swarmUserConfig.variant,
+        temperature: swarmUserConfig.temperature ?? 0.5,
+        description: 'Swarm (Orchestrator) - Orchestrates execution. Delegates, spawns workers, verifies, merges.',
+        prompt: SWARM_BEE_PROMPT + swarmAutoLoadedSkills,
         permission: {
           question: "allow",
           skill: "allow",
@@ -1486,18 +1483,17 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         },
       };
 
-      // --- Adapa (Explorer) ---
-      const adapaUserConfig = configService.getAgentConfig('adapa-explorer');
-      const adapaAutoLoaded = await buildAutoLoadedSkillsContent('adapa-explorer', configService, directory);
-      const adapaConfig = {
-        model: adapaUserConfig.model,
-        variant: adapaUserConfig.variant,
-        temperature: adapaUserConfig.temperature ?? 0.5,
+      const scoutUserConfig = configService.getAgentConfig('scout-researcher');
+      const scoutAutoLoadedSkills = await buildAutoLoadedSkillsContent('scout-researcher', configService, directory);
+      const scoutConfig = {
+        model: scoutUserConfig.model,
+        variant: scoutUserConfig.variant,
+        temperature: scoutUserConfig.temperature ?? 0.5,
         mode: 'subagent' as const,
-        description: 'Adapa (Explorer) — Researches codebase + external docs/data.',
-        prompt: ADAPA_PROMPT + adapaAutoLoaded,
+        description: 'Scout (Explorer/Researcher/Retrieval) - Researches codebase + external docs/data.',
+        prompt: SCOUT_BEE_PROMPT + scoutAutoLoadedSkills,
         permission: {
-          edit: "deny",
+          edit: "deny",  // Researchers don't edit code
           task: "deny",
           delegate: "deny",
           skill: "allow",
@@ -1505,16 +1501,15 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         },
       };
 
-      // --- Kulla (Coder) ---
-      const kullaUserConfig = configService.getAgentConfig('kulla-coder');
-      const kullaAutoLoaded = await buildAutoLoadedSkillsContent('kulla-coder', configService, directory);
-      const kullaConfig = {
-        model: kullaUserConfig.model,
-        variant: kullaUserConfig.variant,
-        temperature: kullaUserConfig.temperature ?? 0.3,
+      const foragerUserConfig = configService.getAgentConfig('forager-worker');
+      const foragerAutoLoadedSkills = await buildAutoLoadedSkillsContent('forager-worker', configService, directory);
+      const foragerConfig = {
+        model: foragerUserConfig.model,
+        variant: foragerUserConfig.variant,
+        temperature: foragerUserConfig.temperature ?? 0.3,
         mode: 'subagent' as const,
-        description: 'Kulla (Coder) — Executes tasks directly in isolated worktrees. Never delegates.',
-        prompt: KULLA_PROMPT + kullaAutoLoaded,
+        description: 'Forager (Worker/Coder) - Executes tasks directly in isolated worktrees. Never delegates.',
+        prompt: FORAGER_BEE_PROMPT + foragerAutoLoadedSkills,
         permission: {
           task: "deny",
           delegate: "deny",
@@ -1522,136 +1517,48 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         },
       };
 
-      // --- Nanshe (Code Reviewer) ---
-      const nansheUserConfig = configService.getAgentConfig('nanshe-reviewer');
-      const nansheAutoLoaded = await buildAutoLoadedSkillsContent('nanshe-reviewer', configService, directory);
-      const nansheConfig = {
-        model: nansheUserConfig.model,
-        variant: nansheUserConfig.variant,
-        temperature: nansheUserConfig.temperature ?? 0.3,
+      const hygienicUserConfig = configService.getAgentConfig('hygienic-reviewer');
+      const hygienicAutoLoadedSkills = await buildAutoLoadedSkillsContent('hygienic-reviewer', configService, directory);
+      const hygienicConfig = {
+        model: hygienicUserConfig.model,
+        variant: hygienicUserConfig.variant,
+        temperature: hygienicUserConfig.temperature ?? 0.3,
         mode: 'subagent' as const,
-        description: 'Nanshe (Code Reviewer) — Reviews code quality and correctness. OKAY/REJECT verdict.',
-        prompt: NANSHE_PROMPT + nansheAutoLoaded,
+        description: 'Hygienic (Consultant/Reviewer/Debugger) - Reviews plan documentation quality. OKAY/REJECT verdict.',
+        prompt: HYGIENIC_BEE_PROMPT + hygienicAutoLoadedSkills,
         permission: {
-          edit: "deny",
+          edit: "deny",  // Reviewers don't edit
           task: "deny",
           delegate: "deny",
           skill: "allow",
-        },
-      };
-
-      // --- Enbilulu (Tester) ---
-      const enbiluluUserConfig = configService.getAgentConfig('enbilulu-tester');
-      const enbiluluAutoLoaded = await buildAutoLoadedSkillsContent('enbilulu-tester', configService, directory);
-      const enbiluluConfig = {
-        model: enbiluluUserConfig.model,
-        variant: enbiluluUserConfig.variant,
-        temperature: enbiluluUserConfig.temperature ?? 0.3,
-        mode: 'subagent' as const,
-        description: 'Enbilulu (Tester) — Writes and runs tests, validates implementation correctness.',
-        prompt: ENBILULU_PROMPT + enbiluluAutoLoaded,
-        permission: {
-          task: "deny",
-          delegate: "deny",
-          skill: "allow",
-        },
-      };
-
-      // --- Mushdamma (Phase Reviewer) ---
-      const mushdammaUserConfig = configService.getAgentConfig('mushdamma-phase-reviewer');
-      const mushdammaAutoLoaded = await buildAutoLoadedSkillsContent('mushdamma-phase-reviewer', configService, directory);
-      const mushdammaConfig = {
-        model: mushdammaUserConfig.model,
-        variant: mushdammaUserConfig.variant,
-        temperature: mushdammaUserConfig.temperature ?? 0.3,
-        mode: 'subagent' as const,
-        description: 'Mushdamma (Phase Reviewer) — Reviews completed phases before next phase begins.',
-        prompt: MUSHDAMMA_PROMPT + mushdammaAutoLoaded,
-        permission: {
-          edit: "deny",
-          task: "deny",
-          delegate: "deny",
-          skill: "allow",
-          todoread: "allow",
-        },
-      };
-
-      // --- Isimud (Idea Architect) — Pre-pipeline ---
-      const isimudUserConfig = configService.getAgentConfig('isimud-ideator');
-      const isimudAutoLoaded = await buildAutoLoadedSkillsContent('isimud-ideator', configService, directory);
-      const isimudConfig = {
-        model: isimudUserConfig.model,
-        variant: isimudUserConfig.variant,
-        temperature: isimudUserConfig.temperature ?? 0.7,
-        description: 'Isimud (Idea Architect) — Shapes raw ideas into implementable concepts. Pre-pipeline.',
-        prompt: ISIMUD_PROMPT + isimudAutoLoaded,
-        permission: {
-          edit: "deny",
-          question: "allow",
-          skill: "allow",
-          todowrite: "allow",
-          todoread: "allow",
-          webfetch: "allow",
-        },
-      };
-
-      // --- Asalluhi (Prompt Engineer) — Pre-pipeline ---
-      const asalluhuUserConfig = configService.getAgentConfig('asalluhi-prompter');
-      const asalluhuAutoLoaded = await buildAutoLoadedSkillsContent('asalluhi-prompter', configService, directory);
-      const asalluhuConfig = {
-        model: asalluhuUserConfig.model,
-        variant: asalluhuUserConfig.variant,
-        temperature: asalluhuUserConfig.temperature ?? 0.5,
-        description: 'Asalluhi (Prompt Engineer) — Crafts and refines prompts. Meta-agent, pre-pipeline.',
-        prompt: ASALLUHI_PROMPT + asalluhuAutoLoaded,
-        permission: {
-          edit: "deny",
-          question: "allow",
-          skill: "allow",
-          webfetch: "allow",
         },
       };
 
       // Build agents map based on agentMode
       const hiveConfigData = configService.get();
-      const agentMode = hiveConfigData.agentMode ?? 'full';
+      const agentMode = hiveConfigData.agentMode ?? 'unified';
       
       const allAgents: Record<string, unknown> = {};
       
-      if (agentMode === 'full') {
-        // All 10 agents
-        allAgents['enlil-validator'] = enlilConfig;
-        allAgents['enki-planner'] = enkiConfig;
-        allAgents['nudimmud-orchestrator'] = nudimmudConfig;
-        allAgents['adapa-explorer'] = adapaConfig;
-        allAgents['kulla-coder'] = kullaConfig;
-        allAgents['nanshe-reviewer'] = nansheConfig;
-        allAgents['enbilulu-tester'] = enbiluluConfig;
-        allAgents['mushdamma-phase-reviewer'] = mushdammaConfig;
-        allAgents['isimud-ideator'] = isimudConfig;
-        allAgents['asalluhi-prompter'] = asalluhuConfig;
-      } else if (agentMode === 'core') {
-        // 6 pipeline agents
-        allAgents['enlil-validator'] = enlilConfig;
-        allAgents['enki-planner'] = enkiConfig;
-        allAgents['nudimmud-orchestrator'] = nudimmudConfig;
-        allAgents['adapa-explorer'] = adapaConfig;
-        allAgents['kulla-coder'] = kullaConfig;
-        allAgents['nanshe-reviewer'] = nansheConfig;
+      if (agentMode === 'unified') {
+        allAgents['hive-master'] = hiveConfig;
+        allAgents['scout-researcher'] = scoutConfig;
+        allAgents['forager-worker'] = foragerConfig;
+        allAgents['hygienic-reviewer'] = hygienicConfig;
       } else {
-        // lean: 4 essential agents (enki plans + orchestrates)
-        allAgents['enki-planner'] = enkiConfig;
-        allAgents['adapa-explorer'] = adapaConfig;
-        allAgents['kulla-coder'] = kullaConfig;
-        allAgents['nanshe-reviewer'] = nansheConfig;
+        allAgents['architect-planner'] = architectConfig;
+        allAgents['swarm-orchestrator'] = swarmConfig;
+        allAgents['scout-researcher'] = scoutConfig;
+        allAgents['forager-worker'] = foragerConfig;
+        allAgents['hygienic-reviewer'] = hygienicConfig;
       }
 
-      // Merge agents into opencodeConfig.agent
+      // Merge agents into opencodeConfig.agent (config hook is sufficient for agent discovery)
       const configAgent = opencodeConfig.agent as Record<string, unknown> | undefined;
       if (!configAgent) {
         opencodeConfig.agent = allAgents;
       } else {
-        // Clean up old bee-themed agent names
+        // Clean up old single-word agent names
         delete (configAgent as Record<string, unknown>).hive;
         delete (configAgent as Record<string, unknown>).architect;
         delete (configAgent as Record<string, unknown>).swarm;
@@ -1659,6 +1566,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         delete (configAgent as Record<string, unknown>).forager;
         delete (configAgent as Record<string, unknown>).hygienic;
         delete (configAgent as Record<string, unknown>).receiver;
+        // Clean up old kebab-case names (in case they exist)
         delete (configAgent as Record<string, unknown>)['hive-master'];
         delete (configAgent as Record<string, unknown>)['architect-planner'];
         delete (configAgent as Record<string, unknown>)['swarm-orchestrator'];
@@ -1670,7 +1578,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
 
       // Set default agent based on mode
       (opencodeConfig as Record<string, unknown>).default_agent = 
-        agentMode === 'lean' ? 'enki-planner' : 'enki-planner';
+        agentMode === 'unified' ? 'hive-master' : 'architect-planner';
 
       // Merge built-in MCP servers (OMO-style remote endpoints)
       const configMcp = opencodeConfig.mcp as Record<string, unknown> | undefined;

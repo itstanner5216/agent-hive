@@ -37,13 +37,13 @@ describe("agentMode gating", () => {
     }
   });
 
-  it("registers hive-master, scout, forager, and hygienic in unified mode", async () => {
+  it("registers enki-planner, adapa, kulla, and nanshe in full mode", async () => {
     const configPath = path.join(testRoot, ".config", "opencode", "agent_hive.json");
     fs.mkdirSync(path.dirname(configPath), { recursive: true });
     fs.writeFileSync(
       configPath,
       JSON.stringify({
-        agentMode: "unified",
+        agentMode: "full",
       }),
     );
 
@@ -59,22 +59,22 @@ describe("agentMode gating", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    expect(opencodeConfig.agent["hive-master"]).toBeDefined();
-    expect(opencodeConfig.agent["architect-planner"]).toBeUndefined();
-    expect(opencodeConfig.agent["swarm-orchestrator"]).toBeUndefined();
-    expect(opencodeConfig.agent["scout-researcher"]).toBeDefined();
-    expect(opencodeConfig.agent["forager-worker"]).toBeDefined();
-    expect(opencodeConfig.agent["hygienic-reviewer"]).toBeDefined();
-    expect(opencodeConfig.default_agent).toBe("hive-master");
+    expect(opencodeConfig.agent["enki-planner"]).toBeDefined();
+    expect(opencodeConfig.agent["enki-planner"]).toBeUndefined();
+    expect(opencodeConfig.agent["nudimmud-orchestrator"]).toBeUndefined();
+    expect(opencodeConfig.agent["adapa-explorer"]).toBeDefined();
+    expect(opencodeConfig.agent["kulla-coder"]).toBeDefined();
+    expect(opencodeConfig.agent["nanshe-reviewer"]).toBeDefined();
+    expect(opencodeConfig.default_agent).toBe("enki-planner");
   });
 
-  it("registers dedicated agents in dedicated mode", async () => {
+  it("registers core agents in core mode", async () => {
     const configPath = path.join(testRoot, ".config", "opencode", "agent_hive.json");
     fs.mkdirSync(path.dirname(configPath), { recursive: true });
     fs.writeFileSync(
       configPath,
       JSON.stringify({
-        agentMode: "dedicated",
+        agentMode: "core",
       }),
     );
 
@@ -90,12 +90,12 @@ describe("agentMode gating", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    expect(opencodeConfig.agent["hive-master"]).toBeUndefined();
-    expect(opencodeConfig.agent["architect-planner"]).toBeDefined();
-    expect(opencodeConfig.agent["swarm-orchestrator"]).toBeDefined();
-    expect(opencodeConfig.agent["scout-researcher"]).toBeDefined();
-    expect(opencodeConfig.agent["forager-worker"]).toBeDefined();
-    expect(opencodeConfig.agent["hygienic-reviewer"]).toBeDefined();
-    expect(opencodeConfig.default_agent).toBe("architect-planner");
+    expect(opencodeConfig.agent["enki-planner"]).toBeUndefined();
+    expect(opencodeConfig.agent["enki-planner"]).toBeDefined();
+    expect(opencodeConfig.agent["nudimmud-orchestrator"]).toBeDefined();
+    expect(opencodeConfig.agent["adapa-explorer"]).toBeDefined();
+    expect(opencodeConfig.agent["kulla-coder"]).toBeDefined();
+    expect(opencodeConfig.agent["nanshe-reviewer"]).toBeDefined();
+    expect(opencodeConfig.default_agent).toBe("enki-planner");
   });
 });

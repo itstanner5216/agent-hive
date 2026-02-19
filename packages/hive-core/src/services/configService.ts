@@ -45,35 +45,46 @@ export class ConfigService {
         agents: {
           ...DEFAULT_HIVE_CONFIG.agents,
           ...stored.agents,
-          // Deep merge hive-master agent config
-          'hive-master': {
-            ...DEFAULT_HIVE_CONFIG.agents?.['hive-master'],
-            ...stored.agents?.['hive-master'],
+          // Deep merge Pantheon agent configs
+          'enlil-validator': {
+            ...DEFAULT_HIVE_CONFIG.agents?.['enlil-validator'],
+            ...stored.agents?.['enlil-validator'],
           },
-          // Deep merge architect-planner agent config
-          'architect-planner': {
-            ...DEFAULT_HIVE_CONFIG.agents?.['architect-planner'],
-            ...stored.agents?.['architect-planner'],
+          'enki-planner': {
+            ...DEFAULT_HIVE_CONFIG.agents?.['enki-planner'],
+            ...stored.agents?.['enki-planner'],
           },
-          // Deep merge swarm-orchestrator agent config
-          'swarm-orchestrator': {
-            ...DEFAULT_HIVE_CONFIG.agents?.['swarm-orchestrator'],
-            ...stored.agents?.['swarm-orchestrator'],
+          'nudimmud-orchestrator': {
+            ...DEFAULT_HIVE_CONFIG.agents?.['nudimmud-orchestrator'],
+            ...stored.agents?.['nudimmud-orchestrator'],
           },
-          // Deep merge scout-researcher agent config
-          'scout-researcher': {
-            ...DEFAULT_HIVE_CONFIG.agents?.['scout-researcher'],
-            ...stored.agents?.['scout-researcher'],
+          'adapa-explorer': {
+            ...DEFAULT_HIVE_CONFIG.agents?.['adapa-explorer'],
+            ...stored.agents?.['adapa-explorer'],
           },
-          // Deep merge forager-worker agent config
-          'forager-worker': {
-            ...DEFAULT_HIVE_CONFIG.agents?.['forager-worker'],
-            ...stored.agents?.['forager-worker'],
+          'kulla-coder': {
+            ...DEFAULT_HIVE_CONFIG.agents?.['kulla-coder'],
+            ...stored.agents?.['kulla-coder'],
           },
-          // Deep merge hygienic-reviewer agent config
-          'hygienic-reviewer': {
-            ...DEFAULT_HIVE_CONFIG.agents?.['hygienic-reviewer'],
-            ...stored.agents?.['hygienic-reviewer'],
+          'nanshe-reviewer': {
+            ...DEFAULT_HIVE_CONFIG.agents?.['nanshe-reviewer'],
+            ...stored.agents?.['nanshe-reviewer'],
+          },
+          'enbilulu-tester': {
+            ...DEFAULT_HIVE_CONFIG.agents?.['enbilulu-tester'],
+            ...stored.agents?.['enbilulu-tester'],
+          },
+          'mushdamma-phase-reviewer': {
+            ...DEFAULT_HIVE_CONFIG.agents?.['mushdamma-phase-reviewer'],
+            ...stored.agents?.['mushdamma-phase-reviewer'],
+          },
+          'isimud-ideator': {
+            ...DEFAULT_HIVE_CONFIG.agents?.['isimud-ideator'],
+            ...stored.agents?.['isimud-ideator'],
+          },
+          'asalluhi-prompter': {
+            ...DEFAULT_HIVE_CONFIG.agents?.['asalluhi-prompter'],
+            ...stored.agents?.['asalluhi-prompter'],
           },
         },
       };
@@ -128,13 +139,13 @@ export class ConfigService {
    * Get agent-specific model config
    */
   getAgentConfig(
-    agent: 'hive-master' | 'architect-planner' | 'swarm-orchestrator' | 'scout-researcher' | 'forager-worker' | 'hygienic-reviewer',
+    agent: 'enlil-validator' | 'enki-planner' | 'nudimmud-orchestrator' | 'adapa-explorer' | 'kulla-coder' | 'nanshe-reviewer' | 'enbilulu-tester' | 'mushdamma-phase-reviewer' | 'isimud-ideator' | 'asalluhi-prompter',
   ): { model?: string; temperature?: number; skills?: string[]; autoLoadSkills?: string[]; variant?: string } {
     const config = this.get();
     const agentConfig = config.agents?.[agent] ?? {};
     const defaultAutoLoadSkills = DEFAULT_HIVE_CONFIG.agents?.[agent]?.autoLoadSkills ?? [];
     const userAutoLoadSkills = agentConfig.autoLoadSkills ?? [];
-    const isPlannerAgent = agent === 'hive-master' || agent === 'architect-planner';
+    const isPlannerAgent = agent === 'enki-planner';
     const effectiveUserAutoLoadSkills = isPlannerAgent
       ? userAutoLoadSkills
       : userAutoLoadSkills.filter((skill) => skill !== 'onboarding');

@@ -57,13 +57,13 @@ describe("config hook autoLoadSkills injection", () => {
     }
   });
 
-  it("injects default autoLoadSkills into agent prompt in config hook (unified mode)", async () => {
+  it("injects default autoLoadSkills into agent prompt in config hook (full mode)", async () => {
     const configPath = path.join(testRoot, ".config", "opencode", "agent_hive.json");
     fs.mkdirSync(path.dirname(configPath), { recursive: true });
     fs.writeFileSync(
       configPath,
       JSON.stringify({
-        agentMode: "unified",
+        agentMode: "full",
       }),
     );
 
@@ -79,22 +79,22 @@ describe("config hook autoLoadSkills injection", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    // hive-master should have parallel-exploration injected by default
-    const hiveMasterPrompt = opencodeConfig.agent["hive-master"]?.prompt as string;
+    // enki-planner should have parallel-exploration injected by default
+    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
     expect(hiveMasterPrompt).toBeDefined();
     
     const parallelExplorationSkill = BUILTIN_SKILLS.find(s => s.name === "parallel-exploration");
     expect(parallelExplorationSkill).toBeDefined();
     expect(hiveMasterPrompt).toContain(parallelExplorationSkill!.template);
 
-    // scout-researcher should NOT have parallel-exploration injected by default
+    // adapa-explorer should NOT have parallel-exploration injected by default
     // (removed to prevent recursive delegation - scout cannot spawn scouts)
-    const scoutPrompt = opencodeConfig.agent["scout-researcher"]?.prompt as string;
+    const scoutPrompt = opencodeConfig.agent["adapa-explorer"]?.prompt as string;
     expect(scoutPrompt).toBeDefined();
     expect(scoutPrompt).not.toContain(parallelExplorationSkill!.template);
 
-    // forager-worker should have test-driven-development and verification-before-completion by default
-    const foragerPrompt = opencodeConfig.agent["forager-worker"]?.prompt as string;
+    // kulla-coder should have test-driven-development and verification-before-completion by default
+    const foragerPrompt = opencodeConfig.agent["kulla-coder"]?.prompt as string;
     expect(foragerPrompt).toBeDefined();
     const tddSkill = BUILTIN_SKILLS.find(s => s.name === "test-driven-development");
     const verificationSkill = BUILTIN_SKILLS.find(s => s.name === "verification-before-completion");
@@ -112,10 +112,10 @@ describe("config hook autoLoadSkills injection", () => {
     fs.writeFileSync(
       configPath,
       JSON.stringify({
-        agentMode: "unified",
+        agentMode: "full",
         agents: {
           // Add brainstorming (not a default for forager) on top of defaults
-          "forager-worker": {
+          "kulla-coder": {
             autoLoadSkills: ["brainstorming"],
           },
         },
@@ -134,8 +134,8 @@ describe("config hook autoLoadSkills injection", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    // forager-worker should have brainstorming (user-configured) AND default skills
-    const foragerPrompt = opencodeConfig.agent["forager-worker"]?.prompt as string;
+    // kulla-coder should have brainstorming (user-configured) AND default skills
+    const foragerPrompt = opencodeConfig.agent["kulla-coder"]?.prompt as string;
     expect(foragerPrompt).toBeDefined();
     
     const brainstormingSkill = BUILTIN_SKILLS.find(s => s.name === "brainstorming");
@@ -157,7 +157,7 @@ describe("config hook autoLoadSkills injection", () => {
     fs.writeFileSync(
       configPath,
       JSON.stringify({
-        agentMode: "unified",
+        agentMode: "full",
         disableSkills: ["parallel-exploration"],
       }),
     );
@@ -174,8 +174,8 @@ describe("config hook autoLoadSkills injection", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    // hive-master should NOT have parallel-exploration (it's disabled globally)
-    const hiveMasterPrompt = opencodeConfig.agent["hive-master"]?.prompt as string;
+    // enki-planner should NOT have parallel-exploration (it's disabled globally)
+    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
     expect(hiveMasterPrompt).toBeDefined();
     
     const parallelExplorationSkill = BUILTIN_SKILLS.find(s => s.name === "parallel-exploration");
@@ -189,9 +189,9 @@ describe("config hook autoLoadSkills injection", () => {
     fs.writeFileSync(
       configPath,
       JSON.stringify({
-        agentMode: "unified",
+        agentMode: "full",
         agents: {
-          "hive-master": {
+          "enki-planner": {
             autoLoadSkills: ["nonexistent-skill"],
           },
         },
@@ -211,17 +211,17 @@ describe("config hook autoLoadSkills injection", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    // hive-master should still be defined
-    expect(opencodeConfig.agent["hive-master"]).toBeDefined();
+    // enki-planner should still be defined
+    expect(opencodeConfig.agent["enki-planner"]).toBeDefined();
   });
 
-  it("injects autoLoadSkills for all agents in dedicated mode", async () => {
+  it("injects autoLoadSkills for all agents in core mode", async () => {
     const configPath = path.join(testRoot, ".config", "opencode", "agent_hive.json");
     fs.mkdirSync(path.dirname(configPath), { recursive: true });
     fs.writeFileSync(
       configPath,
       JSON.stringify({
-        agentMode: "dedicated",
+        agentMode: "core",
       }),
     );
 
@@ -237,16 +237,16 @@ describe("config hook autoLoadSkills injection", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    // architect-planner should have parallel-exploration injected by default
-    const architectPrompt = opencodeConfig.agent["architect-planner"]?.prompt as string;
+    // enki-planner should have parallel-exploration injected by default
+    const architectPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
     expect(architectPrompt).toBeDefined();
     
     const parallelExplorationSkill = BUILTIN_SKILLS.find(s => s.name === "parallel-exploration");
     expect(parallelExplorationSkill).toBeDefined();
     expect(architectPrompt).toContain(parallelExplorationSkill!.template);
 
-    // swarm-orchestrator should NOT have parallel-exploration (default is empty autoLoadSkills)
-    const swarmPrompt = opencodeConfig.agent["swarm-orchestrator"]?.prompt as string;
+    // nudimmud-orchestrator should NOT have parallel-exploration (default is empty autoLoadSkills)
+    const swarmPrompt = opencodeConfig.agent["nudimmud-orchestrator"]?.prompt as string;
     expect(swarmPrompt).toBeDefined();
     expect(swarmPrompt).not.toContain(parallelExplorationSkill!.template);
   });
@@ -259,9 +259,9 @@ describe("config hook autoLoadSkills injection", () => {
     fs.writeFileSync(
       configPath,
       JSON.stringify({
-        agentMode: "unified",
+        agentMode: "full",
         agents: {
-          "hive-master": {
+          "enki-planner": {
             autoLoadSkills: ["brainstorming"],
           },
         },
@@ -281,7 +281,7 @@ describe("config hook autoLoadSkills injection", () => {
     await hooks.config!(opencodeConfig);
 
     // The skill should be in the agent's prompt field directly
-    const hiveMasterPrompt = opencodeConfig.agent["hive-master"]?.prompt as string;
+    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
     expect(hiveMasterPrompt).toBeDefined();
     
     const brainstormingSkill = BUILTIN_SKILLS.find(s => s.name === "brainstorming");
@@ -302,9 +302,9 @@ describe("config hook autoLoadSkills injection", () => {
     fs.writeFileSync(
       configPath,
       JSON.stringify({
-        agentMode: "unified",
+        agentMode: "full",
         agents: {
-          "hive-master": {
+          "enki-planner": {
             autoLoadSkills: ["brainstorming", "parallel-exploration"],
           },
         },
@@ -329,7 +329,7 @@ describe("config hook autoLoadSkills injection", () => {
 
     // Call system.transform WITH agent specified
     const outputWithAgent = { system: [] as string[] };
-    await hooks["experimental.chat.system.transform"]?.({ agent: "hive-master" }, outputWithAgent);
+    await hooks["experimental.chat.system.transform"]?.({ agent: "enki-planner" }, outputWithAgent);
     const joinedWithAgent = outputWithAgent.system.join("\n");
 
     // Skills should NOT be in system.transform output (legacy path removed)
@@ -354,7 +354,7 @@ describe("config hook autoLoadSkills injection", () => {
     // Verify skills ARE in the config hook prompt (the correct path)
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
-    const hiveMasterPrompt = opencodeConfig.agent["hive-master"]?.prompt as string;
+    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
     expect(hiveMasterPrompt).toContain(brainstormingSkill!.template);
     expect(hiveMasterPrompt).toContain(parallelExplorationSkill!.template);
   });
@@ -397,9 +397,9 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     fs.writeFileSync(
       configPath,
       JSON.stringify({
-        agentMode: "unified",
+        agentMode: "full",
         agents: {
-          "hive-master": {
+          "enki-planner": {
             autoLoadSkills: ["my-custom-skill"],
           },
         },
@@ -418,7 +418,7 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    const hiveMasterPrompt = opencodeConfig.agent["hive-master"]?.prompt as string;
+    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
     expect(hiveMasterPrompt).toBeDefined();
     expect(hiveMasterPrompt).toContain("# My Custom Skill");
     expect(hiveMasterPrompt).toContain("This is custom skill content.");
@@ -439,9 +439,9 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     fs.writeFileSync(
       configPath,
       JSON.stringify({
-        agentMode: "unified",
+        agentMode: "full",
         agents: {
-          "hive-master": {
+          "enki-planner": {
             autoLoadSkills: ["global-skill"],
           },
         },
@@ -460,7 +460,7 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    const hiveMasterPrompt = opencodeConfig.agent["hive-master"]?.prompt as string;
+    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
     expect(hiveMasterPrompt).toBeDefined();
     expect(hiveMasterPrompt).toContain("# Global Skill");
     expect(hiveMasterPrompt).toContain("This is from global config.");
@@ -481,9 +481,9 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     fs.writeFileSync(
       configPath,
       JSON.stringify({
-        agentMode: "unified",
+        agentMode: "full",
         agents: {
-          "hive-master": {
+          "enki-planner": {
             autoLoadSkills: ["claude-skill"],
           },
         },
@@ -502,7 +502,7 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    const hiveMasterPrompt = opencodeConfig.agent["hive-master"]?.prompt as string;
+    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
     expect(hiveMasterPrompt).toBeDefined();
     expect(hiveMasterPrompt).toContain("# Claude Skill");
     expect(hiveMasterPrompt).toContain("This is Claude-compatible.");
@@ -523,9 +523,9 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     fs.writeFileSync(
       configPath,
       JSON.stringify({
-        agentMode: "unified",
+        agentMode: "full",
         agents: {
-          "hive-master": {
+          "enki-planner": {
             autoLoadSkills: ["brainstorming"],
           },
         },
@@ -544,7 +544,7 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    const hiveMasterPrompt = opencodeConfig.agent["hive-master"]?.prompt as string;
+    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
     expect(hiveMasterPrompt).toBeDefined();
     
     // Builtin skill template should be present
@@ -563,9 +563,9 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     fs.writeFileSync(
       configPath,
       JSON.stringify({
-        agentMode: "unified",
+        agentMode: "full",
         agents: {
-          "hive-master": {
+          "enki-planner": {
             autoLoadSkills: ["nonexistent-file-skill", "brainstorming"],
           },
         },
@@ -585,7 +585,7 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    const hiveMasterPrompt = opencodeConfig.agent["hive-master"]?.prompt as string;
+    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
     expect(hiveMasterPrompt).toBeDefined();
     
     // Builtin brainstorming should still be present (other skill in list)
@@ -616,9 +616,9 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     fs.writeFileSync(
       configPath,
       JSON.stringify({
-        agentMode: "unified",
+        agentMode: "full",
         agents: {
-          "hive-master": {
+          "enki-planner": {
             autoLoadSkills: ["my-skill"],
           },
         },
@@ -637,7 +637,7 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    const hiveMasterPrompt = opencodeConfig.agent["hive-master"]?.prompt as string;
+    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
     expect(hiveMasterPrompt).toBeDefined();
     
     // Project version should be present
@@ -670,9 +670,9 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     fs.writeFileSync(
       configPath,
       JSON.stringify({
-        agentMode: "unified",
+        agentMode: "full",
         agents: {
-          "hive-master": {
+          "enki-planner": {
             autoLoadSkills: ["skill-a", "skill-b"],
           },
         },
@@ -691,7 +691,7 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    const hiveMasterPrompt = opencodeConfig.agent["hive-master"]?.prompt as string;
+    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
     expect(hiveMasterPrompt).toBeDefined();
     
     // Both skills should be present
@@ -727,10 +727,10 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     fs.writeFileSync(
       configPath,
       JSON.stringify({
-        agentMode: "unified",
+        agentMode: "full",
         disableSkills: ["my-disabled-skill"],
         agents: {
-          "hive-master": {
+          "enki-planner": {
             autoLoadSkills: ["my-disabled-skill", "my-enabled-skill"],
           },
         },
@@ -749,7 +749,7 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    const hiveMasterPrompt = opencodeConfig.agent["hive-master"]?.prompt as string;
+    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
     expect(hiveMasterPrompt).toBeDefined();
 
     // Disabled skill should NOT be present
@@ -776,9 +776,9 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     fs.writeFileSync(
       configPath,
       JSON.stringify({
-        agentMode: "unified",
+        agentMode: "full",
         agents: {
-          "hive-master": {
+          "enki-planner": {
             // Include invalid IDs (path traversal, nonexistent) alongside valid skill
             autoLoadSkills: ["../traversal-attempt", "valid-skill", "nonexistent-skill-xyz"],
           },
@@ -799,7 +799,7 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    const hiveMasterPrompt = opencodeConfig.agent["hive-master"]?.prompt as string;
+    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
     expect(hiveMasterPrompt).toBeDefined();
 
     // Valid skill should still be loaded despite invalid IDs in the list

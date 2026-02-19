@@ -168,22 +168,30 @@ export interface HiveConfig {
   disableMcps?: string[];
   /** Enable OMO-Slim delegation (optional integration) */
   omoSlimEnabled?: boolean;
-  /** Choose between unified or dedicated agent modes */
-  agentMode?: 'unified' | 'dedicated';
+  /** Choose between agent modes: full (10 agents), core (6 agents), lean (4 agents) */
+  agentMode?: 'full' | 'core' | 'lean';
   /** Agent configuration */
   agents?: {
-    /** Hive Master (hybrid planner + orchestrator) */
-    'hive-master'?: AgentModelConfig;
-    /** Architect Planner (planning-only) */
-    'architect-planner'?: AgentModelConfig;
-    /** Swarm Orchestrator */
-    'swarm-orchestrator'?: AgentModelConfig;
-    /** Scout Researcher */
-    'scout-researcher'?: AgentModelConfig;
-    /** Forager Worker */
-    'forager-worker'?: AgentModelConfig;
-    /** Hygienic Reviewer */
-    'hygienic-reviewer'?: AgentModelConfig;
+    /** Enlil - Plan Validator */
+    'enlil-validator'?: AgentModelConfig;
+    /** Enki - Planner (Architect) */
+    'enki-planner'?: AgentModelConfig;
+    /** Nudimmud - Orchestrator */
+    'nudimmud-orchestrator'?: AgentModelConfig;
+    /** Adapa - Explorer / Researcher */
+    'adapa-explorer'?: AgentModelConfig;
+    /** Kulla - Coder (Worker) */
+    'kulla-coder'?: AgentModelConfig;
+    /** Nanshe - Code Reviewer */
+    'nanshe-reviewer'?: AgentModelConfig;
+    /** Enbilulu - Tester */
+    'enbilulu-tester'?: AgentModelConfig;
+    /** Mushdamma - Phase Reviewer */
+    'mushdamma-phase-reviewer'?: AgentModelConfig;
+    /** Isimud - Idea Architect */
+    'isimud-ideator'?: AgentModelConfig;
+    /** Asalluhi - Prompt Engineer */
+    'asalluhi-prompter'?: AgentModelConfig;
   };
   /** Sandbox mode for worker isolation */
   sandbox?: 'none' | 'docker';
@@ -195,14 +203,18 @@ export interface HiveConfig {
   hook_cadence?: Record<string, number>;
 }
 
-/** Default models for Hive agents */
+/** Default models for Pantheon agents */
 export const DEFAULT_AGENT_MODELS = {
-  'hive-master': 'github-copilot/claude-opus-4.5',
-  'architect-planner': 'github-copilot/gpt-5.2-codex',
-  'swarm-orchestrator': 'github-copilot/claude-opus-4.5',
-  'scout-researcher': 'zai-coding-plan/glm-4.7',
-  'forager-worker': 'github-copilot/gpt-5.2-codex',
-  'hygienic-reviewer': 'github-copilot/gpt-5.2-codex',
+  'enlil-validator': 'github-copilot/claude-sonnet-4-20250514',
+  'enki-planner': 'github-copilot/gpt-5.2-codex',
+  'nudimmud-orchestrator': 'github-copilot/claude-opus-4.5',
+  'adapa-explorer': 'zai-coding-plan/glm-4.7',
+  'kulla-coder': 'github-copilot/gpt-5.2-codex',
+  'nanshe-reviewer': 'github-copilot/gpt-5.2-codex',
+  'enbilulu-tester': 'github-copilot/gpt-5.2-codex',
+  'mushdamma-phase-reviewer': 'github-copilot/claude-sonnet-4-20250514',
+  'isimud-ideator': 'github-copilot/claude-sonnet-4-20250514',
+  'asalluhi-prompter': 'github-copilot/claude-sonnet-4-20250514',
 } as const;
 
 export const DEFAULT_HIVE_CONFIG: HiveConfig = {
@@ -210,47 +222,66 @@ export const DEFAULT_HIVE_CONFIG: HiveConfig = {
   enableToolsFor: [],
   disableSkills: [],
   disableMcps: [],
-  agentMode: 'unified',
+  agentMode: 'full',
   sandbox: 'none',
   agents: {
-    'hive-master': {
-      model: DEFAULT_AGENT_MODELS['hive-master'],
-      temperature: 0.5,
-      skills: [
-        'brainstorming',
-        'writing-plans',
-        'dispatching-parallel-agents',
-        'executing-plans',
-      ],
-      autoLoadSkills: ['parallel-exploration'],
+    'enlil-validator': {
+      model: DEFAULT_AGENT_MODELS['enlil-validator'],
+      temperature: 0.3,
+      skills: [],
+      autoLoadSkills: [],
     },
-    'architect-planner': {
-      model: DEFAULT_AGENT_MODELS['architect-planner'],
+    'enki-planner': {
+      model: DEFAULT_AGENT_MODELS['enki-planner'],
       temperature: 0.7,
       skills: ['brainstorming', 'writing-plans'],
       autoLoadSkills: ['parallel-exploration'],
     },
-    'swarm-orchestrator': {
-      model: DEFAULT_AGENT_MODELS['swarm-orchestrator'],
+    'nudimmud-orchestrator': {
+      model: DEFAULT_AGENT_MODELS['nudimmud-orchestrator'],
       temperature: 0.5,
       skills: ['dispatching-parallel-agents', 'executing-plans'],
       autoLoadSkills: [],
     },
-    'scout-researcher': {
-      model: DEFAULT_AGENT_MODELS['scout-researcher'],
+    'adapa-explorer': {
+      model: DEFAULT_AGENT_MODELS['adapa-explorer'],
       temperature: 0.5,
       skills: [],
       autoLoadSkills: [],
     },
-    'forager-worker': {
-      model: DEFAULT_AGENT_MODELS['forager-worker'],
+    'kulla-coder': {
+      model: DEFAULT_AGENT_MODELS['kulla-coder'],
       temperature: 0.3,
       autoLoadSkills: ['test-driven-development', 'verification-before-completion'],
     },
-    'hygienic-reviewer': {
-      model: DEFAULT_AGENT_MODELS['hygienic-reviewer'],
+    'nanshe-reviewer': {
+      model: DEFAULT_AGENT_MODELS['nanshe-reviewer'],
       temperature: 0.3,
       skills: ['systematic-debugging', 'code-reviewer'],
+      autoLoadSkills: [],
+    },
+    'enbilulu-tester': {
+      model: DEFAULT_AGENT_MODELS['enbilulu-tester'],
+      temperature: 0.3,
+      skills: ['test-driven-development'],
+      autoLoadSkills: [],
+    },
+    'mushdamma-phase-reviewer': {
+      model: DEFAULT_AGENT_MODELS['mushdamma-phase-reviewer'],
+      temperature: 0.3,
+      skills: [],
+      autoLoadSkills: [],
+    },
+    'isimud-ideator': {
+      model: DEFAULT_AGENT_MODELS['isimud-ideator'],
+      temperature: 0.7,
+      skills: ['brainstorming'],
+      autoLoadSkills: [],
+    },
+    'asalluhi-prompter': {
+      model: DEFAULT_AGENT_MODELS['asalluhi-prompter'],
+      temperature: 0.5,
+      skills: [],
       autoLoadSkills: [],
     },
   },

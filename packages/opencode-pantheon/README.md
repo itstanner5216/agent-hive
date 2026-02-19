@@ -3,15 +3,15 @@
 [![npm version](https://img.shields.io/npm/v/opencode-pantheon)](https://www.npmjs.com/package/opencode-pantheon)
 [![License: MIT with Commons Clause](https://img.shields.io/badge/License-MIT%20with%20Commons%20Clause-blue.svg)](../../LICENSE)
 
-**From Vibe Coding to Pantheon Coding** — The OpenCode plugin that brings structure to AI-assisted development.
+**God-tier Orchestration for your mortal code** — The OpenCode plugin that turns AI effort into structured delivery.
 
-## Why Pantheon?
+## Why Summon the Pantheon gods?
 
 Stop losing context. Stop repeating decisions. Start shipping with confidence.
 
 ```
 Vibe: "Just make it work"
-Pantheon: Plan → Review → Approve → Execute → Ship
+From myth to reality: let your Pantherian visions come to life.
 ```
 
 ## Installation
@@ -41,11 +41,11 @@ This enables tools like `grep_app_searchGitHub`, `context7_query-docs`, `websear
 
 ### Planning-mode delegation
 
-During planning, "don't execute" means "don't implement" (no code edits, no worktrees). Read-only exploration is explicitly allowed and encouraged, both via local tools and by delegating to Scout.
+During planning, "don't execute" means "don't implement" (no code edits, no worktrees). Read-only exploration is explicitly allowed and encouraged, both via local tools and by delegating to Adapa Explorer.
 
 #### Canonical Delegation Threshold
 
-- Delegate to Scout when you cannot name the file path upfront, expect to inspect 2+ files, or the question is open-ended ("how/where does X work?").
+- Delegate to Adapa Explorer when you cannot name the file path upfront, expect to inspect 2+ files, or the question is open-ended ("how/where does X work?").
 - Local `read`/`grep`/`glob` is acceptable only for a single known file and a bounded question.
 
 ## Tools
@@ -295,7 +295,7 @@ Override models for specific agents:
 
 ## Pair with VS Code
 
-For the full experience, install [vscode-hive](https://marketplace.visualstudio.com/items?itemName=tctinh.vscode-hive) to review plans inline with comments.
+For the full experience, install [vscode-hive](https://marketplace.visualstudio.com/items?itemName=tctinh.vscode-hive) to review Pantheon plans inline with comments.
 
 ## License
 
@@ -303,4 +303,4 @@ MIT with Commons Clause — Free for personal and non-commercial use. See [LICEN
 
 ---
 
-**Stop vibing. Start hiving.** 🐝
+**Stop vibing. Start building with the Pantheon.** ⚡

@@ -10,17 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.0] - 2026-02-08
 
 ### Added
-- **Docker Mastery Skill**: On-demand skill teaching agents container thinking — debugging, docker-compose, Dockerfile authoring, image optimization, integration testing. Primary user: Forager. Loaded via `hive_skill("docker-mastery")`
-- **AGENTS.md Mastery Skill**: On-demand skill teaching agents what makes effective pseudo-memory — signal vs noise filtering, section structure, when to prune. Primary users: Hive, Swarm, Architect. Loaded via `hive_skill("agents-md-mastery")`
-- **Atomic AGENTS.md Apply**: New `apply` action on `hive_agents_md` tool — agents propose → user approves → apply writes atomically to eliminate manual edit errors
+- **Docker Mastery Skill**: On-demand skill teaching agents container thinking — debugging, docker-compose, Dockerfile authoring, image optimization, integration testing. Primary user: Kulla Coder. Loaded via `pantheon_skill("docker-mastery")`
+- **AGENTS.md Mastery Skill**: On-demand skill teaching agents what makes effective pseudo-memory — signal vs noise filtering, section structure, when to prune. Primary users: Nudimmud, Enki, Enlil. Loaded via `pantheon_skill("agents-md-mastery")`
+- **Atomic AGENTS.md Apply**: New `apply` action on `pantheon_agents_md` tool — agents propose → user approves → apply writes atomically to eliminate manual edit errors
 - **Persistent Sandbox Containers**: One container per worktree, reused across commands via `docker exec`. 50 test runs = 1 container (not 50). Reduces overhead, speeds up test execution
 - **Context Lifecycle Management**: `archive()` moves stale contexts to timestamped archive/, `stats()` reports context health (count/size/age), size warning at 20K chars
-- **Sandbox Bypass Audit Logging**: All HOST: commands logged with `[hive:sandbox]` prefix for visibility into sandbox escape usage
+- **Sandbox Bypass Audit Logging**: All HOST: commands logged with `[pantheon:sandbox]` prefix for visibility into sandbox escape usage
 
 ### Changed
 - **Discovery Gate Tightened**: Replaced substring match with regex + 100 char minimum content length. Empty or comment-hidden Discovery sections now rejected (P7 Hard Gates enforcement)
-- **Forager Prompt**: Removed HOST: escape hatch documentation — agents must report as blocked and ask users when host access needed
-- **Agent Prompts (Hive, Swarm, Forager)**: Added skill references for docker-mastery and agents-md-mastery
+- **Kulla Coder Prompt**: Removed HOST: escape hatch documentation — agents must report as blocked and ask users when host access needed
+- **Agent Prompts (Enlil Validator, Nudimmud Orchestrator, Kulla Coder)**: Added skill references for docker-mastery and agents-md-mastery
 - **Skill Count**: 9 skills → 11 skills (docker-mastery, agents-md-mastery added)
 - **JSON Schema**: Added sandbox, dockerImage, and persistentContainers properties to agent_hive.schema.json
 
@@ -30,21 +30,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.1] - 2026-02-08
 
 ### Added
-- **AGENTS.md Self-Maintenance Tool**: New `hive_agents_md` tool with `init` and `sync` operations — agents can bootstrap AGENTS.md from codebase analysis and propose updates from feature context discoveries (with approval gate per P2)
+- **AGENTS.md Self-Maintenance Tool**: New `pantheon_agents_md` tool with `init` and `sync` operations — agents can bootstrap AGENTS.md from codebase analysis and propose updates from feature context discoveries (with approval gate per P2)
 - **Docker Sandbox Isolation**: Level 1 Docker sandboxing for worker execution — transparent bash interception wraps test commands in containers, auto-detects project runtime (node/python/go/rust), includes `HOST:` escape hatch for host-level operations
 
 ### Changed
-- **Architect Prompt Hardened**: Expanded intent classification with Strategy column, 6-item clearance checklist, Test Strategy section, Turn Termination rules
-- **Forager Prompt Hardened**: "Resolve Before Blocking" guidance (try 3+ approaches), expanded Orient pre-flight, 6-item Completion Checklist
-- **Forager Prompt**: Added Docker Sandbox awareness section to Iron Laws — explains transparent container wrapping and HOST: escape hatch
-- **Scout Prompt Fixed**: Fixed leaked persistence example (truncated research dump), added year awareness to Iron Laws
-- **Swarm Prompt Hardened**: Removed non-existent "oracle" subagent reference, added "After Delegation — VERIFY" checklist, Turn Termination
-- **Hive Prompt Hardened**: Turn Termination (valid/invalid endings), Hard Blocks table replacing vague Iron Laws prose, AI-Slop Flags
-- **Hygienic Prompt Hardened**: Agent-executable verification emphasis with ✅/❌ examples, expanded Active Implementation Simulation
+- **Enki Planner Prompt Hardened**: Expanded intent classification with Strategy column, 6-item clearance checklist, Test Strategy section, Turn Termination rules
+- **Kulla Coder Prompt Hardened**: "Resolve Before Blocking" guidance (try 3+ approaches), expanded Orient pre-flight, 6-item Completion Checklist
+- **Kulla Coder Prompt**: Added Docker Sandbox awareness section to Iron Laws — explains transparent container wrapping and HOST: escape hatch
+- **Adapa Explorer Prompt Fixed**: Fixed leaked persistence example (truncated research dump), added year awareness to Iron Laws
+- **Nudimmud Orchestrator Prompt Hardened**: Removed non-existent "oracle" subagent reference, added "After Delegation — VERIFY" checklist, Turn Termination
+- **Enlil Validator Prompt Hardened**: Turn Termination (valid/invalid endings), Hard Blocks table replacing vague Iron Laws prose, AI-Slop Flags
+- **Nanshe Reviewer Prompt Hardened**: Agent-executable verification emphasis with ✅/❌ examples, expanded Active Implementation Simulation
 - **Writing-Plans Skill**: Added agent-executable acceptance criteria guidance
-- **Hive Skill Loading**: Added `systematic-debugging`, `test-driven-development`, `verification-before-completion` to Hive's skill table
-- **PHILOSOPHY.md**: Added "Wax Seal" (sandbox) to Hive Terminology table, added v1.1.1 evolution notes documenting AGENTS.md integration and Docker sandbox design decisions
-- **Agent Prompts (Hive + Swarm)**: Added AGENTS.md maintenance guidance — orchestrators sync context findings after feature completion
+- **Pantheon Skill Loading**: Added `systematic-debugging`, `test-driven-development`, `verification-before-completion` to Pantheon's skill table
+- **PHILOSOPHY.md**: Added "Wax Seal" (sandbox) to Pantheon Terminology table, added v1.1.1 evolution notes documenting AGENTS.md integration and Docker sandbox design decisions
+- **Agent Prompts (Enlil Validator + Nudimmud Orchestrator)**: Added AGENTS.md maintenance guidance — orchestrators sync context findings after feature completion
 
 ### Removed
 - **Onboarding Skill**: Deleted — unreferenced by any agent (10 skills → 9)
@@ -60,18 +60,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.0] - 2026-02-06
 
 ### Added
-- **Worker Orient Phase**: Forager agents now run a pre-flight checklist before coding — read references, check patterns, verify assumptions. Prevents "code first, ask questions later" failures
+- **Worker Orient Phase**: Kulla agents now run a pre-flight checklist before coding — read references, check patterns, verify assumptions. Prevents "code first, ask questions later" failures
 - **Task-Type Auto-Inference**: `buildSpecContent()` automatically infers task type (greenfield/testing/modification/bugfix/refactoring) from task name and plan section, giving workers better context without manual annotation
-- **Post-Batch Code Review Checkpoints**: After each batch merge, orchestrators (Hive + Swarm) prompt for optional Hygienic reviewer consultation to catch drift early
-- **Scout Research Persistence**: Scout agents now persist research findings to context files via `hive_context_write`, so discoveries survive for future workers instead of dying with the session
-- **Active Discovery**: Planning agents (Hive + Architect) challenge user assumptions during planning — collaborative pushback on proposals that may not survive "Good Enough Wins" (P4)
-- **Worktree Info in `hive_status`**: Task status output now includes worktree path and branch info per task for better visibility
+- **Post-Batch Code Review Checkpoints**: After each batch merge, orchestrators (Enlil Validator + Nudimmud Orchestrator) prompt for optional Nanshe Reviewer consultation to catch drift early
+- **Adapa Research Persistence**: Adapa agents now persist research findings to context files via `pantheon_context_write`, so discoveries survive for future workers instead of dying with the session
+- **Active Discovery**: Planning agents (Enlil Validator + Enki Planner) challenge user assumptions during planning — collaborative pushback on proposals that may not survive "Good Enough Wins" (P4)
+- **Worktree Info in `pantheon_status`**: Task status output now includes worktree path and branch info per task for better visibility
 
 ### Changed
 - **Tool Consolidation**: Simplified from 22 tools → 14 tools by removing redundant background task and journal infrastructure
-- **Tool Rename**: `hive_exec_start` → `hive_worktree_create`, `hive_exec_complete` → `hive_worktree_commit` — names now reflect the worktree-based execution model
-- **Worker Summary Guidance**: Forager prompts now guide richer summaries (files changed, key decisions, gotchas, what's left) instead of the old notepad-based approach
-- **All Agent Prompts Updated**: Hive, Swarm, Architect, Scout, Forager, Hygienic — all reflect the consolidated tool set and new capabilities
+- **Tool Rename**: `hive_exec_start` → `pantheon_worktree_create`, `hive_exec_complete` → `pantheon_worktree_commit` — names now reflect the worktree-based execution model
+- **Worker Summary Guidance**: Kulla Coder prompts now guide richer summaries (files changed, key decisions, gotchas, what's left) instead of the old notepad-based approach
+- **All Agent Prompts Updated**: Enlil Validator, Nudimmud Orchestrator, Enki Planner, Adapa Explorer, Kulla Coder, Nanshe Reviewer — all reflect the consolidated tool set and new capabilities
 - **All Skills Updated**: Removed background task references, renamed exec→worktree throughout
 - **VS Code Extension Updated**: Tool registrations reflect the 14-tool set
 
@@ -80,10 +80,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`delegateMode` Config**: Removed from types and configuration — no longer needed without background tasks
 - **Journal Infrastructure**: Removed journal paths, templates, and references from pantheon-core — journals were write-only artifacts nobody read
 - **8 Redundant Tools**: `hive_background_start`, `hive_background_status`, `hive_background_cancel`, `hive_background_result`, `hive_exec_start`, `hive_exec_complete`, `hive_journal_read`, `hive_feature_status`
-- **Dead Notepad References**: Cleaned up stale notepad guidance from forager prompt
+- **Dead Notepad References**: Cleaned up stale notepad guidance from Kulla Coder prompt
 
 ### Fixed
-- **Stale Tool References**: `hive_exec_start`/`hive_exec_complete` → `hive_worktree_create`/`hive_worktree_commit` in PHILOSOPHY.md and all documentation
+- **Stale Tool References**: `hive_exec_start`/`hive_exec_complete` → `pantheon_worktree_create`/`pantheon_worktree_commit` in PHILOSOPHY.md and all documentation
 
 ### Stats
 - 54 files changed, 512 insertions, 7,328 deletions (net ~6,800 lines removed)
@@ -103,15 +103,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **Missing Dependency Skills**: Fixed missing dependency skills in OpenCode agents
   - Align plan templates with updated dependency guidance
-  - Architect agent: updated to include missing dependency skills
-  - Hive agent: synchronized with new dependency handling
-  - Swarm agent: added missing skill references
+  - Enki Planner agent: updated to include missing dependency skills
+  - Enlil Validator agent: synchronized with new dependency handling
+  - Nudimmud Orchestrator agent: added missing skill references
   - Skills registry: regenerated to include all required dependencies
 
 ### Changed
 - **Documentation**: Enhanced documentation across all packages
   - AGENTS.md: Added guidance on worker prompt referencing
-  - OpenCode Hive README: Expanded documentation on task delegation
+  - OpenCode Pantheon README: Expanded documentation on task delegation
   - DATA-MODEL.md: Updated data model documentation
   - HIVE-TOOLS.md: Clarified tool usage patterns
 - **Writing-Plans Skill**: Major skill documentation update
@@ -125,34 +125,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Task Dependency System**: Full dependency tracking and enforcement for task ordering
   - Parse task dependencies from plan templates using `@dep:task-name` syntax
   - Persist task dependencies in status metadata for runtime validation
-  - Validate task dependency graphs during `hive_tasks_sync` to catch cycles and missing dependencies
+  - Validate task dependency graphs during `pantheon_tasks_sync` to catch cycles and missing dependencies
   - Enforce dependencies at execution entrypoints to ensure proper task sequencing
-  - Surface runnable tasks and dependency blocks in `hive_status` for visibility
+  - Surface runnable tasks and dependency blocks in `pantheon_status` for visibility
   - Guide dependency-aware task batching to optimize parallel execution while respecting dependencies
   - Dependency annotations in plan templates with clear syntax documentation
-- **Architect Task Delegation**: Allow Architect agent to delegate execution tasks via `task()` function
-  - Enable Architect to transition from planning to execution by spawning workers
+- **Enki Planner Task Delegation**: Allow Enki Planner agent to delegate execution tasks via `task()` function
+  - Enable Enki Planner to transition from planning to execution by spawning workers
   - Document task() parallelism rules in dispatching-parallel-agents skill
   - Add task-mode guidance to parallel-exploration skill
-  - Align Hive/Swarm prompts and tools template with delegateMode configuration
+  - Align Enlil/Nudimmud prompts and tools template with delegateMode configuration
 
 ### Fixed
-- **Scout Agent Improvements**: Prevent scout background recursion and auto-loading issues
-  - Stop scout auto-loading parallel exploration skill unnecessarily
+- **Adapa Explorer Agent Improvements**: Prevent Adapa background recursion and auto-loading issues
+  - Stop Adapa auto-loading parallel exploration skill unnecessarily
   - Block background delegation from subagents to prevent recursion
   - Disable delegation tools inside workers for proper permission boundaries
   - Deny delegation permissions for subagents to enforce architectural boundaries
-  - Prevent scout background recursion with proper checks
+  - Prevent Adapa background recursion with proper checks
 - **Dependency Graph Alignment**: Fix alignment of legacy dependency fallback across all tools
 - **Spec Generation**: Unify spec generation across sync and exec for consistency
-- **Tool Alignment**: Align opencode hive tools with dependency graphs
+- **Tool Alignment**: Align opencode Pantheon tools with dependency graphs
 
 ### Changed
 - **Documentation**: Comprehensive documentation updates
   - Standardize on `hive_background` tools terminology
   - Update background task reminders with better guidance
-  - Describe dependency semantics in `hive_status` documentation
-  - Clarify Architect task() delegation rules
+  - Describe dependency semantics in `pantheon_status` documentation
+  - Clarify Enki Planner task() delegation rules
 
 ### Tests
 - Extended dependency parsing and enforcement coverage

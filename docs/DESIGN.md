@@ -1,4 +1,4 @@
-# Hive Design
+# Pantheon Design
 
 ## Core Concept
 
@@ -140,18 +140,18 @@ Each task executes in an isolated git worktree:
 
 ## Source of Truth Rules
 
-Hive uses file-based state with clear ownership boundaries:
+Pantheon uses file-based state with clear ownership boundaries:
 
 | File | Owner | Other Access |
 |------|-------|--------------| 
-| `feature.json` | Hive Master | VS Code (read-only) |
-| `tasks.json` | Hive Master | VS Code (read-only) |
-| `status.json` (task) | Worker | Hive Master (read), Poller (read-only) |
-| `plan.md` | Hive Master | VS Code (read + comment) |
-| `comments.json` | VS Code | Hive Master (read-only) |
+| `feature.json` | Pantheon Orchestrator | VS Code (read-only) |
+| `tasks.json` | Pantheon Orchestrator | VS Code (read-only) |
+| `status.json` (task) | Worker | Pantheon Orchestrator (read), Poller (read-only) |
+| `plan.md` | Pantheon Orchestrator | VS Code (read + comment) |
+| `comments.json` | VS Code | Pantheon Orchestrator (read-only) |
 | `spec.md` | `pantheon_worktree_create` | Worker (read-only) |
 | `report.md` | Worker | All (read-only) |
-| `BLOCKED` | Beekeeper | All (read-only, blocks operations) |
+| `BLOCKED` | Steward | All (read-only, blocks operations) |
 
 ### Poller Constraints
 

@@ -1,6 +1,6 @@
 /**
- * Worker prompt builder for Hive delegated execution.
- * Builds context-rich prompts for worker agents with all Hive context.
+ * Worker prompt builder for Pantheon delegated execution.
+ * Builds context-rich prompts for worker agents with all Pantheon context.
  */
 
 export interface ContextFile {
@@ -71,7 +71,7 @@ Continue from where the previous worker left off, incorporating the user's decis
 The worktree already contains the previous worker's progress.
 ` : '';
 
-  return `# Hive Worker Assignment
+  return `# Pantheon Worker Assignment
 
 You are a worker agent executing a task in an isolated git worktree.
 
@@ -133,12 +133,12 @@ pantheon_worktree_commit({
 
 **After calling pantheon_worktree_commit with blocked status, STOP IMMEDIATELY.**
 
-The Hive Master will:
+The Pantheon Master will:
 1. Receive your blocker info
 2. Ask the user via question()
 3. Spawn a NEW worker to continue with the decision
 
-This keeps the user focused on ONE conversation (Hive Master) instead of multiple worker panes.
+This keeps the user focused on ONE conversation (Pantheon Master) instead of multiple worker panes.
 
 ---
 
@@ -165,7 +165,7 @@ Follow result.nextAction, fix the issue, and call pantheon_worktree_commit again
 
 Only when commit result is terminal should you stop.
 Do NOT continue working after a terminal result. Do NOT respond further. Your session is DONE.
-The Hive Master will take over from here.
+The Pantheon Master will take over from here.
 
 **Summary Guidance** (used verbatim for downstream task context):
 1. Start with **what changed** (files/areas touched).
@@ -229,7 +229,7 @@ After 3 failed attempts at same fix: STOP and report blocker.
 **You do NOT have access to (or should not use):**
 - \`question\` - Escalate via blocker protocol instead
 - \`pantheon_worktree_create\` - No spawning sub-workers
-- \`pantheon_merge\` - Only Hive Master merges
+- \`pantheon_merge\` - Only Pantheon Master merges
 - \`task\` - No recursive delegation
 
 ---

@@ -165,10 +165,10 @@ Each agent can have specific skills enabled. If configured, only those skills ap
 ```json
 {
   "agents": {
-    "hive-master": {
+    "enki-planner": {
       "skills": ["brainstorming", "writing-plans", "executing-plans"]
     },
-    "forager-worker": {
+    "kulla-coder": {
       "skills": ["test-driven-development", "verification-before-completion"]
     }
   }
@@ -193,10 +193,10 @@ Use `autoLoadSkills` to automatically inject skills into an agent's system promp
 {
   "$schema": "https://raw.githubusercontent.com/tctinh/agent-hive/main/packages/opencode-pantheon/schema/agent_hive.schema.json",
   "agents": {
-    "hive-master": {
+    "enki-planner": {
       "autoLoadSkills": ["parallel-exploration"]
     },
-    "forager-worker": {
+    "kulla-coder": {
       "autoLoadSkills": ["test-driven-development", "verification-before-completion"]
     }
   }
@@ -226,11 +226,11 @@ Skill IDs must be safe directory names (no `/`, `\`, `..`, or `.`). Missing or i
 
 | Agent | autoLoadSkills default |
 |-------|------------------------|
-| `hive-master` | `parallel-exploration` |
-| `forager-worker` | `test-driven-development`, `verification-before-completion` |
-| `scout-researcher` | (none) |
-| `architect-planner` | `parallel-exploration` |
-| `swarm-orchestrator` | (none) |
+| `enki-planner` | `parallel-exploration` |
+| `kulla-coder` | `test-driven-development`, `verification-before-completion` |
+| `adapa-explorer` | (none) |
+| `enki-planner` | `parallel-exploration` |
+| `nudimmud-orchestrator` | (none) |
 
 ### Per-Agent Model Variants
 
@@ -240,15 +240,15 @@ You can set a `variant` for each Hive agent to control model reasoning/effort le
 {
   "$schema": "https://raw.githubusercontent.com/tctinh/agent-hive/main/packages/opencode-pantheon/schema/agent_hive.schema.json",
   "agents": {
-    "hive-master": {
+    "enki-planner": {
       "model": "anthropic/claude-sonnet-4-20250514",
       "variant": "high"
     },
-    "forager-worker": {
+    "kulla-coder": {
       "model": "anthropic/claude-sonnet-4-20250514",
       "variant": "medium"
     },
-    "scout-researcher": {
+    "adapa-explorer": {
       "variant": "low"
     }
   }
@@ -285,7 +285,7 @@ Override models for specific agents:
 ```json
 {
   "agents": {
-    "hive-master": {
+    "enki-planner": {
       "model": "anthropic/claude-sonnet-4-20250514",
       "temperature": 0.5
     }

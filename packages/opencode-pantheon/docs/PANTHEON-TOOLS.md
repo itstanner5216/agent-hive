@@ -1,6 +1,6 @@
-# Hive Tools Inventory
+# Pantheon Tools Inventory
 
-## Tools (14 total)
+## Tools (16 total)
 
 ### Feature Management (2 tools)
 | Tool | Purpose |
@@ -60,10 +60,15 @@
 |------|---------|
 | `pantheon_status` | Get comprehensive feature status as JSON |
 
-### Steering (1 tool)
+### Skills (1 tool)
 | Tool | Purpose |
 |------|---------|
-| `hive_steering` | Get steering comments from VSCode sidebar |
+| `pantheon_skill` | Load and inject Pantheon skill content |
+
+### Agents (1 tool)
+| Tool | Purpose |
+|------|---------|
+| `pantheon_agents_md` | Generate AGENTS.md with current agent config |
 
 ---
 
@@ -75,6 +80,7 @@
 | `hive_session_*` (2 tools) | Replaced by `pantheon_status` |
 | `hive_context_read` | Agents can read files directly |
 | `hive_context_list` | Agents can use glob/Read |
+| `hive_steering` | Removed in favor of direct context management |
 
 ---
 
@@ -89,5 +95,6 @@
 | Merge | 1 | merge |
 | Context | 1 | write |
 | Status | 1 | status |
-| Steering | 1 | steering |
-| **Total** | **14** | |
+| Skills | 1 | skill |
+| Agents | 1 | agents_md |
+| **Total** | **16** | |

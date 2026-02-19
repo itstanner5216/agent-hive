@@ -5,21 +5,9 @@
     "": {
       "name": "agent-hive",
     },
-    "packages/hive-core": {
-      "name": "hive-core",
-      "version": "1.0.1",
-      "dependencies": {
-        "simple-git": "^3.27.0",
-      },
-      "devDependencies": {
-        "@types/bun": "^1.2.0",
-        "@types/node": "^20.0.0",
-        "typescript": "^5.0.0",
-      },
-    },
-    "packages/opencode-hive": {
-      "name": "opencode-hive",
-      "version": "1.0.1",
+    "packages/opencode-pantheon": {
+      "name": "opencode-pantheon",
+      "version": "1.2.0",
       "dependencies": {
         "simple-git": "^3.27.0",
       },
@@ -28,7 +16,7 @@
         "@opencode-ai/sdk": "^0.13.0",
         "@types/bun": "^1.2.0",
         "@types/node": "^20.0.0",
-        "hive-core": "workspace:*",
+        "pantheon-core": "workspace:*",
         "typescript": "^5.0.0",
       },
       "optionalDependencies": {
@@ -41,12 +29,24 @@
         "@opencode-ai/plugin": ">=0.13.7",
       },
     },
+    "packages/pantheon-core": {
+      "name": "pantheon-core",
+      "version": "1.2.0",
+      "dependencies": {
+        "simple-git": "^3.27.0",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.2.0",
+        "@types/node": "^20.0.0",
+        "typescript": "^5.0.0",
+      },
+    },
     "packages/vscode-hive": {
       "name": "vscode-hive",
-      "version": "1.0.1",
+      "version": "1.2.0",
       "dependencies": {
         "@opencode-ai/sdk": "^1.1.1",
-        "hive-core": "workspace:*",
+        "pantheon-core": "workspace:*",
       },
       "devDependencies": {
         "@types/vscode": "^1.100.0",
@@ -533,8 +533,6 @@
 
     "hasown": ["hasown@2.0.2", "", { "dependencies": { "function-bind": "^1.1.2" } }, "sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ=="],
 
-    "hive-core": ["hive-core@workspace:packages/hive-core"],
-
     "hono": ["hono@4.11.5", "", {}, "sha512-WemPi9/WfyMwZs+ZUXdiwcCh9Y+m7L+8vki9MzDw3jJ+W9Lc+12HGsd368Qc1vZi1xwW8BWMMsnK5efYKPdt4g=="],
 
     "hosted-git-info": ["hosted-git-info@4.1.0", "", { "dependencies": { "lru-cache": "^6.0.0" } }, "sha512-kyCuEOWjJqZuDbRHzL8V93NzQhwIB71oFWSyzVo+KPZI+pnQPPxucdkrOZvkLRnrf5URsQM+IJ09Dw29cRALIA=="],
@@ -707,11 +705,13 @@
 
     "open": ["open@10.1.2", "", { "dependencies": { "default-browser": "^5.2.1", "define-lazy-prop": "^3.0.0", "is-inside-container": "^1.0.0", "is-wsl": "^3.1.0" } }, "sha512-cxN6aIDPz6rm8hbebcP7vrQNhvRcveZoJU72Y7vskh4oIm+BZwBECnx5nTmrlres1Qapvx27Qo1Auukpf8PKXw=="],
 
-    "opencode-hive": ["opencode-hive@workspace:packages/opencode-hive"],
+    "opencode-pantheon": ["opencode-pantheon@workspace:packages/opencode-pantheon"],
 
     "p-map": ["p-map@7.0.4", "", {}, "sha512-tkAQEw8ysMzmkhgw8k+1U/iPhWNhykKnSk4Rd5zLoPJCuJaGRPo6YposrZgaxHKzDHdDWWZvE/Sk7hsL2X/CpQ=="],
 
     "package-json-from-dist": ["package-json-from-dist@1.0.1", "", {}, "sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw=="],
+
+    "pantheon-core": ["pantheon-core@workspace:packages/pantheon-core"],
 
     "parse-json": ["parse-json@8.3.0", "", { "dependencies": { "@babel/code-frame": "^7.26.2", "index-to-position": "^1.1.0", "type-fest": "^4.39.1" } }, "sha512-ybiGyvspI+fAoRQbIPRddCcSTV9/LsJbf0e/S85VLowVGzRmokfneg2kwVW/KU5rOXrPSbF1qAKPMgNTqqROQQ=="],
 

@@ -219,7 +219,7 @@ export class ConfigService {
     // Safety-critical hooks must always fire (cadence=1)
     if (options?.safetyCritical && configuredCadence && configuredCadence > 1) {
       console.warn(
-        `[hive:cadence] Ignoring cadence > 1 for safety-critical hook: ${hookName}`
+        `[pantheon:cadence] Ignoring cadence > 1 for safety-critical hook: ${hookName}`
       );
       return 1;
     }
@@ -230,7 +230,7 @@ export class ConfigService {
     }
     if (configuredCadence <= 0 || !Number.isInteger(configuredCadence)) {
       console.warn(
-        `[hive:cadence] Invalid cadence ${configuredCadence} for ${hookName}, using 1`
+        `[pantheon:cadence] Invalid cadence ${configuredCadence} for ${hookName}, using 1`
       );
       return 1;
     }

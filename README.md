@@ -103,11 +103,11 @@ Run Agent Hive once to auto-generate a default configuration at `~/.config/openc
 ```json
 {
   "$schema": "https://raw.githubusercontent.com/tctinh/agent-hive/main/packages/opencode-pantheon/schema/agent_hive.schema.json",
-  "agentMode": "unified",
+  "agentMode": "full",
   "disableSkills": [],
   "disableMcps": [],
   "agents": {
-    "hive-master": {
+    "enki-planner": {
       "model": "anthropic/claude-sonnet-4-20250514",
       "temperature": 0.5
     }
@@ -119,7 +119,7 @@ Run Agent Hive once to auto-generate a default configuration at `~/.config/openc
 
 | Option | Values | Description |
 |--------|--------|-------------|
-| `agentMode` | `unified` (default), `dedicated` | `unified`: Single `hive-master` agent handles planning + orchestration. `dedicated`: Separate `architect-planner` and `swarm-orchestrator` agents. |
+| `agentMode` | `full` (default), `core`, `lean` | `full`: All 10 Pantheon agents. `core`: 6 pipeline agents (enlil, enki, nudimmud, adapa, kulla, nanshe). `lean`: 4 essential agents (enki, nudimmud, kulla, adapa). |
 | `disableSkills` | `string[]` | Globally disable specific skills (won't appear in `pantheon_skill` tool). |
 | `disableMcps` | `string[]` | Globally disable MCP servers. Options: `websearch`, `context7`, `grep_app`, `ast_grep`. |
 
@@ -130,15 +130,15 @@ Configure models for each agent role. **Update these to models available on your
 ```json
 {
   "agents": {
-    "hive-master": { "model": "anthropic/claude-sonnet-4-20250514", "temperature": 0.5 },
-    "scout-researcher": { "model": "anthropic/claude-sonnet-4-20250514", "temperature": 0.5 },
-    "forager-worker": { "model": "anthropic/claude-sonnet-4-20250514", "temperature": 0.3 },
-    "hygienic-reviewer": { "model": "anthropic/claude-sonnet-4-20250514", "temperature": 0.3 }
+    "enki-planner": { "model": "anthropic/claude-sonnet-4-20250514", "temperature": 0.5 },
+    "adapa-explorer": { "model": "anthropic/claude-sonnet-4-20250514", "temperature": 0.5 },
+    "kulla-coder": { "model": "anthropic/claude-sonnet-4-20250514", "temperature": 0.3 },
+    "nanshe-reviewer": { "model": "anthropic/claude-sonnet-4-20250514", "temperature": 0.3 }
   }
 }
 ```
 
-All agents: `hive-master`, `architect-planner`, `swarm-orchestrator`, `scout-researcher`, `forager-worker`, `hygienic-reviewer`.
+All agents: `enlil-validator`, `enki-planner`, `nudimmud-orchestrator`, `isimud-ideator`, `asalluhi-prompter`, `adapa-explorer`, `kulla-coder`, `nanshe-reviewer`, `enbilulu-tester`, `mushdamma-phase-reviewer`.
 
 #### Skills
 
@@ -163,7 +163,7 @@ Skills provide specialized workflows that agents can load on-demand via `pantheo
 ```json
 {
   "agents": {
-    "forager-worker": {
+    "kulla-coder": {
       "skills": ["test-driven-development", "verification-before-completion"]
     }
   }
@@ -175,8 +175,8 @@ Skills provide specialized workflows that agents can load on-demand via `pantheo
 ```json
 {
   "agents": {
-    "hive-master": { "autoLoadSkills": ["parallel-exploration"] },
-    "forager-worker": { "autoLoadSkills": ["test-driven-development", "verification-before-completion"] }
+    "enki-planner": { "autoLoadSkills": ["parallel-exploration"] },
+    "kulla-coder": { "autoLoadSkills": ["test-driven-development", "verification-before-completion"] }
   }
 }
 ```
@@ -215,8 +215,8 @@ Set reasoning/effort levels per agent:
 ```json
 {
   "agents": {
-    "hive-master": { "model": "anthropic/claude-sonnet-4-20250514", "variant": "high" },
-    "forager-worker": { "variant": "medium" }
+    "enki-planner": { "model": "anthropic/claude-sonnet-4-20250514", "variant": "high" },
+    "kulla-coder": { "variant": "medium" }
   }
 }
 ```

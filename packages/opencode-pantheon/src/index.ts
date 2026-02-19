@@ -30,7 +30,7 @@ function formatSkillsXml(skills: SkillDefinition[]): string {
     return [
       '  <skill>',
       `    <name>${skill.name}</name>`,
-      `    <description>(hive - Skill) ${skill.description}</description>`,
+      `    <description>(pantheon - Skill) ${skill.description}</description>`,
       '  </skill>',
     ].join('\n');
   }).join('\n');
@@ -79,7 +79,7 @@ async function buildAutoLoadedSkillsContent(
     }
     
     // 3. Not found - warn and skip
-    console.warn(`[hive] Unknown skill id "${skillId}" for agent "${agentName}"`);
+    console.warn(`[pantheon] Unknown skill id "${skillId}" for agent "${agentName}"`);
   }
 
   if (skillTemplates.length === 0) {
@@ -89,12 +89,12 @@ async function buildAutoLoadedSkillsContent(
   return '\n\n' + skillTemplates.join('\n\n');
 }
 
-function createHiveSkillTool(filteredSkills: SkillDefinition[]): ToolDefinition {
-  const base = `Load a Hive skill to get detailed instructions for a specific workflow.
+function createPantheonSkillTool(filteredSkills: SkillDefinition[]): ToolDefinition {
+  const base = `Load a Pantheon skill to get detailed instructions for a specific workflow.
 
 Use this when a task matches an available skill's description. The descriptions below ("Use when...", "Use before...") are triggers; when one applies, you MUST load that skill before proceeding.`;
   const description = filteredSkills.length === 0
-    ? base + '\n\nNo Hive skills available.'
+    ? base + '\n\nNo Pantheon skills available.'
     : base + formatSkillsXml(filteredSkills);
 
   // Build a set of available skill names for validation
@@ -109,19 +109,19 @@ Use this when a task matches an available skill's description. The descriptions 
       // Check if skill is available (not filtered out)
       if (!availableNames.has(name)) {
         const available = filteredSkills.map(s => s.name).join(', ');
-        throw new Error(`Skill "${name}" not available. Available Hive skills: ${available || 'none'}`);
+        throw new Error(`Skill "${name}" not available. Available Pantheon skills: ${available || 'none'}`);
       }
 
       const result = loadBuiltinSkill(name);
 
       if (!result.found || !result.skill) {
         const available = filteredSkills.map(s => s.name).join(', ');
-        throw new Error(`Skill "${name}" not found. Available Hive skills: ${available || 'none'}`);
+        throw new Error(`Skill "${name}" not found. Available Pantheon skills: ${available || 'none'}`);
       }
 
       const skill = result.skill;
       return [
-        `## Hive Skill: ${skill.name}`,
+        `## Pantheon Skill: ${skill.name}`,
         '',
         `**Description**: ${skill.description}`,
         '',
@@ -156,7 +156,7 @@ import { formatRelativeTime } from "./utils/format";
 import { HIVE_AGENT_NAMES, isHiveAgent, normalizeVariant } from "./hooks/variant-hook.js";
 
 const HIVE_SYSTEM_PROMPT = `
-## Hive - Feature Development System
+## Pantheon - Feature Development System
 
 Plan-first development: Write plan → User reviews → Approve → Execute tasks
 
@@ -422,7 +422,7 @@ To unblock: Remove .pantheon/features/${feature}/BLOCKED`;
       if (activeFeature) {
         const info = featureService.getInfo(activeFeature);
         if (info) {
-          let statusHint = `\n### Current Hive Status\n`;
+          let statusHint = `\n### Current Pantheon Status\n`;
           statusHint += `**Active Feature**: ${info.name} (${info.status})\n`;
           statusHint += `**Progress**: ${info.tasks.filter(t => t.status === 'done').length}/${info.tasks.length} tasks\n`;
 
@@ -462,7 +462,7 @@ To unblock: Remove .pantheon/features/${feature}/BLOCKED`;
       // Skip if no agent specified
       if (!agent) return;
 
-      // Skip if not a Hive agent
+      // Skip if not a Pantheon agent
       if (!isHiveAgent(agent)) return;
 
       // Skip if variant is already set (respect explicit selection)
@@ -498,12 +498,12 @@ To unblock: Remove .pantheon/features/${feature}/BLOCKED`;
       // Escape hatch: HOST: prefix (case-insensitive)
       if (/^HOST:\s*/i.test(command)) {
         const strippedCommand = command.replace(/^HOST:\s*/i, '');
-        console.warn(`[hive:sandbox] HOST bypass: ${strippedCommand.slice(0, 80)}${strippedCommand.length > 80 ? '...' : ''}`);
+        console.warn(`[pantheon:sandbox] HOST bypass: ${strippedCommand.slice(0, 80)}${strippedCommand.length > 80 ? '...' : ''}`);
         output.args.command = strippedCommand;
         return;
       }
       
-      // Only wrap commands with explicit workdir inside hive worktrees
+      // Only wrap commands with explicit workdir inside pantheon worktrees
       const workdir = output.args?.workdir;
       if (!workdir) return;
       
@@ -519,7 +519,7 @@ To unblock: Remove .pantheon/features/${feature}/BLOCKED`;
     mcp: builtinMcps,
 
     tool: {
-      pantheon_skill: createHiveSkillTool(filteredSkills),
+      pantheon_skill: createPantheonSkillTool(filteredSkills),
 
       pantheon_feature_create: tool({
         description: 'Create a new feature and set it as active',
@@ -712,7 +712,7 @@ Expand your Discovery section and try again.`;
       }),
 
       pantheon_worktree_create: tool({
-        description: 'Create worktree and begin work on task. Spawns Forager worker automatically.',
+        description: 'Create worktree and begin work on task. Spawns Kulla (Coder) worker automatically.',
         args: {
           task: tool.schema.string().describe('Task folder name'),
           feature: tool.schema.string().optional().describe('Feature name (defaults to detection or single feature)'),
@@ -858,7 +858,7 @@ Expand your Discovery section and try again.`;
           const agent = 'kulla-coder';
 
           // Generate stable idempotency key for safe retries
-          // Format: hive-<feature>-<task>-<attempt>
+          // Format: pantheon-<feature>-<task>-<attempt>
           const rawStatus = taskService.getRawStatus(feature, task);
           const attempt = (rawStatus?.workerSession?.attempt || 0) + 1;
           const idempotencyKey = `pantheon-${feature}-${task}-${attempt}`;
@@ -903,7 +903,7 @@ Use OpenCode's built-in \`task\` tool to spawn a Kulla (Coder) worker.
 \`\`\`
 task({
   subagent_type: "${agent}",
-  description: "Hive: ${task}",
+  description: "Pantheon: ${task}",
   prompt: "${taskToolPrompt}"
 })
 \`\`\`
@@ -1087,7 +1087,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
           }
 
           // For failed/partial, still commit what we have
-          const commitResult = await worktreeService.commitChanges(feature, task, `hive(${task}): ${summary.slice(0, 50)}`);
+          const commitResult = await worktreeService.commitChanges(feature, task, `pantheon(${task}): ${summary.slice(0, 50)}`);
 
           if (status === 'completed' && !commitResult.committed && commitResult.message !== 'No changes to commit') {
             return respond({
@@ -1614,8 +1614,8 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
       };
 
       // Build agents map based on agentMode
-      const hiveConfigData = configService.get();
-      const agentMode = hiveConfigData.agentMode ?? 'full';
+      const pantheonConfig = configService.get();
+      const agentMode = pantheonConfig.agentMode ?? 'full';
       
       const allAgents: Record<string, unknown> = {};
       

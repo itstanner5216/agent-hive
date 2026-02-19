@@ -109,4 +109,41 @@ describe("agentMode gating", () => {
     expect(opencodeConfig.agent["asalluhi-prompter"]).toBeUndefined();
     expect(opencodeConfig.default_agent).toBe("enki-planner");
   });
+
+  it("registers lean agents in lean mode", async () => {
+    const configPath = path.join(testRoot, ".config", "opencode", "agent_hive.json");
+    fs.mkdirSync(path.dirname(configPath), { recursive: true });
+    fs.writeFileSync(
+      configPath,
+      JSON.stringify({
+        agentMode: "lean",
+      }),
+    );
+
+    const ctx: any = {
+      directory: testRoot,
+      worktree: testRoot,
+      serverUrl: new URL("http://localhost:1"),
+      project: createProject(testRoot),
+      client: OPENCODE_CLIENT,
+    };
+
+    const hooks = await plugin(ctx);
+    const opencodeConfig: any = { agent: {} };
+    await hooks.config!(opencodeConfig);
+
+    // Lean mode: 4 essential agents
+    expect(opencodeConfig.agent["enki-planner"]).toBeDefined();
+    expect(opencodeConfig.agent["nudimmud-orchestrator"]).toBeDefined();
+    expect(opencodeConfig.agent["kulla-coder"]).toBeDefined();
+    expect(opencodeConfig.agent["adapa-explorer"]).toBeDefined();
+    // NOT in lean mode
+    expect(opencodeConfig.agent["enlil-validator"]).toBeUndefined();
+    expect(opencodeConfig.agent["nanshe-reviewer"]).toBeUndefined();
+    expect(opencodeConfig.agent["enbilulu-tester"]).toBeUndefined();
+    expect(opencodeConfig.agent["mushdamma-phase-reviewer"]).toBeUndefined();
+    expect(opencodeConfig.agent["isimud-ideator"]).toBeUndefined();
+    expect(opencodeConfig.agent["asalluhi-prompter"]).toBeUndefined();
+    expect(opencodeConfig.default_agent).toBe("enki-planner");
+  });
 });

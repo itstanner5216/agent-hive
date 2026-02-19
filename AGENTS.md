@@ -90,7 +90,7 @@ packages/
 │       └── types.ts     # Shared type definitions
 ├── opencode-pantheon/       # OpenCode plugin
 │   └── src/
-│       ├── agents/      # scout, swarm, hive, architect, forager, hygienic
+│       ├── agents/      # enlil, enki, nudimmud, isimud, asalluhi, adapa, kulla, nanshe, enbilulu, mushdamma
 │       ├── mcp/         # websearch, grep-app, context7, ast-grep
 │       ├── tools/       # Hive tool implementations
 │       ├── hooks/       # Event hooks
@@ -139,12 +139,16 @@ feat!: change plan format to support subtasks
 
 | Agent | Role |
 |-------|------|
-| Hive (Hybrid) | Plans AND orchestrates; phase-aware |
-| Architect | Plans features, interviews, writes plans. NEVER executes |
-| Swarm | Orchestrates execution. Delegates, spawns workers, verifies |
-| Scout | Researches codebase + external docs/data |
-| Forager | Executes tasks directly in isolated worktrees |
-| Hygienic | Reviews plan/code quality. OKAY/REJECT verdict |
+| Enlil (Validator) | Validates plans against user vision; supreme authority |
+| Enki (Planner) | Plans features, interviews, writes implementation plans |
+| Nudimmud (Orchestrator) | Orchestrates execution; delegates to specialists |
+| Isimud (Ideator) | Conceptualizes ideas into structured blueprints |
+| Asalluhi (Prompter) | Crafts prompts for optimal model performance |
+| Adapa (Explorer) | Researches codebase + external docs/data |
+| Kulla (Coder) | Executes tasks directly in isolated worktrees |
+| Nanshe (Reviewer) | Reviews code quality, correctness; OKAY/REJECT verdict |
+| Enbilulu (Tester) | Runs tests, catches regressions |
+| Mushdamma (Phase Reviewer) | Validates structural integrity of completed phases |
 
 ### Data Model
 
@@ -237,7 +241,7 @@ This is a **bun workspaces** monorepo:
 - Each package has its own `package.json`
 - Run package scripts from the package directory (for example, `packages/vscode-hive/` → `bun run build`)
 
-## Hive - Feature Development System
+## Pantheon - Feature Development System
 
 Plan-first development: Write plan → User reviews → Approve → Execute tasks
 

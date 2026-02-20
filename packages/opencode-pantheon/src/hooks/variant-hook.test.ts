@@ -9,7 +9,7 @@
  */
 
 import { describe, it, expect } from 'bun:test';
-import { normalizeVariant, createVariantHook, HIVE_AGENT_NAMES } from './variant-hook.js';
+import { normalizeVariant, createVariantHook, PANTHEON_AGENT_NAMES } from './variant-hook.js';
 
 // ============================================================================
 // normalizeVariant tests
@@ -37,18 +37,18 @@ describe('normalizeVariant', () => {
 // HIVE_AGENT_NAMES tests
 // ============================================================================
 
-describe('HIVE_AGENT_NAMES', () => {
+describe('PANTHEON_AGENT_NAMES', () => {
   it('contains all expected Pantheon agent names', () => {
-    expect(HIVE_AGENT_NAMES).toContain('enki-planner');
-    expect(HIVE_AGENT_NAMES).toContain('enki-planner');
-    expect(HIVE_AGENT_NAMES).toContain('nudimmud-orchestrator');
-    expect(HIVE_AGENT_NAMES).toContain('adapa-explorer');
-    expect(HIVE_AGENT_NAMES).toContain('kulla-coder');
-    expect(HIVE_AGENT_NAMES).toContain('nanshe-reviewer');
+    expect(PANTHEON_AGENT_NAMES).toContain('enki-planner');
+    expect(PANTHEON_AGENT_NAMES).toContain('enki-planner');
+    expect(PANTHEON_AGENT_NAMES).toContain('nudimmud-orchestrator');
+    expect(PANTHEON_AGENT_NAMES).toContain('adapa-explorer');
+    expect(PANTHEON_AGENT_NAMES).toContain('kulla-coder');
+    expect(PANTHEON_AGENT_NAMES).toContain('nanshe-reviewer');
   });
 
   it('has exactly 10 agents', () => {
-    expect(HIVE_AGENT_NAMES.length).toBe(10);
+    expect(PANTHEON_AGENT_NAMES.length).toBe(10);
   });
 });
 
@@ -109,7 +109,7 @@ describe('createVariantHook', () => {
 
       const hook = createVariantHook(configService as any);
 
-      for (const agentName of HIVE_AGENT_NAMES) {
+      for (const agentName of PANTHEON_AGENT_NAMES) {
         const output = createOutput(undefined);
 
         await hook(

@@ -13,7 +13,7 @@ import type { ConfigService } from 'pantheon-core';
 /**
  * List of Pantheon agent names that can have variants configured.
  */
-export const HIVE_AGENT_NAMES = [
+export const PANTHEON_AGENT_NAMES = [
   'enlil-validator',
   'enki-planner',
   'nudimmud-orchestrator',
@@ -26,13 +26,13 @@ export const HIVE_AGENT_NAMES = [
   'asalluhi-prompter',
 ] as const;
 
-export type HiveAgentName = typeof HIVE_AGENT_NAMES[number];
+export type PantheonAgentName = typeof PANTHEON_AGENT_NAMES[number];
 
 /**
  * Check if an agent name is a Pantheon agent.
  */
-export function isHiveAgent(agent: string | undefined): agent is HiveAgentName {
-  return agent !== undefined && HIVE_AGENT_NAMES.includes(agent as HiveAgentName);
+export function isPantheonAgent(agent: string | undefined): agent is PantheonAgentName {
+  return agent !== undefined && PANTHEON_AGENT_NAMES.includes(agent as PantheonAgentName);
 }
 
 /**
@@ -76,7 +76,7 @@ export function createVariantHook(configService: ConfigService) {
     if (!agent) return;
 
     // Skip if not a Pantheon agent
-    if (!isHiveAgent(agent)) return;
+    if (!isPantheonAgent(agent)) return;
 
     // Skip if variant is already set (respect explicit selection)
     if (output.message.variant !== undefined) return;

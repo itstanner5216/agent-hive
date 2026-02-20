@@ -9,9 +9,9 @@
  * - Kulla (Coder): Executes tasks in isolated worktrees
  * - Nanshe (Reviewer): Reviews code quality and correctness
  * - Enbilulu (Tester): Writes and runs tests
- * - Mushdamma (Phase Reviewer): Reviews completed phases
- * - Isimud (Ideator): Shapes raw ideas into implementable concepts
- * - Asalluhi (Prompter): Crafts and refines prompts
+ * - Mushdamma (Phase Reviewer): Benched — not active in any mode
+ * - Isimud (Ideator): Benched — not active in any mode
+ * - Asalluhi (Critical Implementer): Resolves blockages and complex tasks
  */
 
 // Pantheon agents (Eridu deity suite)
@@ -38,9 +38,9 @@ export { ASALLUHI_PROMPT } from './asalluhi';
  * - kulla-coder: Coder/worker (executes tasks in worktrees)
  * - nanshe-reviewer: Code reviewer (quality, correctness, standards)
  * - enbilulu-tester: Tester (writes and runs tests)
- * - mushdamma-phase-reviewer: Phase reviewer (validates phase completion)
- * - isimud-ideator: Idea architect (shapes raw ideas)
- * - asalluhi-prompter: Prompt engineer (crafts prompts)
+ * - mushdamma-phase-reviewer: Benched — not active in any mode
+ * - isimud-ideator: Benched — not active in any mode
+ * - asalluhi-prompter: Critical implementer (resolves blockages, complex tasks)
  */
 export const pantheonAgents = {
   'enlil-validator': {
@@ -89,8 +89,8 @@ export const pantheonAgents = {
     mode: 'primary' as const,
   },
   'asalluhi-prompter': {
-    name: 'Asalluhi (Prompt Engineer)',
-    description: 'Crafts and refines prompts. Meta-agent, pre-pipeline.',
+    name: 'Asalluhi (Critical Implementer)',
+    description: 'Resolves blockages, implements complex tasks that other agents cannot. Critical path agent.',
     mode: 'primary' as const,
   },
 };

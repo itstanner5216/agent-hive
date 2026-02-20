@@ -153,8 +153,7 @@ import { buildWorkerPrompt, type ContextFile, type CompletedTask } from "./utils
 import { calculatePromptMeta, calculatePayloadMeta, checkWarnings } from "./utils/prompt-observability";
 import { applyTaskBudget, applyContextBudget, DEFAULT_BUDGET, type TruncationEvent } from "./utils/prompt-budgeting";
 import { writeWorkerPromptFile } from "./utils/prompt-file";
-import { formatRelativeTime } from "./utils/format";
-import { HIVE_AGENT_NAMES, isHiveAgent, normalizeVariant } from "./hooks/variant-hook.js";
+import { PANTHEON_AGENT_NAMES, isPantheonAgent, normalizeVariant } from "./hooks/variant-hook.js";
 
 /**
  * Core hook cadence logic, extracted for testability.
@@ -318,7 +317,7 @@ const plugin: Plugin = async (ctx) => {
   };
 
   /**
-   * Check if a feature is blocked by the Beekeeper.
+   * Check if a feature is blocked by the Gatekeeper.
    * Returns the block message if blocked, null otherwise.
    * 
    * File protocol: .pantheon/features/<name>/BLOCKED
@@ -330,7 +329,7 @@ const plugin: Plugin = async (ctx) => {
     const blockedPath = path.join(directory, '.pantheon', 'features', feature, 'BLOCKED');
     if (fs.existsSync(blockedPath)) {
       const reason = fs.readFileSync(blockedPath, 'utf-8').trim();
-      return `⛔ BLOCKED by Beekeeper
+      return `⛔ BLOCKED by Gatekeeper
 
 ${reason || '(No reason provided)'}
 
@@ -472,7 +471,7 @@ To unblock: Remove .pantheon/features/${feature}/BLOCKED`;
       if (!agent) return;
 
       // Skip if not a Pantheon agent
-      if (!isHiveAgent(agent)) return;
+      if (!isPantheonAgent(agent)) return;
 
       // Skip if variant is already set (respect explicit selection)
       if (output.message.variant !== undefined) return;
@@ -713,7 +712,7 @@ Expand your Discovery section and try again.`;
           const feature = resolveFeature(explicitFeature);
           if (!feature) return "Error: No feature specified. Create a feature or provide feature param.";
           const updated = taskService.update(feature, task, {
-            status: status as any,
+            status: status as any, // string-to-enum coercion — strict mode off
             summary,
           });
           return `Task "${task}" updated: status=${updated.status}`;
@@ -856,7 +855,7 @@ Expand your Discovery section and try again.`;
             previousTasks,
             continueFrom: continueFrom === 'blocked' ? {
               status: 'blocked',
-              previousSummary: (taskInfo as any).summary || 'No previous summary',
+              previousSummary: (taskInfo as any).summary || 'No previous summary', // dynamic property access — strict mode off
               decision: decision || 'No decision provided',
             } : undefined,
           });
@@ -1074,8 +1073,8 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
             taskService.update(feature, task, {
               status: 'blocked',
               summary,
-              blocker: blocker as any,
-            } as any);
+              blocker: blocker as any, // string-to-enum coercion — strict mode off
+            } as any); // string-to-enum coercion — strict mode off
 
             const worktree = await worktreeService.get(feature, task);
             return respond({
@@ -1163,7 +1162,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
           const reportPath = taskService.writeReport(feature, task, reportLines.join('\n'));
 
           const finalStatus = status === 'completed' ? 'done' : status;
-          taskService.update(feature, task, { status: finalStatus as any, summary });
+          taskService.update(feature, task, { status: finalStatus as any, summary }); // string-to-enum coercion — strict mode off
 
           const worktree = await worktreeService.get(feature, task);
           return respond({
@@ -1605,7 +1604,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         },
       };
 
-      // --- Asalluhi (Prompt Engineer) — Pre-pipeline ---
+      // --- Asalluhi (Critical Implementer) ---
       const asalluhiUserConfig = configService.getAgentConfig('asalluhi-prompter');
       const asalluhiAutoLoaded = await buildAutoLoadedSkillsContent('asalluhi-prompter', configService, directory);
       const asalluhiConfig = {

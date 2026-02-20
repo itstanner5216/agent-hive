@@ -186,11 +186,11 @@ export interface HiveConfig {
     'nanshe-reviewer'?: AgentModelConfig;
     /** Enbilulu - Tester */
     'enbilulu-tester'?: AgentModelConfig;
-    /** Mushdamma - Phase Reviewer */
+    /** Mushdamma - Reserved/Benched */
     'mushdamma-phase-reviewer'?: AgentModelConfig;
-    /** Isimud - Idea Architect */
+    /** Isimud - Reserved/Benched */
     'isimud-ideator'?: AgentModelConfig;
-    /** Asalluhi - Prompt Engineer */
+    /** Asalluhi - Critical Implementer */
     'asalluhi-prompter'?: AgentModelConfig;
   };
   /** Sandbox mode for worker isolation */
@@ -218,7 +218,7 @@ export const DEFAULT_AGENT_MODELS = {
 } as const;
 
 export const DEFAULT_HIVE_CONFIG: HiveConfig = {
-  $schema: 'https://raw.githubusercontent.com/tctinh/agent-hive/main/packages/opencode-pantheon/schema/agent_pantheon.schema.json',
+  $schema: 'https://raw.githubusercontent.com/itstanner5216/agent-hive/main/packages/opencode-pantheon/schema/agent_pantheon.schema.json',
   enableToolsFor: [],
   disableSkills: [],
   disableMcps: [],

@@ -200,6 +200,86 @@ describe('Agent permissions', () => {
     expect(kullaPerm!.edit).toBe('allow');
   });
 
+  describe('lean mode', () => {
+    it('registers exactly 4 agents in lean mode', async () => {
+      spyOn(ConfigService.prototype, 'get').mockReturnValue({
+        agentMode: 'lean',
+        agents: {},
+      } as any);
+
+      const repoRoot = path.resolve(import.meta.dir, '..', '..', '..', '..');
+
+      const ctx: PluginInput = {
+        directory: repoRoot,
+        worktree: repoRoot,
+        serverUrl: new URL('http://localhost:1'),
+        project: { id: 'test', worktree: repoRoot, time: { created: Date.now() } },
+        client: createStubClient(),
+        $: createStubShell(),
+      };
+
+      const hooks = await plugin(ctx as any);
+
+      const opencodeConfig: {
+        agent?: Record<string, { permission?: Record<string, string> }>,
+        default_agent?: string
+      } = {};
+      await hooks.config?.(opencodeConfig);
+
+      // Lean mode: 4 essential agents
+      expect(opencodeConfig.agent?.['enki-planner']).toBeTruthy();
+      expect(opencodeConfig.agent?.['nudimmud-orchestrator']).toBeTruthy();
+      expect(opencodeConfig.agent?.['kulla-coder']).toBeTruthy();
+      expect(opencodeConfig.agent?.['adapa-explorer']).toBeTruthy();
+
+      // Agents excluded from lean mode must NOT be registered
+      expect(opencodeConfig.agent?.['enbilulu-tester']).toBeUndefined();
+      expect(opencodeConfig.agent?.['nanshe-reviewer']).toBeUndefined();
+      expect(opencodeConfig.agent?.['enlil-validator']).toBeUndefined();
+      expect(opencodeConfig.agent?.['asalluhi-prompter']).toBeUndefined();
+
+      // Benched agents never registered
+      expect(opencodeConfig.agent?.['isimud-ideator']).toBeUndefined();
+      expect(opencodeConfig.agent?.['mushdamma-phase-reviewer']).toBeUndefined();
+
+      // Verify count
+      expect(Object.keys(opencodeConfig.agent!).length).toBe(4);
+
+      expect(opencodeConfig.default_agent).toBe('enki-planner');
+    });
+
+    it('lean mode agents have permissions set', async () => {
+      spyOn(ConfigService.prototype, 'get').mockReturnValue({
+        agentMode: 'lean',
+        agents: {},
+      } as any);
+
+      const repoRoot = path.resolve(import.meta.dir, '..', '..', '..', '..');
+
+      const ctx: PluginInput = {
+        directory: repoRoot,
+        worktree: repoRoot,
+        serverUrl: new URL('http://localhost:1'),
+        project: { id: 'test', worktree: repoRoot, time: { created: Date.now() } },
+        client: createStubClient(),
+        $: createStubShell(),
+      };
+
+      const hooks = await plugin(ctx as any);
+
+      const opencodeConfig: {
+        agent?: Record<string, { permission?: Record<string, string> }>,
+        default_agent?: string
+      } = {};
+      await hooks.config?.(opencodeConfig);
+
+      expect(opencodeConfig.agent?.['enki-planner']?.permission).toBeTruthy();
+      expect(opencodeConfig.agent?.['nudimmud-orchestrator']?.permission).toBeTruthy();
+      expect(opencodeConfig.agent?.['kulla-coder']?.permission).toBeTruthy();
+      expect(opencodeConfig.agent?.['adapa-explorer']?.permission).toBeTruthy();
+    });
+  });
+
   it('asalluhi has critical implementer permissions', async () => {
     spyOn(ConfigService.prototype, 'get').mockReturnValue({
       agentMode: 'full',

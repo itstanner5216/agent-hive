@@ -124,6 +124,7 @@ export class ConfigService {
     }
     
     fs.writeFileSync(this.configPath, JSON.stringify(merged, null, 2));
+    this.cachedConfig = merged;
     return merged;
   }
 

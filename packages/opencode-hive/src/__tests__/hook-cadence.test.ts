@@ -48,7 +48,7 @@ describe('Hook Cadence Logic', () => {
 
   // Thin wrapper so existing tests don't need to change their call signature
   const callShouldExecute = (hookName: string, options?: { safetyCritical?: boolean }): boolean => {
-    return callShouldExecute(hookName, configService, turnCounters, options);
+    return shouldExecuteHook(hookName, configService, turnCounters, options);
   };
 
   describe('Default behavior (no config)', () => {

@@ -9,7 +9,7 @@ import type { SkillDefinition } from './skills/types.js';
 // Pantheon agents (Eridu deity suite)
 import { ENLIL_PROMPT, ENLIL_MINI_PROMPT } from './agents/enlil.js';
 import { ENKI_PROMPT, ENKI_MINI_PROMPT } from './agents/enki.js';
-import { NUDIMMUD_PROMPT, NUDIMMUD_MINI_PROMPT } from './agents/nudimmud.js';
+import { MARDUK_PROMPT, MARDUK_MINI_PROMPT } from './agents/marduk.js';
 import { ADAPA_PROMPT, ADAPA_MINI_PROMPT } from './agents/adapa.js';
 import { KULLA_PROMPT, KULLA_MINI_PROMPT } from './agents/kulla.js';
 import { NANSHE_PROMPT, NANSHE_MINI_PROMPT } from './agents/nanshe.js';
@@ -49,7 +49,7 @@ function formatSkillsXml(skills: SkillDefinition[]): string {
  * 3. Warn and skip if not found
  */
 async function buildAutoLoadedSkillsContent(
-  agentName: 'enlil-validator' | 'enki-planner' | 'nudimmud-orchestrator' | 'adapa-explorer' | 'kulla-coder' | 'nanshe-reviewer' | 'enbilulu-tester' | 'mushdamma-phase-reviewer' | 'isimud-ideator' | 'asalluhi-prompter',
+  agentName: 'enlil-validator' | 'enki-planner' | 'marduk-orchestrator' | 'adapa-explorer' | 'kulla-coder' | 'nanshe-reviewer' | 'enbilulu-tester' | 'mushdamma-phase-reviewer' | 'isimud-ideator' | 'asalluhi-prompter',
   configService: ConfigService,
   projectRoot: string,
 ): Promise<string> {
@@ -169,7 +169,7 @@ export { shouldExecuteHook } from './utils/hook-cadence.js';
 const AGENT_FULL_PROMPTS: Record<string, string> = {
   'enlil-validator': ENLIL_PROMPT,
   'enki-planner': ENKI_PROMPT,
-  'nudimmud-orchestrator': NUDIMMUD_PROMPT,
+  'marduk-orchestrator': MARDUK_PROMPT,
   'adapa-explorer': ADAPA_PROMPT,
   'kulla-coder': KULLA_PROMPT,
   'asalluhi-prompter': ASALLUHI_PROMPT,
@@ -202,32 +202,40 @@ Plan-first development: Write plan → User reviews → Approve → Execute task
 3. User adds comments in VSCode → \`pantheon_plan_read\` to see them
 4. Revise plan → User approves
 5. \`pantheon_tasks_sync()\` - Generate tasks from plan
-6. \`pantheon_worktree_create(task)\` → work in worktree → \`pantheon_worktree_commit(task, summary)\`
-7. \`pantheon_merge(task)\` - Merge task branch into main (when ready)
+6. Wave dispatch: call \`pantheon_worktree_create\` for ALL runnable tasks in a single response → workers execute in parallel → \`pantheon_worktree_commit\` from each
+7. \`pantheon_merge(task)\` sequentially for each completed task in the wave, then loop to next wave
 
 **Important:** \`pantheon_worktree_commit\` commits changes to task branch but does NOT merge.
 Use \`pantheon_merge\` to explicitly integrate changes. Worktrees persist until manually removed.
 
-### Delegated Execution
+### Delegated Execution (Wave-Based Parallel Dispatch)
 
-\`pantheon_worktree_create\` creates worktree and spawns worker automatically:
+\`pantheon_worktree_create\` creates worktree and spawns a worker automatically:
 
-1. \`pantheon_worktree_create(task)\` → Creates worktree + spawns Kulla (Coder) worker
-2. Worker executes → calls \`pantheon_worktree_commit(status: "completed")\`
-3. Worker blocked → calls \`pantheon_worktree_commit(status: "blocked", blocker: {...})\`
+1. Call \`pantheon_status()\` → read the \`runnable\` array
+2. Dispatch ALL runnable tasks: call \`pantheon_worktree_create(task)\` for each → collect all \`taskToolCall\` responses
+3. Fire ALL \`task()\` calls in a single response turn → workers run in parallel
+4. After all workers return, merge sequentially: \`pantheon_merge(task)\` one at a time
+5. Return to step 1 for the next wave
 
-**Handling blocked workers:**
-1. Check blockers with \`pantheon_status()\`
-2. Read the blocker info (reason, options, recommendation, context)
-3. Ask user via \`question()\` tool - NEVER plain text
-4. Resume with \`pantheon_worktree_create(task, continueFrom: "blocked", decision: answer)\`
+Workers: default is Kulla (Coder). Use \`agent: "asalluhi-prompter"\` for \`[ASALLUHI]\`-flagged tasks.
+
+**Handling blocked workers (two-tier escalation):**
+
+Tier 1 — Autonomous (try first, NO user question):
+1. \`pantheon_worktree_create(task, continueFrom: "blocked", agent: "asalluhi-prompter", decision: "Escalated automatically — resolve using your judgment.")\`
+2. Fire the \`task()\` call → Asalluhi works in the same worktree
+
+Tier 2 — Human (only if Asalluhi also blocks):
+1. Present BOTH Kulla's and Asalluhi's blocker info via \`question()\` - NEVER plain text
+2. Resume with \`pantheon_worktree_create(task, continueFrom: "blocked", decision: userAnswer)\`
 
 **CRITICAL**: When resuming, a NEW worker spawns in the SAME worktree.
-The previous worker's progress is preserved. Include the user's decision in the \`decision\` parameter.
+The previous worker's progress is preserved. Include the decision in the \`decision\` parameter.
 
 **After task() Returns:**
 - task() is BLOCKING — when it returns, the worker is DONE
-- Call \`pantheon_status()\` immediately to check the new task state and find next runnable tasks
+- Call \`pantheon_status()\` after each wave to check state and find next runnable tasks
 - No notifications or polling needed — the result is already available
 
 **For research**, use MCP tools or parallel exploration:
@@ -444,6 +452,18 @@ To unblock: Remove .pantheon/features/${feature}/BLOCKED`;
           }
 
           output.system.push(statusHint);
+
+          // Verification reminders — inject every turn once progress threshold is reached
+          const totalTasks = info.tasks.length;
+          const doneTasks = info.tasks.filter(t => t.status === 'done').length;
+          if (totalTasks >= 3 && info.status === 'executing') {
+            const ratio = doneTasks / totalTasks;
+            if (ratio >= 0.9) {
+              output.system.push(`> ⚠️ **VERIFICATION REMINDER**: The todo list will remain active until all implemented changes have been verified thoroughly. Begin preparing for the verification review now — do not call \`pantheon_feature_complete\` without verified evidence.`);
+            } else if (ratio >= 0.7) {
+              output.system.push(`> 📋 **Reminder**: A plan cannot be considered complete until it has been thoroughly reviewed and verified.`);
+            }
+          }
         }
       }
     },
@@ -575,13 +595,28 @@ NEXT: Ask your first clarifying question about this feature.`;
       }),
 
       pantheon_feature_complete: tool({
-        description: 'Mark feature as completed (irreversible)',
-        args: { name: tool.schema.string().optional().describe('Feature name (defaults to active)') },
-        async execute({ name }) {
+        description: 'Mark feature as completed (irreversible). Requires verification evidence — provide a summary of what was tested and confirmed working.',
+        args: {
+          name: tool.schema.string().optional().describe('Feature name (defaults to active)'),
+          verificationEvidence: tool.schema.string().describe('Required: Summary of verification performed — what was tested, how it was confirmed working, test results or manual checks done.'),
+        },
+        async execute({ name, verificationEvidence }) {
           const feature = resolveFeature(name);
           if (!feature) return "Error: No feature specified. Create a feature or provide name.";
+
+          if (!verificationEvidence || verificationEvidence.trim().length < 20) {
+            return `BLOCKED: Verification evidence required before marking feature complete.
+
+Provide a \`verificationEvidence\` argument summarizing:
+- What was tested (e.g., "ran bun test — all 178 tests pass")
+- How the implementation was confirmed working (manual testing, CI results, etc.)
+- Any edge cases verified
+
+A feature cannot be considered complete without verified evidence.`;
+          }
+
           featureService.complete(feature);
-          return `Feature "${feature}" marked as completed`;
+          return `Feature "${feature}" marked as completed.\n\nVerification evidence recorded: ${verificationEvidence.slice(0, 200)}${verificationEvidence.length > 200 ? '...' : ''}`;
         },
       }),
 
@@ -726,8 +761,10 @@ Expand your Discovery section and try again.`;
           feature: tool.schema.string().optional().describe('Feature name (defaults to detection or single feature)'),
           continueFrom: tool.schema.enum(['blocked']).optional().describe('Resume a blocked task'),
           decision: tool.schema.string().optional().describe('Answer to blocker question when continuing'),
+          agent: tool.schema.enum(['kulla-coder', 'asalluhi-prompter']).optional()
+            .describe('Worker agent to spawn. Default: kulla-coder. Use asalluhi-prompter for [ASALLUHI]-flagged tasks or block escalation.'),
         },
-        async execute({ task, feature: explicitFeature, continueFrom, decision }, toolContext) {
+        async execute({ task, feature: explicitFeature, continueFrom, decision, agent: agentParam }, toolContext) {
           const feature = resolveFeature(explicitFeature);
           if (!feature) return "Error: No feature specified. Create a feature or provide feature param.";
 
@@ -860,10 +897,9 @@ Expand your Discovery section and try again.`;
             } : undefined,
           });
 
-          // Always use Kulla (kulla-coder) for task execution
-          // Kulla knows Pantheon protocols (pantheon_worktree_commit, blocker protocol, Iron Laws)
-          // Kulla can research via MCP tools (grep_app, context7, etc.)
-          const agent = 'kulla-coder';
+          // Select worker agent: default to Kulla, allow override to Asalluhi for
+          // [ASALLUHI]-flagged tasks, blocked-task escalation, or high-risk work.
+          const agent = agentParam ?? 'kulla-coder';
 
           // Generate stable idempotency key for safe retries
           // Format: pantheon-<feature>-<task>-<attempt>
@@ -904,9 +940,10 @@ Expand your Discovery section and try again.`;
 
           const taskToolPrompt = `Follow instructions in @${relativePromptPath}`;
 
+          const workerLabel = agent === 'asalluhi-prompter' ? 'Asalluhi (Critical Implementer)' : 'Kulla (Coder)';
           const taskToolInstructions = `## Delegation Required
 
-Use OpenCode's built-in \`task\` tool to spawn a Kulla (Coder) worker.
+Use OpenCode's built-in \`task\` tool to spawn a ${workerLabel} worker.
 
 \`\`\`
 task({
@@ -1089,8 +1126,8 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
               blocker,
               worktreePath: worktree?.path,
               branch: worktree?.branch,
-              message: 'Task blocked. Pantheon Master will ask user and resume with pantheon_worktree_create(continueFrom: "blocked", decision: answer)',
-              nextAction: 'Wait for orchestrator to collect user decision and resume with continueFrom: "blocked".',
+              message: 'Task blocked. Orchestrator will first escalate to Asalluhi; if that also blocks, user will be asked.',
+              nextAction: 'Orchestrator: call pantheon_worktree_create(continueFrom: "blocked", agent: "asalluhi-prompter") first.',
             });
           }
 
@@ -1332,9 +1369,12 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
             if (tasks.length === 0) {
               return 'Generate tasks from plan with pantheon_tasks_sync';
             }
-            const inProgress = tasks.find(t => t.status === 'in_progress');
-            if (inProgress) {
-              return `Continue work on task: ${inProgress.folder}`;
+            const inProgressList = tasks.filter(t => t.status === 'in_progress');
+            if (inProgressList.length > 1) {
+              return `${inProgressList.length} workers running in parallel: ${inProgressList.map(t => t.folder).join(', ')} — wait for all task() calls to return, then merge sequentially.`;
+            }
+            if (inProgressList.length === 1) {
+              return `Worker running for: ${inProgressList[0].folder} — wait for task() to return, then merge.`;
             }
             if (runnableTasks.length > 1) {
               return `${runnableTasks.length} tasks are ready to start in parallel: ${runnableTasks.join(', ')}`;
@@ -1346,7 +1386,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
             if (pending) {
               return `Pending tasks exist but are blocked by dependencies. Check blockedBy for details.`;
             }
-            return 'All tasks complete. Review and merge or complete feature.';
+            return 'All tasks done. Verify implementation thoroughly before calling pantheon_feature_complete with verificationEvidence.';
           };
 
           const planStatus = featureData.status === 'planning' ? 'draft' :
@@ -1477,15 +1517,15 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         },
       };
 
-      // --- Nudimmud (Orchestrator) ---
-      const nudimmudUserConfig = configService.getAgentConfig('nudimmud-orchestrator');
-      const nudimmudAutoLoaded = await buildAutoLoadedSkillsContent('nudimmud-orchestrator', configService, directory);
+      // --- Marduk (Orchestrator) ---
+      const nudimmudUserConfig = configService.getAgentConfig('marduk-orchestrator');
+      const nudimmudAutoLoaded = await buildAutoLoadedSkillsContent('marduk-orchestrator', configService, directory);
       const nudimmudConfig = {
         model: nudimmudUserConfig.model,
         variant: nudimmudUserConfig.variant,
         temperature: nudimmudUserConfig.temperature ?? 0.5,
-        description: 'Nudimmud (Orchestrator) — Orchestrates execution. Delegates, spawns workers, verifies, merges.',
-        prompt: NUDIMMUD_MINI_PROMPT + nudimmudAutoLoaded,
+        description: 'Marduk (Orchestrator) — Orchestrates execution. Delegates, spawns workers, verifies, merges.',
+        prompt: MARDUK_MINI_PROMPT + nudimmudAutoLoaded,
         permission: {
           question: "allow",
           skill: "allow",
@@ -1633,7 +1673,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         // 8 active agents (Isimud and Mushdamma are benched)
         allAgents['enlil-validator'] = enlilConfig;
         allAgents['enki-planner'] = enkiConfig;
-        allAgents['nudimmud-orchestrator'] = nudimmudConfig;
+        allAgents['marduk-orchestrator'] = nudimmudConfig;
         allAgents['adapa-explorer'] = adapaConfig;
         allAgents['kulla-coder'] = kullaConfig;
         allAgents['nanshe-reviewer'] = nansheConfig;
@@ -1643,14 +1683,14 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         // 6 pipeline agents
         allAgents['enlil-validator'] = enlilConfig;
         allAgents['enki-planner'] = enkiConfig;
-        allAgents['nudimmud-orchestrator'] = nudimmudConfig;
+        allAgents['marduk-orchestrator'] = nudimmudConfig;
         allAgents['adapa-explorer'] = adapaConfig;
         allAgents['kulla-coder'] = kullaConfig;
         allAgents['nanshe-reviewer'] = nansheConfig;
       } else {
         // lean: 4 essential agents
         allAgents['enki-planner'] = enkiConfig;
-        allAgents['nudimmud-orchestrator'] = nudimmudConfig;
+        allAgents['marduk-orchestrator'] = nudimmudConfig;
         allAgents['kulla-coder'] = kullaConfig;
         allAgents['adapa-explorer'] = adapaConfig;
       }

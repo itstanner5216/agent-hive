@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import { ENLIL_PROMPT } from './enlil';
 import { ENKI_PROMPT } from './enki';
-import { NUDIMMUD_PROMPT } from './nudimmud';
+import { MARDUK_PROMPT } from './marduk';
 import { ADAPA_PROMPT } from './adapa';
 import { KULLA_PROMPT } from './kulla';
 import { NANSHE_PROMPT } from './nanshe';
@@ -21,9 +21,9 @@ describe('Pantheon agent prompts', () => {
     expect(ENKI_PROMPT.length).toBeGreaterThan(0);
   });
 
-  it('NUDIMMUD_PROMPT is a non-empty string', () => {
-    expect(typeof NUDIMMUD_PROMPT).toBe('string');
-    expect(NUDIMMUD_PROMPT.length).toBeGreaterThan(0);
+  it('MARDUK_PROMPT is a non-empty string', () => {
+    expect(typeof MARDUK_PROMPT).toBe('string');
+    expect(MARDUK_PROMPT.length).toBeGreaterThan(0);
   });
 
   it('ADAPA_PROMPT is a non-empty string', () => {

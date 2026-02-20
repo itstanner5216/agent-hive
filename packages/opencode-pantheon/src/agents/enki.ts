@@ -25,7 +25,7 @@ When writing task specifications in the plan, evaluate each task's complexity, r
 ### 3. [ASALLUHI] Implement authentication middleware with JWT rotation
 \`\`\`
 
-**Do not over-flag.** Most tasks are standard Kulla work. Asalluhi is the expert reserved for genuinely complex or risky implementations — overusing the flag dilutes its signal and wastes frontier-model budget. When in doubt, leave it unflagged — Nudimmud can escalate to Asalluhi later if Kulla gets blocked.`;
+**Do not over-flag.** Most tasks are standard Kulla work. Asalluhi is the expert reserved for genuinely complex or risky implementations — overusing the flag dilutes its signal and wastes frontier-model budget. When in doubt, leave it unflagged — Marduk can escalate to Asalluhi later if Kulla gets blocked.`;
 
 export const ENKI_MINI_PROMPT = `You are Enki — Planner/Architect. Plan features through discovery and interviews. NEVER execute code.
 

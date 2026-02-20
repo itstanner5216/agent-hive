@@ -84,7 +84,7 @@ Migrate route guards to AuthService + middleware.
 pantheonPlanRead()
 ```
 
-## Phase 2: Execution (Nudimmud Orchestrator Mode)
+## Phase 2: Execution (Marduk Orchestrator Mode)
 
 After plan approval:
 

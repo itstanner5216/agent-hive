@@ -44,7 +44,7 @@ export class ConfigService {
       const stored = JSON.parse(raw) as Partial<HiveConfig>;
 
       // Deep merge with defaults
-      return {
+      const merged = {
         ...DEFAULT_HIVE_CONFIG,
         ...stored,
         agents: {
@@ -59,9 +59,9 @@ export class ConfigService {
             ...DEFAULT_HIVE_CONFIG.agents?.['enki-planner'],
             ...stored.agents?.['enki-planner'],
           },
-          'nudimmud-orchestrator': {
-            ...DEFAULT_HIVE_CONFIG.agents?.['nudimmud-orchestrator'],
-            ...stored.agents?.['nudimmud-orchestrator'],
+          'marduk-orchestrator': {
+            ...DEFAULT_HIVE_CONFIG.agents?.['marduk-orchestrator'],
+            ...stored.agents?.['marduk-orchestrator'],
           },
           'adapa-explorer': {
             ...DEFAULT_HIVE_CONFIG.agents?.['adapa-explorer'],
@@ -148,7 +148,7 @@ export class ConfigService {
    * Get agent-specific model config
    */
   getAgentConfig(
-    agent: 'enlil-validator' | 'enki-planner' | 'nudimmud-orchestrator' | 'adapa-explorer' | 'kulla-coder' | 'nanshe-reviewer' | 'enbilulu-tester' | 'mushdamma-phase-reviewer' | 'isimud-ideator' | 'asalluhi-prompter',
+    agent: 'enlil-validator' | 'enki-planner' | 'marduk-orchestrator' | 'adapa-explorer' | 'kulla-coder' | 'nanshe-reviewer' | 'enbilulu-tester' | 'mushdamma-phase-reviewer' | 'isimud-ideator' | 'asalluhi-prompter',
   ): { model?: string; temperature?: number; skills?: string[]; autoLoadSkills?: string[]; variant?: string } {
     const config = this.get();
     const agentConfig = config.agents?.[agent] ?? {};

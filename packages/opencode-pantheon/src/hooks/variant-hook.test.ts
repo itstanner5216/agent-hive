@@ -41,7 +41,7 @@ describe('PANTHEON_AGENT_NAMES', () => {
   it('contains all expected Pantheon agent names', () => {
     expect(PANTHEON_AGENT_NAMES).toContain('enki-planner');
     expect(PANTHEON_AGENT_NAMES).toContain('enki-planner');
-    expect(PANTHEON_AGENT_NAMES).toContain('nudimmud-orchestrator');
+    expect(PANTHEON_AGENT_NAMES).toContain('marduk-orchestrator');
     expect(PANTHEON_AGENT_NAMES).toContain('adapa-explorer');
     expect(PANTHEON_AGENT_NAMES).toContain('kulla-coder');
     expect(PANTHEON_AGENT_NAMES).toContain('nanshe-reviewer');
@@ -97,7 +97,7 @@ describe('createVariantHook', () => {
       const configService = createMockConfigService({
         'enlil-validator': 'max',
         'enki-planner': 'high',
-        'nudimmud-orchestrator': 'medium',
+        'marduk-orchestrator': 'medium',
         'adapa-explorer': 'low',
         'kulla-coder': 'high',
         'nanshe-reviewer': 'medium',

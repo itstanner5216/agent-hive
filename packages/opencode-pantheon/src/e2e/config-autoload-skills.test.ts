@@ -245,8 +245,8 @@ describe("config hook autoLoadSkills injection", () => {
     expect(parallelExplorationSkill).toBeDefined();
     expect(architectPrompt).toContain(parallelExplorationSkill!.template);
 
-    // nudimmud-orchestrator should NOT have parallel-exploration (default is empty autoLoadSkills)
-    const swarmPrompt = opencodeConfig.agent["nudimmud-orchestrator"]?.prompt as string;
+    // marduk-orchestrator should NOT have parallel-exploration (default is empty autoLoadSkills)
+    const swarmPrompt = opencodeConfig.agent["marduk-orchestrator"]?.prompt as string;
     expect(swarmPrompt).toBeDefined();
     expect(swarmPrompt).not.toContain(parallelExplorationSkill!.template);
   });

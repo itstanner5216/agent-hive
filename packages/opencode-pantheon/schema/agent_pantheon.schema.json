@@ -90,9 +90,9 @@
           "$ref": "#/$defs/agentConfig",
           "description": "Enki - Planner (Architect)"
         },
-        "nudimmud-orchestrator": {
+        "marduk-orchestrator": {
           "$ref": "#/$defs/agentConfig",
-          "description": "Nudimmud - Orchestrator"
+          "description": "Marduk - Orchestrator"
         },
         "adapa-explorer": {
           "$ref": "#/$defs/agentConfig",

@@ -176,8 +176,8 @@ export interface HiveConfig {
     'enlil-validator'?: AgentModelConfig;
     /** Enki - Planner (Architect) */
     'enki-planner'?: AgentModelConfig;
-    /** Nudimmud - Orchestrator */
-    'nudimmud-orchestrator'?: AgentModelConfig;
+    /** Marduk - Orchestrator */
+    'marduk-orchestrator'?: AgentModelConfig;
     /** Adapa - Explorer / Researcher */
     'adapa-explorer'?: AgentModelConfig;
     /** Kulla - Coder (Worker) */
@@ -207,7 +207,7 @@ export interface HiveConfig {
 export const DEFAULT_AGENT_MODELS = {
   'enlil-validator': 'github-copilot/claude-sonnet-4-20250514',
   'enki-planner': 'github-copilot/gpt-5.2-codex',
-  'nudimmud-orchestrator': 'github-copilot/claude-opus-4.5',
+  'marduk-orchestrator': 'github-copilot/claude-opus-4.5',
   'adapa-explorer': 'zai-coding-plan/glm-4.7',
   'kulla-coder': 'github-copilot/gpt-5.2-codex',
   'nanshe-reviewer': 'github-copilot/gpt-5.2-codex',
@@ -237,8 +237,8 @@ export const DEFAULT_HIVE_CONFIG: HiveConfig = {
       skills: ['brainstorming', 'writing-plans'],
       autoLoadSkills: ['parallel-exploration'],
     },
-    'nudimmud-orchestrator': {
-      model: DEFAULT_AGENT_MODELS['nudimmud-orchestrator'],
+    'marduk-orchestrator': {
+      model: DEFAULT_AGENT_MODELS['marduk-orchestrator'],
       temperature: 0.5,
       skills: ['dispatching-parallel-agents', 'executing-plans'],
       autoLoadSkills: [],

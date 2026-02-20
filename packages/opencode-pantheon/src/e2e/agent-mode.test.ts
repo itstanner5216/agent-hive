@@ -62,7 +62,7 @@ describe("agentMode gating", () => {
     // Full mode: 8 active agents (Isimud and Mushdamma benched)
     expect(opencodeConfig.agent["enlil-validator"]).toBeDefined();
     expect(opencodeConfig.agent["enki-planner"]).toBeDefined();
-    expect(opencodeConfig.agent["nudimmud-orchestrator"]).toBeDefined();
+    expect(opencodeConfig.agent["marduk-orchestrator"]).toBeDefined();
     expect(opencodeConfig.agent["adapa-explorer"]).toBeDefined();
     expect(opencodeConfig.agent["kulla-coder"]).toBeDefined();
     expect(opencodeConfig.agent["nanshe-reviewer"]).toBeDefined();
@@ -98,7 +98,7 @@ describe("agentMode gating", () => {
     // Core mode: 6 pipeline agents
     expect(opencodeConfig.agent["enlil-validator"]).toBeDefined();
     expect(opencodeConfig.agent["enki-planner"]).toBeDefined();
-    expect(opencodeConfig.agent["nudimmud-orchestrator"]).toBeDefined();
+    expect(opencodeConfig.agent["marduk-orchestrator"]).toBeDefined();
     expect(opencodeConfig.agent["adapa-explorer"]).toBeDefined();
     expect(opencodeConfig.agent["kulla-coder"]).toBeDefined();
     expect(opencodeConfig.agent["nanshe-reviewer"]).toBeDefined();
@@ -134,7 +134,7 @@ describe("agentMode gating", () => {
 
     // Lean mode: 4 essential agents
     expect(opencodeConfig.agent["enki-planner"]).toBeDefined();
-    expect(opencodeConfig.agent["nudimmud-orchestrator"]).toBeDefined();
+    expect(opencodeConfig.agent["marduk-orchestrator"]).toBeDefined();
     expect(opencodeConfig.agent["kulla-coder"]).toBeDefined();
     expect(opencodeConfig.agent["adapa-explorer"]).toBeDefined();
     // NOT in lean mode

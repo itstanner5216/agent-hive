@@ -39,9 +39,9 @@ describe("ConfigService defaults", () => {
       "enlil-validator",
       "isimud-ideator",
       "kulla-coder",
+      "marduk-orchestrator",
       "mushdamma-phase-reviewer",
       "nanshe-reviewer",
-      "nudimmud-orchestrator",
     ]);
     expect(config.agents?.["enki-planner"]?.model).toBe(
       "github-copilot/gpt-5.2-codex",
@@ -49,7 +49,7 @@ describe("ConfigService defaults", () => {
     expect(config.agents?.["enlil-validator"]?.model).toBe(
       "github-copilot/claude-sonnet-4-20250514",
     );
-    expect(config.agents?.["nudimmud-orchestrator"]?.model).toBe(
+    expect(config.agents?.["marduk-orchestrator"]?.model).toBe(
       "github-copilot/claude-opus-4.5",
     );
   });

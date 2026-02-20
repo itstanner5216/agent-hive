@@ -144,10 +144,14 @@ Pantheon uses a config file at `~/.config/opencode/agent_hive.json`. You can cus
 | `writing-plans` | Use when you have a spec or requirements for a multi-step task. Creates detailed implementation plans with bite-sized tasks. |
 | `executing-plans` | Use when you have a written implementation plan. Executes tasks in batches with review checkpoints. |
 | `dispatching-parallel-agents` | Use when facing 2+ independent tasks. Dispatches multiple agents to work concurrently on unrelated problems. |
+| `parallel-exploration` | Use for fan-out research across multiple Adapa explorer agents simultaneously. |
 | `test-driven-development` | Use when implementing any feature or bugfix. Enforces write-test-first, red-green-refactor cycle. |
 | `systematic-debugging` | Use when encountering any bug or test failure. Requires root cause investigation before proposing fixes. |
 | `code-reviewer` | Use when reviewing implementation changes against an approved plan or task to catch missing requirements, YAGNI, dead code, and risky patterns. |
 | `verification-before-completion` | Use before claiming work is complete. Requires running verification commands and confirming output before success claims. |
+| `docker-mastery` | Use for Docker container work — debugging, docker-compose, Dockerfile authoring, image optimization, integration testing. |
+| `agents-md-mastery` | Use when reviewing or updating AGENTS.md. Teaches signal vs noise filtering, section structure, and when to prune. |
+| `prompt-engineering` | Use when crafting or refining agent system prompts, task instructions, or structured prompt templates. |
 
 #### Available MCPs
 
@@ -230,7 +234,7 @@ Skill IDs must be safe directory names (no `/`, `\`, `..`, or `.`). Missing or i
 | `kulla-coder` | `test-driven-development`, `verification-before-completion` |
 | `adapa-explorer` | (none) |
 | `enki-planner` | `parallel-exploration` |
-| `nudimmud-orchestrator` | (none) |
+| `marduk-orchestrator` | (none) |
 
 ### Per-Agent Model Variants
 

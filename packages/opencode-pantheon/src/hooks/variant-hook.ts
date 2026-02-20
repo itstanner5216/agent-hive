@@ -16,7 +16,7 @@ import type { ConfigService } from 'pantheon-core';
 export const PANTHEON_AGENT_NAMES = [
   'enlil-validator',
   'enki-planner',
-  'nudimmud-orchestrator',
+  'marduk-orchestrator',
   'adapa-explorer',
   'kulla-coder',
   'nanshe-reviewer',

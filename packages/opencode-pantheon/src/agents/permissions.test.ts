@@ -85,7 +85,7 @@ describe('Agent permissions', () => {
 
     // Full mode: 8 active agents
     expect(opencodeConfig.agent?.['enki-planner']).toBeTruthy();
-    expect(opencodeConfig.agent?.['nudimmud-orchestrator']).toBeTruthy();
+    expect(opencodeConfig.agent?.['marduk-orchestrator']).toBeTruthy();
     expect(opencodeConfig.agent?.['enlil-validator']).toBeTruthy();
     expect(opencodeConfig.agent?.['adapa-explorer']).toBeTruthy();
     expect(opencodeConfig.agent?.['kulla-coder']).toBeTruthy();
@@ -111,7 +111,7 @@ describe('Agent permissions', () => {
       agentMode: 'core',
       agents: {
         'enki-planner': {},
-        'nudimmud-orchestrator': {},
+        'marduk-orchestrator': {},
       }
     } as any);
 
@@ -137,7 +137,7 @@ describe('Agent permissions', () => {
     // Core mode: 6 pipeline agents
     expect(opencodeConfig.agent?.['enlil-validator']).toBeTruthy();
     expect(opencodeConfig.agent?.['enki-planner']).toBeTruthy();
-    expect(opencodeConfig.agent?.['nudimmud-orchestrator']).toBeTruthy();
+    expect(opencodeConfig.agent?.['marduk-orchestrator']).toBeTruthy();
     expect(opencodeConfig.agent?.['adapa-explorer']).toBeTruthy();
     expect(opencodeConfig.agent?.['kulla-coder']).toBeTruthy();
     expect(opencodeConfig.agent?.['nanshe-reviewer']).toBeTruthy();
@@ -152,10 +152,10 @@ describe('Agent permissions', () => {
 
     expect(opencodeConfig.default_agent).toBe('enki-planner');
 
-    const nudimmudPerm = opencodeConfig.agent?.['nudimmud-orchestrator']?.permission;
+    const mardukPerm = opencodeConfig.agent?.['marduk-orchestrator']?.permission;
     const enkiPerm = opencodeConfig.agent?.['enki-planner']?.permission;
 
-    expect(nudimmudPerm).toBeTruthy();
+    expect(mardukPerm).toBeTruthy();
     expect(enkiPerm).toBeTruthy();
     expect(enkiPerm!.edit).toBe('deny');
     expect(enkiPerm!.task).toBe('allow');
@@ -228,7 +228,7 @@ describe('Agent permissions', () => {
 
       // Lean mode: 4 essential agents
       expect(opencodeConfig.agent?.['enki-planner']).toBeTruthy();
-      expect(opencodeConfig.agent?.['nudimmud-orchestrator']).toBeTruthy();
+      expect(opencodeConfig.agent?.['marduk-orchestrator']).toBeTruthy();
       expect(opencodeConfig.agent?.['kulla-coder']).toBeTruthy();
       expect(opencodeConfig.agent?.['adapa-explorer']).toBeTruthy();
 
@@ -274,7 +274,7 @@ describe('Agent permissions', () => {
       await hooks.config?.(opencodeConfig);
 
       expect(opencodeConfig.agent?.['enki-planner']?.permission).toBeTruthy();
-      expect(opencodeConfig.agent?.['nudimmud-orchestrator']?.permission).toBeTruthy();
+      expect(opencodeConfig.agent?.['marduk-orchestrator']?.permission).toBeTruthy();
       expect(opencodeConfig.agent?.['kulla-coder']?.permission).toBeTruthy();
       expect(opencodeConfig.agent?.['adapa-explorer']?.permission).toBeTruthy();
     });

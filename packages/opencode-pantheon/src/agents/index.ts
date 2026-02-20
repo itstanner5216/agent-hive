@@ -4,7 +4,7 @@
  * The Eridu Pantheon Model:
  * - Enlil (Validator): Validates plans against iron laws
  * - Enki (Planner): Plans features through discovery and interviews
- * - Nudimmud (Orchestrator): Orchestrates execution, delegates, spawns workers
+ * - Marduk (Orchestrator): Orchestrates execution, delegates, spawns workers
  * - Adapa (Explorer): Researches codebase and external docs/data
  * - Kulla (Coder): Executes tasks in isolated worktrees
  * - Nanshe (Reviewer): Reviews code quality and correctness
@@ -17,7 +17,7 @@
 // Pantheon agents (Eridu deity suite)
 export { ENLIL_PROMPT } from './enlil';
 export { ENKI_PROMPT } from './enki';
-export { NUDIMMUD_PROMPT } from './nudimmud';
+export { MARDUK_PROMPT } from './marduk';
 export { ADAPA_PROMPT } from './adapa';
 export { KULLA_PROMPT } from './kulla';
 export { NANSHE_PROMPT } from './nanshe';
@@ -33,7 +33,7 @@ export { ASALLUHI_PROMPT } from './asalluhi';
  * Pantheon Agents:
  * - enlil-validator: Plan validator (APPROVE/REJECT)
  * - enki-planner: Planner/architect (discovery, interviews, plans)
- * - nudimmud-orchestrator: Orchestrator (delegates, verifies, merges)
+ * - marduk-orchestrator: Orchestrator (delegates, verifies, merges)
  * - adapa-explorer: Explorer/researcher (codebase + external docs)
  * - kulla-coder: Coder/worker (executes tasks in worktrees)
  * - nanshe-reviewer: Code reviewer (quality, correctness, standards)
@@ -53,8 +53,8 @@ export const pantheonAgents = {
     description: 'Plans features through discovery and interviews. NEVER executes.',
     mode: 'primary' as const,
   },
-  'nudimmud-orchestrator': {
-    name: 'Nudimmud (Orchestrator)',
+  'marduk-orchestrator': {
+    name: 'Marduk (Orchestrator)',
     description: 'Orchestrates execution. Delegates, spawns workers, verifies, merges.',
     mode: 'primary' as const,
   },

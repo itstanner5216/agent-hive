@@ -1518,14 +1518,14 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
       };
 
       // --- Marduk (Orchestrator) ---
-      const nudimmudUserConfig = configService.getAgentConfig('marduk-orchestrator');
-      const nudimmudAutoLoaded = await buildAutoLoadedSkillsContent('marduk-orchestrator', configService, directory);
-      const nudimmudConfig = {
-        model: nudimmudUserConfig.model,
-        variant: nudimmudUserConfig.variant,
-        temperature: nudimmudUserConfig.temperature ?? 0.5,
+      const mardukUserConfig = configService.getAgentConfig('marduk-orchestrator');
+      const mardukAutoLoaded = await buildAutoLoadedSkillsContent('marduk-orchestrator', configService, directory);
+      const mardukConfig = {
+        model: mardukUserConfig.model,
+        variant: mardukUserConfig.variant,
+        temperature: mardukUserConfig.temperature ?? 0.5,
         description: 'Marduk (Orchestrator) — Orchestrates execution. Delegates, spawns workers, verifies, merges.',
-        prompt: MARDUK_MINI_PROMPT + nudimmudAutoLoaded,
+        prompt: MARDUK_MINI_PROMPT + mardukAutoLoaded,
         permission: {
           question: "allow",
           skill: "allow",
@@ -1673,7 +1673,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         // 8 active agents (Isimud and Mushdamma are benched)
         allAgents['enlil-validator'] = enlilConfig;
         allAgents['enki-planner'] = enkiConfig;
-        allAgents['marduk-orchestrator'] = nudimmudConfig;
+        allAgents['marduk-orchestrator'] = mardukConfig;
         allAgents['adapa-explorer'] = adapaConfig;
         allAgents['kulla-coder'] = kullaConfig;
         allAgents['nanshe-reviewer'] = nansheConfig;
@@ -1683,14 +1683,14 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         // 6 pipeline agents
         allAgents['enlil-validator'] = enlilConfig;
         allAgents['enki-planner'] = enkiConfig;
-        allAgents['marduk-orchestrator'] = nudimmudConfig;
+        allAgents['marduk-orchestrator'] = mardukConfig;
         allAgents['adapa-explorer'] = adapaConfig;
         allAgents['kulla-coder'] = kullaConfig;
         allAgents['nanshe-reviewer'] = nansheConfig;
       } else {
         // lean: 4 essential agents
         allAgents['enki-planner'] = enkiConfig;
-        allAgents['marduk-orchestrator'] = nudimmudConfig;
+        allAgents['marduk-orchestrator'] = mardukConfig;
         allAgents['kulla-coder'] = kullaConfig;
         allAgents['adapa-explorer'] = adapaConfig;
       }

@@ -1,7 +1,6 @@
 /**
- * Mushdamma — Phase Reviewer
- * Reviews completed phases before the next phase begins.
+ * Mushdamma — The Great Builder (Reserved)
+ * Role TBD — placeholder preserved for future assignment.
  */
-export const MUSHDAMMA_PROMPT = `You are Mushdamma, the Phase Reviewer. Your role is to review completed implementation phases before the next phase begins. You validate that phase deliverables are complete and correct.
-
-[Full prompt will be injected — this is a placeholder]`;
+export const MUSHDAMMA_PROMPT = `You are Mushdamma, the great builder. Your role has not yet been defined.`;
+export const MUSHDAMMA_MINI_PROMPT = `You are Mushdamma. Awaiting role assignment.`;

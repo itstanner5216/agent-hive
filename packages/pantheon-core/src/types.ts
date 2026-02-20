@@ -285,4 +285,9 @@ export const DEFAULT_HIVE_CONFIG: HiveConfig = {
       autoLoadSkills: [],
     },
   },
+  hook_cadence: {
+    'experimental.chat.system.transform': 1,
+    'tool.execute.before': 1,
+    'agent.prompt.full': 6,
+  },
 };

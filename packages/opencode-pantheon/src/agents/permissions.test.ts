@@ -56,7 +56,7 @@ describe('Agent permissions', () => {
     mock.restore();
   });
 
-  it('registers enki-planner, adapa, kulla, and nanshe in full mode', async () => {
+  it('registers 8 active agents in full mode (Isimud and Mushdamma benched)', async () => {
     spyOn(ConfigService.prototype, 'get').mockReturnValue({
       agentMode: 'full',
       agents: {
@@ -83,7 +83,7 @@ describe('Agent permissions', () => {
     } = {};
     await hooks.config?.(opencodeConfig);
 
-    // Full mode: all 10 agents should be registered
+    // Full mode: 8 active agents
     expect(opencodeConfig.agent?.['enki-planner']).toBeTruthy();
     expect(opencodeConfig.agent?.['nudimmud-orchestrator']).toBeTruthy();
     expect(opencodeConfig.agent?.['enlil-validator']).toBeTruthy();
@@ -91,9 +91,15 @@ describe('Agent permissions', () => {
     expect(opencodeConfig.agent?.['kulla-coder']).toBeTruthy();
     expect(opencodeConfig.agent?.['nanshe-reviewer']).toBeTruthy();
     expect(opencodeConfig.agent?.['enbilulu-tester']).toBeTruthy();
-    expect(opencodeConfig.agent?.['mushdamma-phase-reviewer']).toBeTruthy();
-    expect(opencodeConfig.agent?.['isimud-ideator']).toBeTruthy();
     expect(opencodeConfig.agent?.['asalluhi-prompter']).toBeTruthy();
+
+    // Benched agents must NOT be registered
+    expect(opencodeConfig.agent?.['isimud-ideator']).toBeUndefined();
+    expect(opencodeConfig.agent?.['mushdamma-phase-reviewer']).toBeUndefined();
+
+    // Verify count
+    expect(Object.keys(opencodeConfig.agent!).length).toBe(8);
+
     expect(opencodeConfig.default_agent).toBe('enki-planner');
 
     const enkiPerm = opencodeConfig.agent?.['enki-planner']?.permission;
@@ -138,9 +144,11 @@ describe('Agent permissions', () => {
 
     // NOT in core mode
     expect(opencodeConfig.agent?.['enbilulu-tester']).toBeUndefined();
-    expect(opencodeConfig.agent?.['mushdamma-phase-reviewer']).toBeUndefined();
-    expect(opencodeConfig.agent?.['isimud-ideator']).toBeUndefined();
     expect(opencodeConfig.agent?.['asalluhi-prompter']).toBeUndefined();
+
+    // Benched agents never registered regardless of mode
+    expect(opencodeConfig.agent?.['isimud-ideator']).toBeUndefined();
+    expect(opencodeConfig.agent?.['mushdamma-phase-reviewer']).toBeUndefined();
 
     expect(opencodeConfig.default_agent).toBe('enki-planner');
 
@@ -190,5 +198,42 @@ describe('Agent permissions', () => {
     expect(kullaPerm).toBeTruthy();
     expect(kullaPerm!.task).toBe('deny');
     expect(kullaPerm!.edit).toBe('allow');
+  });
+
+  it('asalluhi has critical implementer permissions', async () => {
+    spyOn(ConfigService.prototype, 'get').mockReturnValue({
+      agentMode: 'full',
+      agents: {
+        'asalluhi-prompter': {},
+      }
+    } as any);
+
+    const repoRoot = path.resolve(import.meta.dir, '..', '..', '..', '..');
+
+    const ctx: PluginInput = {
+      directory: repoRoot,
+      worktree: repoRoot,
+      serverUrl: new URL('http://localhost:1'),
+      project: { id: 'test', worktree: repoRoot, time: { created: Date.now() } },
+      client: createStubClient(),
+      $: createStubShell(),
+    };
+
+    const hooks = await plugin(ctx as any);
+    
+    const opencodeConfig: { 
+      agent?: Record<string, { permission?: Record<string, string> }>,
+      default_agent?: string 
+    } = {};
+    await hooks.config?.(opencodeConfig);
+
+    const asalluhiPerm = opencodeConfig.agent?.['asalluhi-prompter']?.permission;
+    expect(asalluhiPerm).toBeTruthy();
+    expect(asalluhiPerm!.edit).toBe('allow');
+    expect(asalluhiPerm!.task).toBe('deny');
+    expect(asalluhiPerm!.delegate).toBe('deny');
+    expect(asalluhiPerm!.webfetch).toBe('allow');
+    expect(asalluhiPerm!.skill).toBe('allow');
+    expect(asalluhiPerm!.todoread).toBe('allow');
   });
 });

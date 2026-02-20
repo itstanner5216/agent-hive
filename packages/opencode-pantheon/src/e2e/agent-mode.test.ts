@@ -59,7 +59,7 @@ describe("agentMode gating", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    // Full mode: all 10 agents
+    // Full mode: 8 active agents (Isimud and Mushdamma benched)
     expect(opencodeConfig.agent["enlil-validator"]).toBeDefined();
     expect(opencodeConfig.agent["enki-planner"]).toBeDefined();
     expect(opencodeConfig.agent["nudimmud-orchestrator"]).toBeDefined();
@@ -67,9 +67,9 @@ describe("agentMode gating", () => {
     expect(opencodeConfig.agent["kulla-coder"]).toBeDefined();
     expect(opencodeConfig.agent["nanshe-reviewer"]).toBeDefined();
     expect(opencodeConfig.agent["enbilulu-tester"]).toBeDefined();
-    expect(opencodeConfig.agent["mushdamma-phase-reviewer"]).toBeDefined();
-    expect(opencodeConfig.agent["isimud-ideator"]).toBeDefined();
     expect(opencodeConfig.agent["asalluhi-prompter"]).toBeDefined();
+    expect(opencodeConfig.agent["mushdamma-phase-reviewer"]).toBeUndefined();
+    expect(opencodeConfig.agent["isimud-ideator"]).toBeUndefined();
     expect(opencodeConfig.default_agent).toBe("enki-planner");
   });
 

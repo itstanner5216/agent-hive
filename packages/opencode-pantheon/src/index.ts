@@ -7,16 +7,16 @@ import { loadFileSkill } from './skills/file-loader.js';
 import { BUILTIN_SKILLS } from './skills/registry.generated.js';
 import type { SkillDefinition } from './skills/types.js';
 // Pantheon agents (Eridu deity suite)
-import { ENLIL_PROMPT } from './agents/enlil.js';
-import { ENKI_PROMPT } from './agents/enki.js';
-import { NUDIMMUD_PROMPT } from './agents/nudimmud.js';
-import { ADAPA_PROMPT } from './agents/adapa.js';
-import { KULLA_PROMPT } from './agents/kulla.js';
-import { NANSHE_PROMPT } from './agents/nanshe.js';
-import { ENBILULU_PROMPT } from './agents/enbilulu.js';
+import { ENLIL_PROMPT, ENLIL_MINI_PROMPT } from './agents/enlil.js';
+import { ENKI_PROMPT, ENKI_MINI_PROMPT } from './agents/enki.js';
+import { NUDIMMUD_PROMPT, NUDIMMUD_MINI_PROMPT } from './agents/nudimmud.js';
+import { ADAPA_PROMPT, ADAPA_MINI_PROMPT } from './agents/adapa.js';
+import { KULLA_PROMPT, KULLA_MINI_PROMPT } from './agents/kulla.js';
+import { NANSHE_PROMPT, NANSHE_MINI_PROMPT } from './agents/nanshe.js';
+import { ENBILULU_PROMPT, ENBILULU_MINI_PROMPT } from './agents/enbilulu.js';
 import { MUSHDAMMA_PROMPT } from './agents/mushdamma.js';
 import { ISIMUD_PROMPT } from './agents/isimud.js';
-import { ASALLUHI_PROMPT } from './agents/asalluhi.js';
+import { ASALLUHI_PROMPT, ASALLUHI_MINI_PROMPT } from './agents/asalluhi.js';
 import { createBuiltinMcps } from './mcp/index.js';
 import { shouldExecuteHook } from './utils/hook-cadence.js';
 
@@ -161,6 +161,22 @@ import { HIVE_AGENT_NAMES, isHiveAgent, normalizeVariant } from "./hooks/variant
  * Determines whether a hook should execute based on its configured cadence.
  */
 export { shouldExecuteHook } from './utils/hook-cadence.js';
+
+/**
+ * Full prompt lookup by agent ID.
+ * Used by the two-tier injection system: mini prompts load at config time,
+ * full prompts inject via system.transform on cadence (default: every 6 turns).
+ */
+const AGENT_FULL_PROMPTS: Record<string, string> = {
+  'enlil-validator': ENLIL_PROMPT,
+  'enki-planner': ENKI_PROMPT,
+  'nudimmud-orchestrator': NUDIMMUD_PROMPT,
+  'adapa-explorer': ADAPA_PROMPT,
+  'kulla-coder': KULLA_PROMPT,
+  'asalluhi-prompter': ASALLUHI_PROMPT,
+  'nanshe-reviewer': NANSHE_PROMPT,
+  'enbilulu-tester': ENBILULU_PROMPT,
+};
 
 const PANTHEON_SYSTEM_PROMPT = `
 ## Pantheon - Feature Development System
@@ -402,6 +418,15 @@ To unblock: Remove .pantheon/features/${feature}/BLOCKED`;
       }
 
       output.system.push(PANTHEON_SYSTEM_PROMPT);
+
+      // Two-tier injection: inject full agent prompt on cadence (default: every 6 turns)
+      const agentId = (input as { agent?: string }).agent;
+      if (agentId && _shouldExecuteHook("agent.prompt.full")) {
+        const fullPrompt = AGENT_FULL_PROMPTS[agentId];
+        if (fullPrompt) {
+          output.system.push(fullPrompt);
+        }
+      }
 
       // NOTE: autoLoadSkills injection is now done in the config hook (prompt field)
       // to ensure skills are present from the first message. The system.transform hook
@@ -1423,7 +1448,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         temperature: enlilUserConfig.temperature ?? 0.3,
         mode: 'subagent' as const,
         description: 'Enlil (Plan Validator) — Validates plans against iron laws. APPROVE/REJECT verdict.',
-        prompt: ENLIL_PROMPT + enlilAutoLoaded,
+        prompt: ENLIL_MINI_PROMPT + enlilAutoLoaded,
         permission: {
           edit: "deny",
           task: "deny",
@@ -1441,7 +1466,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         variant: enkiUserConfig.variant,
         temperature: enkiUserConfig.temperature ?? 0.7,
         description: 'Enki (Planner) — Plans features through discovery and interviews. NEVER executes.',
-        prompt: ENKI_PROMPT + enkiAutoLoaded,
+        prompt: ENKI_MINI_PROMPT + enkiAutoLoaded,
         permission: {
           edit: "deny",
           task: "allow",
@@ -1461,7 +1486,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         variant: nudimmudUserConfig.variant,
         temperature: nudimmudUserConfig.temperature ?? 0.5,
         description: 'Nudimmud (Orchestrator) — Orchestrates execution. Delegates, spawns workers, verifies, merges.',
-        prompt: NUDIMMUD_PROMPT + nudimmudAutoLoaded,
+        prompt: NUDIMMUD_MINI_PROMPT + nudimmudAutoLoaded,
         permission: {
           question: "allow",
           skill: "allow",
@@ -1479,7 +1504,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         temperature: adapaUserConfig.temperature ?? 0.5,
         mode: 'subagent' as const,
         description: 'Adapa (Explorer) — Researches codebase + external docs/data.',
-        prompt: ADAPA_PROMPT + adapaAutoLoaded,
+        prompt: ADAPA_MINI_PROMPT + adapaAutoLoaded,
         permission: {
           edit: "deny",
           task: "deny",
@@ -1498,7 +1523,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         temperature: kullaUserConfig.temperature ?? 0.3,
         mode: 'subagent' as const,
         description: 'Kulla (Coder) — Executes tasks directly in isolated worktrees. Never delegates.',
-        prompt: KULLA_PROMPT + kullaAutoLoaded,
+        prompt: KULLA_MINI_PROMPT + kullaAutoLoaded,
         permission: {
           task: "deny",
           delegate: "deny",
@@ -1516,7 +1541,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         temperature: nansheUserConfig.temperature ?? 0.3,
         mode: 'subagent' as const,
         description: 'Nanshe (Code Reviewer) — Reviews code quality and correctness. OKAY/REJECT verdict.',
-        prompt: NANSHE_PROMPT + nansheAutoLoaded,
+        prompt: NANSHE_MINI_PROMPT + nansheAutoLoaded,
         permission: {
           edit: "deny",
           task: "deny",
@@ -1534,7 +1559,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         temperature: enbiluluUserConfig.temperature ?? 0.3,
         mode: 'subagent' as const,
         description: 'Enbilulu (Tester) — Writes and runs tests, validates implementation correctness.',
-        prompt: ENBILULU_PROMPT + enbiluluAutoLoaded,
+        prompt: ENBILULU_MINI_PROMPT + enbiluluAutoLoaded,
         permission: {
           task: "deny",
           delegate: "deny",
@@ -1587,13 +1612,15 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         model: asalluhiUserConfig.model,
         variant: asalluhiUserConfig.variant,
         temperature: asalluhiUserConfig.temperature ?? 0.5,
-        description: 'Asalluhi (Prompt Engineer) — Crafts and refines prompts. Meta-agent, pre-pipeline.',
-        prompt: ASALLUHI_PROMPT + asalluhiAutoLoaded,
+        description: 'Asalluhi (Critical Implementer) — Handles complex, risky, or blocked tasks requiring frontier-level depth.',
+        prompt: ASALLUHI_MINI_PROMPT + asalluhiAutoLoaded,
         permission: {
-          edit: "deny",
-          question: "allow",
-          skill: "allow",
+          edit: "allow",
+          task: "deny",
+          delegate: "deny",
           webfetch: "allow",
+          skill: "allow",
+          todoread: "allow",
         },
       };
 
@@ -1604,7 +1631,7 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
       const allAgents: Record<string, unknown> = {};
       
       if (agentMode === 'full') {
-        // All 10 agents
+        // 8 active agents (Isimud and Mushdamma are benched)
         allAgents['enlil-validator'] = enlilConfig;
         allAgents['enki-planner'] = enkiConfig;
         allAgents['nudimmud-orchestrator'] = nudimmudConfig;
@@ -1612,8 +1639,6 @@ Use the \`@path\` attachment syntax in the prompt to reference the file. Do not 
         allAgents['kulla-coder'] = kullaConfig;
         allAgents['nanshe-reviewer'] = nansheConfig;
         allAgents['enbilulu-tester'] = enbiluluConfig;
-        allAgents['mushdamma-phase-reviewer'] = mushdammaConfig;
-        allAgents['isimud-ideator'] = isimudConfig;
         allAgents['asalluhi-prompter'] = asalluhiConfig;
       } else if (agentMode === 'core') {
         // 6 pipeline agents

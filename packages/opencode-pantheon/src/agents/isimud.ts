@@ -1,7 +1,6 @@
 /**
- * Isimud — Idea Architect (Pre-pipeline)
- * Shapes raw ideas into implementable concepts before planning begins.
+ * Isimud — The Two-Faced Vizier (Reserved)
+ * Role TBD — placeholder preserved for future assignment.
  */
-export const ISIMUD_PROMPT = `You are Isimud, the Idea Architect. Your role is to shape raw ideas into implementable concepts through structured brainstorming and feasibility analysis, before formal planning begins.
-
-[Full prompt will be injected — this is a placeholder]`;
+export const ISIMUD_PROMPT = `You are Isimud, the two-faced vizier. Your role has not yet been defined.`;
+export const ISIMUD_MINI_PROMPT = `You are Isimud. Awaiting role assignment.`;

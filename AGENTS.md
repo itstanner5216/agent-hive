@@ -90,7 +90,7 @@ packages/
 │       └── types.ts     # Shared type definitions
 ├── opencode-pantheon/       # OpenCode plugin
 │   └── src/
-│       ├── agents/      # enlil, enki, nudimmud, isimud, asalluhi, adapa, kulla, nanshe, enbilulu, mushdamma
+│       ├── agents/      # enlil, enki, marduk, isimud, asalluhi, adapa, kulla, nanshe, enbilulu, mushdamma
 │       ├── mcp/         # websearch, grep-app, context7, ast-grep
 │       ├── tools/       # Pantheon tool implementations
 │       ├── hooks/       # Event hooks
@@ -141,7 +141,7 @@ feat!: change plan format to support subtasks
 |-------|------|
 | Enlil (Validator) | Validates plans against user vision; supreme authority |
 | Enki (Planner) | Plans features, interviews, writes implementation plans |
-| Nudimmud (Orchestrator) | Orchestrates execution; delegates to specialists |
+| Marduk (Orchestrator) | Orchestrates execution; delegates to specialists |
 | Isimud (Ideator) | Conceptualizes ideas into structured blueprints |
 | Asalluhi (Prompter) | Crafts prompts for optimal model performance |
 | Adapa (Explorer) | Researches codebase + external docs/data |

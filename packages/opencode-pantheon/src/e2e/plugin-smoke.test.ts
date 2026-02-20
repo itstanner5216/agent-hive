@@ -198,7 +198,7 @@ Do it
       { feature: "smoke-feature" },
       toolContext
     );
-    const hiveStatus = JSON.parse(statusRaw as string) as {
+    const pantheonStatus = JSON.parse(statusRaw as string) as {
       tasks?: {
         list?: Array<{
           folder: string;
@@ -210,11 +210,11 @@ Do it
       };
     };
 
-    expect(hiveStatus.tasks?.list?.[0]?.folder).toBe("01-first-task");
-    expect(hiveStatus.tasks?.list?.[0]?.dependsOn).toEqual([]);
-    expect(hiveStatus.tasks?.list?.[0]?.worktree).toBeNull();
-    expect(hiveStatus.tasks?.runnable).toContain("01-first-task");
-    expect(hiveStatus.tasks?.blockedBy).toEqual({});
+    expect(pantheonStatus.tasks?.list?.[0]?.folder).toBe("01-first-task");
+    expect(pantheonStatus.tasks?.list?.[0]?.dependsOn).toEqual([]);
+    expect(pantheonStatus.tasks?.list?.[0]?.worktree).toBeNull();
+    expect(pantheonStatus.tasks?.runnable).toContain("01-first-task");
+    expect(pantheonStatus.tasks?.blockedBy).toEqual({});
 
     const execStartOutput = await hooks.tool!.pantheon_worktree_create.execute(
       { feature: "smoke-feature", task: "01-first-task" },

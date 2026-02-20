@@ -182,7 +182,7 @@ const PANTHEON_SYSTEM_PROMPT = `
 
 Plan-first development: Write plan → User reviews → Approve → Execute tasks
 
-### Tools (14 total)
+### Tools (15 total)
 
 | Domain | Tools |
 |--------|-------|
@@ -419,6 +419,24 @@ To unblock: Remove .pantheon/features/${feature}/BLOCKED`;
       input: { agent?: string } | unknown,
       output: { system: string[] },
     ) => {
+      // Verification reminders — always fire once threshold is reached, regardless of cadence
+      const activeFeature = resolveFeature();
+      if (activeFeature) {
+        const info = featureService.getInfo(activeFeature);
+        if (info) {
+          const totalTasks = info.tasks.length;
+          const doneTasks = info.tasks.filter(t => t.status === 'done').length;
+          if (totalTasks >= 3 && info.status === 'executing') {
+            const ratio = doneTasks / totalTasks;
+            if (ratio >= 0.9) {
+              output.system.push(`> ⚠️ **VERIFICATION REMINDER**: The todo list will remain active until all implemented changes have been verified thoroughly. Begin preparing for the verification review now — do not call \`pantheon_feature_complete\` without verified evidence.`);
+            } else if (ratio >= 0.7) {
+              output.system.push(`> 📋 **Reminder**: A plan cannot be considered complete until it has been thoroughly reviewed and verified.`);
+            }
+          }
+        }
+      }
+
       // Cadence gate: check if this hook should execute this turn
       if (!_shouldExecuteHook("experimental.chat.system.transform")) {
         return;
@@ -439,7 +457,6 @@ To unblock: Remove .pantheon/features/${feature}/BLOCKED`;
       // to ensure skills are present from the first message. The system.transform hook
       // may not receive the agent name at runtime, so we removed legacy auto-load here.
 
-      const activeFeature = resolveFeature();
       if (activeFeature) {
         const info = featureService.getInfo(activeFeature);
         if (info) {
@@ -452,18 +469,6 @@ To unblock: Remove .pantheon/features/${feature}/BLOCKED`;
           }
 
           output.system.push(statusHint);
-
-          // Verification reminders — inject every turn once progress threshold is reached
-          const totalTasks = info.tasks.length;
-          const doneTasks = info.tasks.filter(t => t.status === 'done').length;
-          if (totalTasks >= 3 && info.status === 'executing') {
-            const ratio = doneTasks / totalTasks;
-            if (ratio >= 0.9) {
-              output.system.push(`> ⚠️ **VERIFICATION REMINDER**: The todo list will remain active until all implemented changes have been verified thoroughly. Begin preparing for the verification review now — do not call \`pantheon_feature_complete\` without verified evidence.`);
-            } else if (ratio >= 0.7) {
-              output.system.push(`> 📋 **Reminder**: A plan cannot be considered complete until it has been thoroughly reviewed and verified.`);
-            }
-          }
         }
       }
     },
@@ -535,8 +540,8 @@ To unblock: Remove .pantheon/features/${feature}/BLOCKED`;
       const workdir = output.args?.workdir;
       if (!workdir) return;
       
-      const hiveWorktreeBase = path.join(directory, '.pantheon', '.worktrees');
-      if (!workdir.startsWith(hiveWorktreeBase)) return;
+      const pantheonWorktreeBase = path.join(directory, '.pantheon', '.worktrees');
+      if (!workdir.startsWith(pantheonWorktreeBase)) return;
       
       // Wrap command using static method (with persistent config)
       const wrapped = DockerSandboxService.wrapCommand(workdir, command, sandboxConfig);
@@ -924,8 +929,8 @@ Expand your Discovery section and try again.`;
 
           // Write worker prompt to file to prevent tool output truncation (Task 05)
           // This keeps the tool output small while preserving full prompt content
-          const hiveDir = path.join(directory, '.pantheon');
-          const workerPromptPath = writeWorkerPromptFile(feature, task, workerPrompt, hiveDir);
+          const pantheonDir = path.join(directory, '.pantheon');
+          const workerPromptPath = writeWorkerPromptFile(feature, task, workerPrompt, pantheonDir);
           
           // Convert to relative path for portability in output
           const relativePromptPath = normalizePath(path.relative(directory, workerPromptPath));

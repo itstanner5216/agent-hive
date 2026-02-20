@@ -80,12 +80,12 @@ describe("config hook autoLoadSkills injection", () => {
     await hooks.config!(opencodeConfig);
 
     // enki-planner should have parallel-exploration injected by default
-    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
-    expect(hiveMasterPrompt).toBeDefined();
+    const enkiPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
+    expect(enkiPrompt).toBeDefined();
     
     const parallelExplorationSkill = BUILTIN_SKILLS.find(s => s.name === "parallel-exploration");
     expect(parallelExplorationSkill).toBeDefined();
-    expect(hiveMasterPrompt).toContain(parallelExplorationSkill!.template);
+    expect(enkiPrompt).toContain(parallelExplorationSkill!.template);
 
     // adapa-explorer should NOT have parallel-exploration injected by default
     // (removed to prevent recursive delegation - scout cannot spawn scouts)
@@ -175,12 +175,12 @@ describe("config hook autoLoadSkills injection", () => {
     await hooks.config!(opencodeConfig);
 
     // enki-planner should NOT have parallel-exploration (it's disabled globally)
-    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
-    expect(hiveMasterPrompt).toBeDefined();
+    const enkiPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
+    expect(enkiPrompt).toBeDefined();
     
     const parallelExplorationSkill = BUILTIN_SKILLS.find(s => s.name === "parallel-exploration");
     expect(parallelExplorationSkill).toBeDefined();
-    expect(hiveMasterPrompt).not.toContain(parallelExplorationSkill!.template);
+    expect(enkiPrompt).not.toContain(parallelExplorationSkill!.template);
   });
 
   it("warns on unknown skill ID but continues without error", async () => {
@@ -281,17 +281,17 @@ describe("config hook autoLoadSkills injection", () => {
     await hooks.config!(opencodeConfig);
 
     // The skill should be in the agent's prompt field directly
-    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
-    expect(hiveMasterPrompt).toBeDefined();
+    const enkiPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
+    expect(enkiPrompt).toBeDefined();
     
     const brainstormingSkill = BUILTIN_SKILLS.find(s => s.name === "brainstorming");
     expect(brainstormingSkill).toBeDefined();
-    expect(hiveMasterPrompt).toContain(brainstormingSkill!.template);
+    expect(enkiPrompt).toContain(brainstormingSkill!.template);
 
     // Also verify default skill (parallel-exploration) is present
     const parallelExplorationSkill = BUILTIN_SKILLS.find(s => s.name === "parallel-exploration");
     expect(parallelExplorationSkill).toBeDefined();
-    expect(hiveMasterPrompt).toContain(parallelExplorationSkill!.template);
+    expect(enkiPrompt).toContain(parallelExplorationSkill!.template);
   });
 
   it("system.transform does NOT inject skills (legacy path removed)", async () => {
@@ -354,9 +354,9 @@ describe("config hook autoLoadSkills injection", () => {
     // Verify skills ARE in the config hook prompt (the correct path)
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
-    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
-    expect(hiveMasterPrompt).toContain(brainstormingSkill!.template);
-    expect(hiveMasterPrompt).toContain(parallelExplorationSkill!.template);
+    const enkiPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
+    expect(enkiPrompt).toContain(brainstormingSkill!.template);
+    expect(enkiPrompt).toContain(parallelExplorationSkill!.template);
   });
 });
 
@@ -418,10 +418,10 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
-    expect(hiveMasterPrompt).toBeDefined();
-    expect(hiveMasterPrompt).toContain("# My Custom Skill");
-    expect(hiveMasterPrompt).toContain("This is custom skill content.");
+    const enkiPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
+    expect(enkiPrompt).toBeDefined();
+    expect(enkiPrompt).toContain("# My Custom Skill");
+    expect(enkiPrompt).toContain("This is custom skill content.");
   });
 
   it("falls back to global OpenCode skill when project skill not found", async () => {
@@ -460,10 +460,10 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
-    expect(hiveMasterPrompt).toBeDefined();
-    expect(hiveMasterPrompt).toContain("# Global Skill");
-    expect(hiveMasterPrompt).toContain("This is from global config.");
+    const enkiPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
+    expect(enkiPrompt).toBeDefined();
+    expect(enkiPrompt).toContain("# Global Skill");
+    expect(enkiPrompt).toContain("This is from global config.");
   });
 
   it("falls back to project Claude skill when OpenCode skills not found", async () => {
@@ -502,10 +502,10 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
-    expect(hiveMasterPrompt).toBeDefined();
-    expect(hiveMasterPrompt).toContain("# Claude Skill");
-    expect(hiveMasterPrompt).toContain("This is Claude-compatible.");
+    const enkiPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
+    expect(enkiPrompt).toBeDefined();
+    expect(enkiPrompt).toContain("# Claude Skill");
+    expect(enkiPrompt).toContain("This is Claude-compatible.");
   });
 
   it("builtin skill wins over file-based skill with same ID", async () => {
@@ -544,17 +544,17 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
-    expect(hiveMasterPrompt).toBeDefined();
+    const enkiPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
+    expect(enkiPrompt).toBeDefined();
     
     // Builtin skill template should be present
     const builtinBrainstorming = BUILTIN_SKILLS.find(s => s.name === "brainstorming");
     expect(builtinBrainstorming).toBeDefined();
-    expect(hiveMasterPrompt).toContain(builtinBrainstorming!.template);
+    expect(enkiPrompt).toContain(builtinBrainstorming!.template);
     
     // File-based fake should NOT be present
-    expect(hiveMasterPrompt).not.toContain("# Fake Brainstorming");
-    expect(hiveMasterPrompt).not.toContain("This should NOT appear.");
+    expect(enkiPrompt).not.toContain("# Fake Brainstorming");
+    expect(enkiPrompt).not.toContain("This should NOT appear.");
   });
 
   it("warns and skips when file-based skill does not exist", async () => {
@@ -585,12 +585,12 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
-    expect(hiveMasterPrompt).toBeDefined();
+    const enkiPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
+    expect(enkiPrompt).toBeDefined();
     
     // Builtin brainstorming should still be present (other skill in list)
     const builtinBrainstorming = BUILTIN_SKILLS.find(s => s.name === "brainstorming");
-    expect(hiveMasterPrompt).toContain(builtinBrainstorming!.template);
+    expect(enkiPrompt).toContain(builtinBrainstorming!.template);
   });
 
   it("project OpenCode skill takes precedence over global OpenCode skill", async () => {
@@ -637,16 +637,16 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
-    expect(hiveMasterPrompt).toBeDefined();
+    const enkiPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
+    expect(enkiPrompt).toBeDefined();
     
     // Project version should be present
-    expect(hiveMasterPrompt).toContain("# Project Version");
-    expect(hiveMasterPrompt).toContain("This is the PROJECT version.");
+    expect(enkiPrompt).toContain("# Project Version");
+    expect(enkiPrompt).toContain("This is the PROJECT version.");
     
     // Global version should NOT be present
-    expect(hiveMasterPrompt).not.toContain("# Global Version");
-    expect(hiveMasterPrompt).not.toContain("This is the GLOBAL version.");
+    expect(enkiPrompt).not.toContain("# Global Version");
+    expect(enkiPrompt).not.toContain("This is the GLOBAL version.");
   });
 
   it("preserves order of skills from autoLoadSkills config", async () => {
@@ -691,16 +691,16 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
-    expect(hiveMasterPrompt).toBeDefined();
+    const enkiPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
+    expect(enkiPrompt).toBeDefined();
     
     // Both skills should be present
-    expect(hiveMasterPrompt).toContain("# Skill A Content");
-    expect(hiveMasterPrompt).toContain("# Skill B Content");
+    expect(enkiPrompt).toContain("# Skill A Content");
+    expect(enkiPrompt).toContain("# Skill B Content");
     
     // Order should be preserved (A before B)
-    const indexA = hiveMasterPrompt.indexOf("# Skill A Content");
-    const indexB = hiveMasterPrompt.indexOf("# Skill B Content");
+    const indexA = enkiPrompt.indexOf("# Skill A Content");
+    const indexB = enkiPrompt.indexOf("# Skill B Content");
     expect(indexA).toBeLessThan(indexB);
   });
 
@@ -749,16 +749,16 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
-    expect(hiveMasterPrompt).toBeDefined();
+    const enkiPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
+    expect(enkiPrompt).toBeDefined();
 
     // Disabled skill should NOT be present
-    expect(hiveMasterPrompt).not.toContain("# Disabled Skill");
-    expect(hiveMasterPrompt).not.toContain("This should NOT appear because it's disabled.");
+    expect(enkiPrompt).not.toContain("# Disabled Skill");
+    expect(enkiPrompt).not.toContain("This should NOT appear because it's disabled.");
 
     // Enabled skill should still be present
-    expect(hiveMasterPrompt).toContain("# Enabled Skill");
-    expect(hiveMasterPrompt).toContain("This SHOULD appear.");
+    expect(enkiPrompt).toContain("# Enabled Skill");
+    expect(enkiPrompt).toContain("This SHOULD appear.");
   });
 
   it("invalid IDs do not throw and do not prevent other skills from loading", async () => {
@@ -799,11 +799,11 @@ describe("file-based skill fallback in autoLoadSkills", () => {
     const opencodeConfig: any = { agent: {} };
     await hooks.config!(opencodeConfig);
 
-    const hiveMasterPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
-    expect(hiveMasterPrompt).toBeDefined();
+    const enkiPrompt = opencodeConfig.agent["enki-planner"]?.prompt as string;
+    expect(enkiPrompt).toBeDefined();
 
     // Valid skill should still be loaded despite invalid IDs in the list
-    expect(hiveMasterPrompt).toContain("# Valid Skill");
-    expect(hiveMasterPrompt).toContain("This should load successfully.");
+    expect(enkiPrompt).toContain("# Valid Skill");
+    expect(enkiPrompt).toContain("This should load successfully.");
   });
 });

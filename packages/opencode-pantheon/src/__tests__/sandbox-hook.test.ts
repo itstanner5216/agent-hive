@@ -17,8 +17,8 @@ import { DockerSandboxService } from 'pantheon-core';
 
 describe('tool.execute.before bash interception hook logic', () => {
   const mockDirectory = '/mock/project';
-  const hiveWorktreeBase = path.join(mockDirectory, '.pantheon', '.worktrees');
-  const worktreePath = path.join(hiveWorktreeBase, 'feature-x', 'task-1');
+  const pantheonWorktreeBase = path.join(mockDirectory, '.pantheon', '.worktrees');
+  const worktreePath = path.join(pantheonWorktreeBase, 'feature-x', 'task-1');
 
   /**
    * Simulates the hook logic from index.ts
@@ -48,8 +48,8 @@ describe('tool.execute.before bash interception hook logic', () => {
     const workdir = output.args?.workdir;
     if (!workdir) return;
     
-    const hiveWorktreeBase = path.join(directory, '.pantheon', '.worktrees');
-    if (!workdir.startsWith(hiveWorktreeBase)) return;
+    const pantheonWorktreeBase = path.join(directory, '.pantheon', '.worktrees');
+    if (!workdir.startsWith(pantheonWorktreeBase)) return;
     
     // Wrap command using static method
     const wrapped = DockerSandboxService.wrapCommand(workdir, command, sandboxConfig);

@@ -44,7 +44,7 @@ export class ConfigService {
       const stored = JSON.parse(raw) as Partial<HiveConfig>;
 
       // Deep merge with defaults
-      return {
+      const merged: HiveConfig = {
         ...DEFAULT_HIVE_CONFIG,
         ...stored,
         agents: {

@@ -22,7 +22,7 @@ bun run release:check     # Install, build, and test all packages
 bun run release:prepare   # Prepare release
 ```
 
-Worktree dependency note: worktrees are isolated checkouts and do not share the root `node_modules`. If you run tests or builds inside a worktree, run `bun install` there first (or run tests from the repo root that already has dependencies installed).
+Worktree dependency note: worktrees are lightweight checkouts without project dependencies. Workers do best-effort verification using ast-grep (no dependencies needed). Full build and test verification (`bun run build` + `bun run test`) runs on the main branch after the orchestrator merges a batch of task branches.
 
 ### Package-Specific Commands
 
@@ -132,7 +132,7 @@ feat!: change plan format to support subtasks
 3. **Human Shapes, Agent Builds** - Humans decide direction, agents implement
 4. **Good Enough Wins** - Ship working code, iterate later
 5. **Batched Parallelism** - Delegate independent tasks to workers
-6. **Tests Define Done** - TDD subtasks: test → implement → verify
+6. **Tests Define Done** - Workers do best-effort checks; orchestrator runs full test suite after batch merge
 7. **Iron Laws + Hard Gates** - Non-negotiable constraints per agent
 
 ### Agent Roles

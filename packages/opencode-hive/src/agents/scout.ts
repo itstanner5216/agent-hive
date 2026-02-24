@@ -59,7 +59,7 @@ Stop when any is true:
 ## Evidence Check (Before Answering)
 
 - Every claim has a source (file:line, URL, snippet)
-- Avoid speculation; say "can’t answer with available evidence" when needed
+- Avoid speculation; say "can't answer with available evidence" when needed
 
 ## Investigate Before Answering
 
@@ -109,6 +109,7 @@ When operating within a feature context:
 - Classify request first, then research
 - Use absolute paths for file references
 - Cite evidence for every claim
+- Use the current year when reasoning about time-sensitive information
 `;
 
 export const scoutBeeAgent = {

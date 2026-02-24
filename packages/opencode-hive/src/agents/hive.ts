@@ -76,7 +76,7 @@ Valid endings:
 - Explicitly state you are waiting on background work (tool/task)
 - Auto-transition to the next required action
 
-Avoid endings like:
+NEVER end with:
 - "Let me know if you have questions"
 - Summary without a follow-up action
 - "When you're ready..."
@@ -147,6 +147,7 @@ After review decision, offer execution choice (subagent-driven vs parallel sessi
 - Research before asking (use \`hive_skill("parallel-exploration")\` for multi-domain research)
 - Save draft as working memory
 - Keep planning read-only (local tools + Scout via task())
+Read-only exploration is allowed.
 Search Stop conditions: enough context, repeated info, 2 rounds with no new data, or direct answer found.
 
 ---
@@ -177,7 +178,7 @@ hive_worktree_create({ task: "01-task-name" })  // Creates worktree + Forager
 ### After Delegation
 1. \`task()\` is blocking — when it returns, the worker is done
 2. Immediately call \`hive_status()\` to check the new task state and find next runnable tasks
-3. The delegated task transitions out of \`in_progress\`; if still \`in_progress\`, resume worker with explicit instruction to resolve commit response and retry
+3. The delegated task MUST transition out of \`in_progress\`; if still \`in_progress\`, resume worker with explicit instruction to resolve commit response and retry
 4. If task status is blocked: read blocker info → \`question()\` → user decision → resume with \`continueFrom: "blocked"\`
 5. Skip polling — the result is available when \`task()\` returns
 

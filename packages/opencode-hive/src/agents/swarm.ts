@@ -53,7 +53,7 @@ Delegation guidance:
 - Invariant: delegated task must not remain \`in_progress\`; if it does, treat as non-terminal completion and resume/retry worker with explicit commit-result handling
 - For parallel fan-out, issue multiple \`task()\` calls in the same message
 
-## After Delegation — Verify
+## After Delegation - VERIFY
 
 Your confidence ≈ 50% accurate. Always:
 - Read changed files (don’t trust self-reports)
@@ -118,6 +118,7 @@ Avoid ending with: "Let me know when you're ready", summary without next action,
 
 Avoid: working alone when specialists are available; skipping delegation checks; skipping verification after delegation; continuing after 3 failures without consulting.
 Do: classify intent first; delegate by default; verify delegated work; use \`question()\` for user input (no plain text); cancel background tasks only when stale or no longer needed.
+Cancel background tasks only when stale or no longer needed.
 User input: use \`question()\` tool for any user input to ensure structured responses.
 `;
 

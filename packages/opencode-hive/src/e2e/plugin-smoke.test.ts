@@ -454,7 +454,7 @@ Do it later
     expect(execStart.error).toContain("dependencies not done");
   });
 
-  it("returns non-terminal JSON response when completion verification is missing", async () => {
+  it("returns terminal JSON with advisory note when verification evidence is missing", async () => {
     const ctx: PluginInput = {
       directory: testRoot,
       worktree: testRoot,
@@ -517,17 +517,17 @@ Do it
       ok: boolean;
       terminal: boolean;
       status: string;
-      reason?: string;
       taskState?: string;
+      verificationNote?: string;
       nextAction?: string;
     };
 
-    expect(commitResult.ok).toBe(false);
-    expect(commitResult.terminal).toBe(false);
-    expect(commitResult.status).toBe("rejected");
-    expect(commitResult.reason).toBe("verification_required");
-    expect(commitResult.taskState).toBe("in_progress");
-    expect(commitResult.nextAction).toContain("Run verification commands");
+    expect(commitResult.ok).toBe(true);
+    expect(commitResult.terminal).toBe(true);
+    expect(commitResult.status).toBe("completed");
+    expect(commitResult.taskState).toBe("done");
+    expect(commitResult.verificationNote).toContain("No verification evidence in summary");
+    expect(commitResult.nextAction).toContain("hive_merge");
   });
 
   it("returns terminal JSON response when commit completes", async () => {

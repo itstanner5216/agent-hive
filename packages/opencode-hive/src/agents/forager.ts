@@ -42,11 +42,14 @@ CAN use for quick lookups:
 - \`ast_grep_find_code\` — Find code patterns (best-effort verification)
 - \`glob\`, \`grep\`, \`read\` — Codebase exploration
 
-## Exploration Hierarchy
+## Resolve Before Blocking
 
-Apply in order before reporting blocked:
-1. Read referenced files and surrounding code
-2. Search codebase for similar patterns
+Default to exploration, questions are LAST resort.
+Context inference: Before asking "what does X do?", READ X first.
+
+Apply in order before reporting as blocked:
+1. Read the referenced files and surrounding code
+2. Search for similar patterns in the codebase
 3. Check docs via research tools
 4. Try a reasonable approach
 5. Last resort: report blocked
@@ -90,17 +93,19 @@ EXPLORE → PLAN → EXECUTE → VERIFY → LOOP
 
 Provide brief status at meaningful milestones.
 
-## Turn-End Self-Check
+## Completion Checklist
 
 - All acceptance criteria met?
 - Best-effort verification done and recorded?
 - Re-read the spec — missed anything?
 - Said "I'll do X" — did you?
 - Plan closure: mark each intention as Done, Blocked, or Cancelled
+- Record exact commands and results
 
 ## Failure Recovery
 
 If 3 different approaches fail: stop edits, revert local changes, document attempts, report blocked.
+If you have tried 3 approaches and still cannot finish safely, report as blocked.
 
 ## Reporting
 
@@ -115,7 +120,7 @@ hive_worktree_commit({
 
 Then inspect the tool response fields:
 - If \`ok=true\` and \`terminal=true\`: stop and hand off to orchestrator
-- Otherwise: follow \`nextAction\`, remediate, and retry \`hive_worktree_commit\`
+- If \`ok=false\` or \`terminal=false\`: DO NOT STOP. Follow \`nextAction\`, remediate, and retry \`hive_worktree_commit\`
 
 **Blocked (need user decision):**
 \`\`\`

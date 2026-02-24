@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Verification Model**: Shifted from mandatory TDD verification to best-effort worker verification + orchestrator batch testing. Workers use ast-grep for lightweight code checks in worktrees (no project dependencies needed). Orchestrators run full build + test suite after merging each batch on the main branch
+- **Forager Prompt**: Removed TDD flow, added best-effort ast-grep verification model. Workers focus on writing quality code with ~80% confidence, not overthinking verification. Added `ast_grep_scan-code` and `ast_grep_find_code` to Allowed Research tools
+- **Hive Prompt**: Added Batch-Merge-Verify Workflow section — orchestrator merges batch, runs `build` + `test`, diagnoses failures with full context
+- **Swarm Prompt**: Same batch-merge-verify workflow as Hive. Replaced "Merge only after verification passes" with batch workflow reference
+- **AGENTS.md**: Updated worktree dependency note and P6 description to reflect best-effort + batch verification model
+- **Verification Gate Softened**: `hive_worktree_commit` no longer hard-rejects commits without test/build keywords. Returns advisory `verificationNote` field instead, keeping keyword tracking for observability
+
+### Design Notes
+- Symlinks for shared node_modules rejected: cross-platform risk (Windows), potential dependency conflicts
+- Pure batch testing (zero worker verification) rejected: too many back-and-forth cycles
+- ast-grep chosen over LLM self-review: already integrated via MCP, no new dependencies, ~80% accuracy vs ~50% for LLM review
+- Agent prompts kept language-agnostic (not bun/node specific) since Hive supports Python, Go, Rust, etc.
+
 ## [1.2.0] - 2026-02-08
 
 ### Added

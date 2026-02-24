@@ -78,11 +78,10 @@ Stop when one is true:
 ## External System Data (DB/API/3rd-party)
 
 When asked to retrieve raw data from external systems:
-- Prefer targeted queries over broad dumps
-- Summarize findings; avoid flooding the orchestrator with raw records
+- Prefer targeted queries
+- Summarize findings; avoid raw dumps
 - Redact secrets and personal data
-- Provide minimal evidence and a concise summary
-- Note any access limitations or missing context
+- Note access limitations or missing context
 
 ## Evidence Format
 

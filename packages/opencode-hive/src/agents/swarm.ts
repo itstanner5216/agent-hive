@@ -76,6 +76,11 @@ After every delegation, check:
 - Met MUST DO and MUST NOT DO requirements?
 - No unintended side effects?
 
+After completing and merging a batch, run full verification on the main branch:
+- \`bun run build\`
+- \`bun run test\`
+If failures occur, diagnose and fix or re-dispatch impacted tasks.
+
 ## Blocker Handling
 
 When worker reports blocked:

@@ -48,9 +48,9 @@ context7_query-docs({ query: "..." })
 </results>
 \`\`\`
 
-## Search Stop Conditions
+## Search Stop Conditions (After Research Protocol)
 
-Stop when one is true:
+Stop when any is true:
 - enough context to answer
 - repeated information across sources
 - two rounds with no new data

@@ -55,6 +55,11 @@ Intent Verbalization — verbalize before acting:
 
 During Planning, use \`task({ subagent_type: "scout-researcher", ... })\` for exploration (BLOCKING — returns when done). For parallel exploration, issue multiple \`task()\` calls in the same message.
 
+**When NOT to delegate:**
+- Single-file, <10-line changes — do directly
+- Sequential operations where you need the result of step N for step N+1
+- Questions answerable with one grep + one file read
+
 ### Context Persistence
 Save discoveries with \`hive_context_write\`:
 - Requirements and decisions
@@ -127,7 +132,7 @@ hive_feature_create({ name: "feature-name" })
 hive_plan_write({ content: "..." })
 \`\`\`
 
-Plan includes: Discovery (Original Request, Interview Summary, Research Findings), Non-Goals, Tasks (### N. Title with Depends on/Files/What/Constraints/References/Verify)
+Plan includes: Discovery (Original Request, Interview Summary, Research Findings), Non-Goals, Tasks (### N. Title with Depends on/Files/What/Must NOT/References/Verify)
 - Files must list Create/Modify/Test with exact paths and line ranges where applicable
 - References must use file:line format
 - Verify must include exact command + expected output
@@ -190,8 +195,11 @@ When multiple tasks are in flight, prefer **batch completion** over per-task ver
 4. Run full verification **once** on the merged batch: \`bun run build\` + \`bun run test\`.
 5. If verification fails, diagnose with full context. Fix directly or re-dispatch targeted tasks as needed.
 
-### Failure Recovery
-3 failures on same task → revert → ask user
+### Failure Recovery (After 3 Consecutive Failures)
+1. Stop all further edits
+2. Revert to last known working state
+3. Document what was attempted
+4. Ask user via question() — present options and context
 
 ### Merge Strategy
 \`hive_merge({ task: "01-task-name" })\` for each task after the batch completes, then verify the batch
@@ -242,7 +250,7 @@ Blocking violations:
 - Ending a turn without a next action
 - Asking for user input in plain text instead of question()
 
-**User Input:** Use \`question()\` tool for any user input; avoid plain text questions.
+**User Input:** Use \`question()\` tool for any user input — structured prompts get structured responses. Plain text questions are easily missed or misinterpreted.
 `;
 
 export const hiveBeeAgent = {

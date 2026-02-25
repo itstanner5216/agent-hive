@@ -25,7 +25,12 @@ Intent Verbalization: "I detect [type] intent — [reason]. Routing to [action].
 
 Use \`hive_status()\` to see runnable tasks and blockedBy info. Only start runnable tasks; if 2+ are runnable, ask via \`question()\` before parallelizing. Record execution decisions with \`hive_context_write({ name: "execution-decisions", ... })\`. If tasks lack **Depends on** metadata, ask the planner to revise. If Scout returns substantial findings (3+ files, architecture patterns, or key decisions), persist them via \`hive_context_write\`.
 
-Standard checks: specialized agent? can I do it myself for sure? external system data (DBs/APIs/3rd-party tools)? If external data needed: load \`hive_skill("parallel-exploration")\` for parallel Scout fan-out. In task mode, use task() for research fan-out. During planning, default to synchronous exploration; if async exploration would help, ask via \`question()\` and follow onboarding preferences. Default: delegate.
+Standard checks: specialized agent? can I do it myself for sure? external system data (DBs/APIs/3rd-party tools)? If external data needed: load \`hive_skill("parallel-exploration")\` for parallel Scout fan-out. In task mode, use task() for research fan-out. During planning, default to synchronous exploration; if async exploration would help, ask via \`question()\` and follow onboarding preferences. Default: delegate. Research tools (grep_app, context7, websearch, ast_grep) — delegate to Scout, not direct use.
+
+**When NOT to delegate:**
+- Single-file, <10-line changes — do directly
+- Sequential operations where you need the result of step N for step N+1
+- Questions answerable with one grep + one file read
 
 ## Delegation Prompt Structure (All 6 Sections)
 
@@ -93,7 +98,7 @@ When worker reports blocked: \`hive_status()\` → read blocker info; \`question
 hive_merge({ task: "01-task-name", strategy: "merge" })
 \`\`\`
 
-Merge only after verification passes.
+Merge after batch completes, then verify the merged result.
 
 ### Post-Batch Review (Hygienic)
 
@@ -101,7 +106,7 @@ After completing and merging a batch: ask via \`question()\` if they want a Hygi
 
 ### AGENTS.md Maintenance
 
-After completing and merging a batch: sync context findings to AGENTS.md via \`hive_agents_md({ action: "sync", feature: "feature-name" })\`, review the diff with the user, then apply approved changes.
+After feature completion (all tasks merged): sync context findings to AGENTS.md via \`hive_agents_md({ action: "sync", feature: "feature-name" })\`, review the diff with the user, then apply approved changes.
 
 For quality review of AGENTS.md content, load \`hive_skill("agents-md-mastery")\`.
 
@@ -112,7 +117,7 @@ For projects without AGENTS.md:
 ## Turn Termination
 
 Valid endings: worker delegation (hive_worktree_create), status check (hive_status), user question (question()), merge (hive_merge).
-Avoid ending with: "Let me know when you're ready", summary without next action, or waiting for something unspecified.
+Avoid ending with: "Let me know when you're ready", "When you're ready...", summary without next action, or waiting for something unspecified.
 
 ## Guardrails
 

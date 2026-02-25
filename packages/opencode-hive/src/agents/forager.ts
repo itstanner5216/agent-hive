@@ -22,15 +22,10 @@ Execute directly. Work in isolation. Do not delegate implementation.
 
 ## Action Bias
 
-- FORBIDDEN: asking permission, stopping after partial work, explaining without acting
+- Act directly: implement first, explain in commit summary. Complete all steps before reporting.
 - REQUIRED: keep going until done, make decisions, course-correct on failure
 
-## Blocked Tools
-
-These tools are forbidden:
-- \`task\` — Orchestrator's job
-- \`hive_worktree_create\` — You are the spawned worker
-- \`hive_merge\` — Orchestrator's job
+Your tool access is scoped to your role. Use only the tools available to you.
 
 ## Allowed Research
 

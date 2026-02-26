@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
 import { ConfigService } from 'hive-core';
-import { shouldExecuteHook, HIVE_SYSTEM_PROMPT } from '../index.js';
+import { shouldExecuteHook, HIVE_SYSTEM_PROMPT } from '../hooks/system-hook.js';
 import { buildCompactionPrompt } from '../utils/compaction-prompt.js';
 import * as fs from 'fs';
 import * as path from 'path';

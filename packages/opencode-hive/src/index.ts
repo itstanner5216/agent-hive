@@ -150,6 +150,7 @@ import { applyTaskBudget, applyContextBudget, DEFAULT_BUDGET, type TruncationEve
 import { writeWorkerPromptFile } from "./utils/prompt-file";
 import { formatRelativeTime } from "./utils/format";
 import { HIVE_AGENT_NAMES, isHiveAgent, normalizeVariant } from "./hooks/variant-hook.js";
+import { buildCompactionPrompt } from "./utils/compaction-prompt.js";
 
 /**
  * Core hook cadence logic, extracted for testability.
@@ -364,6 +365,13 @@ To unblock: Remove .hive/features/${feature}/BLOCKED`;
           output.system.push(statusHint);
         }
       }
+    },
+
+    "experimental.session.compacting": async (
+      _input: { sessionID: string },
+      output: { context: string[]; prompt?: string },
+    ) => {
+      output.context.push(buildCompactionPrompt());
     },
 
     // Apply per-agent variant to messages (covers built-in task() tool)

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
 import { ConfigService } from 'hive-core';
-import { shouldExecuteHook } from '../index.js';
+import { shouldExecuteHook, HIVE_SYSTEM_PROMPT } from '../index.js';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
@@ -365,5 +365,20 @@ describe('Hook Cadence Logic', () => {
       expect(results[4]).toEqual({ turn: 5, hookA: true, hookB: false, hookC: false });
       expect(results[5]).toEqual({ turn: 6, hookA: false, hookB: false, hookC: true });
     });
+  });
+});
+
+describe('HIVE_SYSTEM_PROMPT — no broad worker-startup reinjection', () => {
+  it('does not contain a broad startup mandate to call hive_status', () => {
+    expect(HIVE_SYSTEM_PROMPT).not.toMatch(/use hive_status to check feature state before starting work/i);
+  });
+
+  it('does not contain a broad startup mandate to call hive_plan_read unconditionally', () => {
+    expect(HIVE_SYSTEM_PROMPT).not.toMatch(/use hive_plan_read to see plan comments/i);
+  });
+
+  it('retains the hive_worktree_commit vs hive_merge distinction note', () => {
+    expect(HIVE_SYSTEM_PROMPT).toMatch(/hive_worktree_commit/);
+    expect(HIVE_SYSTEM_PROMPT).toMatch(/hive_merge/);
   });
 });

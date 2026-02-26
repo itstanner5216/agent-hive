@@ -367,7 +367,8 @@ Do it
 
     const joined = output.system.join("\n");
     expect(joined).toContain("## Hive — Active Session");
-    expect(joined).toContain("hive_status");
+    expect(joined).not.toContain("Use hive_status to check feature state before starting work");
+    expect(joined).not.toContain("Use hive_plan_read to see plan comments");
     
     // Auto-loaded skills are now injected via config hook (prompt field), NOT system.transform
     // Verify by checking the agent's prompt field in config

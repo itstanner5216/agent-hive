@@ -326,6 +326,10 @@ class HiveExtension {
         }
 
         const plan = planService.read(activeFeature.name)
+        if (!plan?.content?.trim()) {
+          vscode.window.showWarningMessage(`Hive: No plan found for "${activeFeature.name}". Write a plan first.`)
+          return
+        }
         const comments = planService.getComments(activeFeature.name)
         const mode = activeFeature.status === 'planning' ? 'planning' : 'execution'
 

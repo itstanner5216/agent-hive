@@ -19,6 +19,7 @@ import { ISIMUD_PROMPT } from './agents/isimud.js';
 import { ASALLUHI_PROMPT, ASALLUHI_MINI_PROMPT } from './agents/asalluhi.js';
 import { createBuiltinMcps } from './mcp/index.js';
 import { shouldExecuteHook } from './utils/hook-cadence.js';
+import { buildCompactionPrompt } from './utils/compaction-prompt.js';
 
 // ============================================================================
 // Skill Tool - Uses generated registry (no file-based discovery)
@@ -471,6 +472,13 @@ To unblock: Remove .pantheon/features/${feature}/BLOCKED`;
           output.system.push(statusHint);
         }
       }
+    },
+
+    "experimental.session.compacting": async (
+      _input: { sessionID: string },
+      output: { context: string[]; prompt?: string },
+    ) => {
+      output.context.push(buildCompactionPrompt());
     },
 
     // Apply per-agent variant to messages (covers built-in task() tool)

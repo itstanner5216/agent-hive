@@ -182,11 +182,8 @@ export function shouldExecuteHook(
   return (currentTurn - 1) % cadence === 0;
 }
 
-const HIVE_SYSTEM_PROMPT = `
+export const HIVE_SYSTEM_PROMPT = `
 ## Hive — Active Session
-
-Use hive_status to check feature state before starting work.
-Use hive_plan_read to see plan comments.
 
 **Important:** hive_worktree_commit commits to the task branch but does NOT merge.
 Use hive_merge to integrate changes into the current branch.

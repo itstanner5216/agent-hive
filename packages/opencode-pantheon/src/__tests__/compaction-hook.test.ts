@@ -41,11 +41,14 @@ describe('buildCompactionPrompt', () => {
   });
 });
 
+import plugin from '../index.js';
+
 describe('experimental.session.compacting hook output', () => {
-  test('context includes resume directives (via buildCompactionPrompt)', () => {
-    const prompt = buildCompactionPrompt();
-    expect(prompt).toMatch(/continue/i);
-    expect(prompt).not.toMatch(/hive_status/);
-    expect(prompt).toMatch(/pantheon_status|status/i);
+  test('pushes compaction prompt into output.context', async () => {
+    const hooks = await plugin({ directory: process.cwd(), client: {} as any } as any);
+    const output = { context: [] as string[] };
+    await (hooks as any)['experimental.session.compacting']({ sessionID: 's1' }, output);
+    expect(output.context).toContain(buildCompactionPrompt());
   });
+});
 });

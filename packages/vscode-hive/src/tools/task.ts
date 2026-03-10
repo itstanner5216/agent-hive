@@ -1,4 +1,4 @@
-import { TaskService, TaskStatusType } from 'hive-core';
+import { TaskService, TaskStatusType } from 'pantheon-core';
 import type { ToolRegistration } from './base';
 import { createToolResult } from './base';
 

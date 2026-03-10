@@ -1,9 +1,10 @@
 import * as vscode from 'vscode'
 import * as fs from 'fs'
 import * as path from 'path'
-import { FeatureService, PlanService, TaskService, WorktreeService } from 'hive-core'
+import { FeatureService, PlanService, TaskService, WorktreeService } from 'pantheon-core'
 import { HiveWatcher, Launcher } from './services'
 import { HiveSidebarProvider, PlanCommentController } from './providers'
+import { HiveQueenPanel } from './panels/HiveQueenPanel'
 import {
   registerAllTools,
   getFeatureTools,
@@ -307,6 +308,40 @@ class HiveExtension {
         // Copy feedback to clipboard for easy pasting
         await vscode.env.clipboard.writeText(`@Hive ${feedback}`)
         vscode.window.showInformationMessage('Hive: Feedback copied to clipboard. Paste in Copilot Chat.')
+      }),
+
+      vscode.commands.registerCommand('hive.openQueenPanel', async () => {
+        if (!this.workspaceRoot) {
+          vscode.window.showWarningMessage('Hive: No .hive directory found.')
+          return
+        }
+
+        const featureService = new FeatureService(this.workspaceRoot)
+        const planService = new PlanService(this.workspaceRoot)
+        const activeFeature = featureService.getActive()
+
+        if (!activeFeature) {
+          vscode.window.showWarningMessage('Hive: No active feature. Create one first.')
+          return
+        }
+
+        const plan = planService.read(activeFeature.name)
+        if (!plan?.content?.trim()) {
+          vscode.window.showWarningMessage(`Hive: No plan found for "${activeFeature.name}". Write a plan first.`)
+          return
+        }
+        const comments = planService.getComments(activeFeature.name)
+        const mode = activeFeature.status === 'planning' ? 'planning' : 'execution'
+
+        await HiveQueenPanel.showWithOptions(this.context.extensionUri, {
+          plan: plan?.content || '',
+          title: `Hive Queen: ${activeFeature.name}`,
+          mode,
+          featureName: activeFeature.name,
+          featurePath: path.join(this.workspaceRoot, '.hive', 'features', activeFeature.name),
+          projectRoot: this.workspaceRoot,
+          existingComments: comments
+        })
       })
     )
   }

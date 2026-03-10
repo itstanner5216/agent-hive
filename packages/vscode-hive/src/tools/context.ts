@@ -1,4 +1,4 @@
-import { ContextService } from 'hive-core';
+import { ContextService } from 'pantheon-core';
 import type { ToolRegistration } from './base';
 
 export function getContextTools(workspaceRoot: string): ToolRegistration[] {

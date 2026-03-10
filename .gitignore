@@ -24,7 +24,7 @@ npm-debug.log*
 tmp/
 
 # Hive runtime data
-.hive/
+.pantheon/
 .hive2/
 opencode-antigravity-auth/
 gistpad/

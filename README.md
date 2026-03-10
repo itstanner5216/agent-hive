@@ -1,8 +1,8 @@
-# Agent Hive 🐝
+# Agent Pantheon ⚡
 
-**From Vibe Coding to Hive Coding** — Plan first. Execute with trust. Context persists.
+**From Vibe Coding to Pantheon Building** — Plan first. Execute with trust. Context persists.
 
-[![npm version](https://img.shields.io/npm/v/opencode-hive.svg)](https://www.npmjs.com/package/opencode-hive)
+[![npm version](https://img.shields.io/npm/v/opencode-pantheon.svg)](https://www.npmjs.com/package/opencode-pantheon)
 [![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/tctinh.vscode-hive.svg)](https://marketplace.visualstudio.com/items?itemName=tctinh.vscode-hive)
 [![License: MIT with Commons Clause](https://img.shields.io/badge/License-MIT%20with%20Commons%20Clause-blue.svg)](LICENSE)
 
@@ -29,18 +29,18 @@ Vibe coding is powerful but chaotic. Without structure:
 
 ---
 
-## The Hive Solution
+## The Pantheon Solution
 
-| Problem | Hive Solution |
+| Problem | Pantheon Solution |
 |---------|---------------|
 | Lost context | **Context persists** — Feature-scoped knowledge survives sessions |
 | Subagents go wild | **Batched parallelism** — Coordinated execution with context flow |
 | Scope creep | **Plan approval gate** — Human shapes, agent builds |
 | Messes to clean up | **Worktree isolation** — Each task isolated, easy discard |
-| No audit trail | **Automatic tracking** — Every task logged to `.hive/` |
+| No audit trail | **Automatic tracking** — Every task logged to `.pantheon/` |
 | Agent hallucination | **Context files** — Research and decisions ground agent work |
 
-**Hive doesn't change how you work. It makes what happens traceable, auditable, and grounded.**
+**Pantheon doesn't change how you work. It makes what happens traceable, auditable, and grounded.**
 
 ---
 
@@ -48,13 +48,13 @@ Vibe coding is powerful but chaotic. Without structure:
 
 We studied what actually works in the AI coding community and built upon it:
 
-| Source | What We Learned | Hive Implementation |
+| Source | What We Learned | Pantheon Implementation |
 |--------|-----------------|---------------------|
 | **[Boris Cherny's 13 Tips](https://www.anthropic.com/research/claude-code-best-practices)** | Feedback loops = 2-3x quality | Task-level verification with tests |
 | **[Spec Kit](https://github.com/github/spec-kit)** | Specs are valuable | Specs emerge from dialogue, not upfront |
-| **[Conductor](https://github.com/gemini-cli-extensions/conductor)** | Context persistence matters | Feature-scoped `.hive/context/` |
+| **[Conductor](https://github.com/gemini-cli-extensions/conductor)** | Context persistence matters | Feature-scoped `.pantheon/context/` |
 | **[Ralph Wiggum](https://awesomeclaude.ai/ralph-wiggum)** | Retry loops work for verification | TDD loops, not infinite retries |
-| **[Oh My OpenCode](https://github.com/code-yeongyu/oh-my-opencode)** | Agent delegation scales | OMO as Hive Queen, Hive as workflow |
+| **[Oh My OpenCode](https://github.com/code-yeongyu/oh-my-opencode)** | Agent delegation scales | OMO as agent layer, Pantheon as workflow |
 | **Antigravity** | Plan gates build trust | Plan → Approve → Execute workflow |
 
 > *"Give Claude a way to verify its work. When Claude has a feedback loop, it will 2-3x the quality of the final result."* — Boris Cherny
@@ -67,30 +67,30 @@ See [PHILOSOPHY.md](PHILOSOPHY.md) for the full breakdown of what we learned fro
 
 ### Option A: GitHub Copilot
 
-1. Install the **Agent Hive** extension:
+1. Install the **Agent Pantheon** extension:
    ```bash
    code --install-extension tctinh.vscode-hive
    ```
 
-2. Create `.github/agents/Hive.agent.md` in your repository (copy from this repo or see the [GitHub Copilot Guide](docs/GITHUB-COPILOT-GUIDE.md))
+2. Create `.github/agents/Pantheon.agent.md` in your repository (copy from this repo or see the [GitHub Copilot Guide](docs/GITHUB-COPILOT-GUIDE.md))
 
 3. In Copilot Chat, invoke your agent:
    ```
-   I want to hive plan add user authentication
+   I want to plan user authentication with the Pantheon workflow
    ```
 
-The extension provides Hive tools for plan-first development. The agent file teaches Copilot how to use them.
+The extension provides Pantheon workflow tools for plan-first development. The agent file teaches Copilot how to use them.
 
 See the full [GitHub Copilot Guide](docs/GITHUB-COPILOT-GUIDE.md) for creating and customizing your agent.
 
 ### Option B: OpenCode
 
-Add `opencode-hive` to your `opencode.json`:
+Add `opencode-pantheon` to your `opencode.json`:
 
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["opencode-hive"]
+  "plugin": ["opencode-pantheon"]
 }
 ```
 
@@ -98,16 +98,16 @@ OpenCode handles the rest — no manual npm install needed.
 
 ### Configuration
 
-Run Agent Hive once to auto-generate a default configuration at `~/.config/opencode/agent_hive.json`. Review it to ensure it matches your local setup.
+Run Agent Pantheon once to auto-generate a default configuration at `~/.config/opencode/agent_hive.json`. Review it to ensure it matches your local setup.
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/tctinh/agent-hive/main/packages/opencode-hive/schema/agent_hive.schema.json",
-  "agentMode": "unified",
+  "$schema": "https://raw.githubusercontent.com/itstanner5216/agent-hive/main/packages/opencode-pantheon/schema/agent_hive.schema.json",
+  "agentMode": "full",
   "disableSkills": [],
   "disableMcps": [],
   "agents": {
-    "hive-master": {
+    "enki-planner": {
       "model": "anthropic/claude-sonnet-4-20250514",
       "temperature": 0.5
     }
@@ -119,8 +119,8 @@ Run Agent Hive once to auto-generate a default configuration at `~/.config/openc
 
 | Option | Values | Description |
 |--------|--------|-------------|
-| `agentMode` | `unified` (default), `dedicated` | `unified`: Single `hive-master` agent handles planning + orchestration. `dedicated`: Separate `architect-planner` and `swarm-orchestrator` agents. |
-| `disableSkills` | `string[]` | Globally disable specific skills (won't appear in `hive_skill` tool). |
+| `agentMode` | `full` (default), `core`, `lean` | `full`: All 10 Pantheon agents. `core`: 6 pipeline agents (enlil, enki, nudimmud, adapa, kulla, nanshe). `lean`: 4 essential agents (enki, nudimmud, kulla, adapa). |
+| `disableSkills` | `string[]` | Globally disable specific skills (won't appear in `pantheon_skill` tool). |
 | `disableMcps` | `string[]` | Globally disable MCP servers. Options: `websearch`, `context7`, `grep_app`, `ast_grep`. |
 
 #### Agent Models
@@ -130,19 +130,19 @@ Configure models for each agent role. **Update these to models available on your
 ```json
 {
   "agents": {
-    "hive-master": { "model": "anthropic/claude-sonnet-4-20250514", "temperature": 0.5 },
-    "scout-researcher": { "model": "anthropic/claude-sonnet-4-20250514", "temperature": 0.5 },
-    "forager-worker": { "model": "anthropic/claude-sonnet-4-20250514", "temperature": 0.3 },
-    "hygienic-reviewer": { "model": "anthropic/claude-sonnet-4-20250514", "temperature": 0.3 }
+    "enki-planner": { "model": "anthropic/claude-sonnet-4-20250514", "temperature": 0.5 },
+    "adapa-explorer": { "model": "anthropic/claude-sonnet-4-20250514", "temperature": 0.5 },
+    "kulla-coder": { "model": "anthropic/claude-sonnet-4-20250514", "temperature": 0.3 },
+    "nanshe-reviewer": { "model": "anthropic/claude-sonnet-4-20250514", "temperature": 0.3 }
   }
 }
 ```
 
-All agents: `hive-master`, `architect-planner`, `swarm-orchestrator`, `scout-researcher`, `forager-worker`, `hygienic-reviewer`.
+All agents: `enlil-validator`, `enki-planner`, `nudimmud-orchestrator`, `isimud-ideator`, `asalluhi-prompter`, `adapa-explorer`, `kulla-coder`, `nanshe-reviewer`, `enbilulu-tester`, `mushdamma-phase-reviewer`.
 
 #### Skills
 
-Skills provide specialized workflows that agents can load on-demand via `hive_skill`.
+Skills provide specialized workflows that agents can load on-demand via `pantheon_skill`.
 
 | Skill | Description |
 |-------|-------------|
@@ -153,17 +153,17 @@ Skills provide specialized workflows that agents can load on-demand via `hive_sk
 | `test-driven-development` | Enforces write-test-first, red-green-refactor cycle |
 | `systematic-debugging` | Requires root cause investigation before proposing fixes |
 | `verification-before-completion` | Requires running verification commands before claiming success |
-| `parallel-exploration` | Fan-out research across multiple Scout agents |
+| `parallel-exploration` | Fan-out research across multiple Adapa agents |
 | `code-reviewer` | Reviews code changes against plan for quality and alignment |
 | `docker-mastery` | Docker container expertise — debugging, docker-compose, optimization |
 | `agents-md-mastery` | AGENTS.md quality review — signal vs noise, when to prune |
 
-**Per-agent skills:** Restrict which skills appear in `hive_skill()` tool:
+**Per-agent skills:** Restrict which skills appear in `pantheon_skill()` tool:
 
 ```json
 {
   "agents": {
-    "forager-worker": {
+    "kulla-coder": {
       "skills": ["test-driven-development", "verification-before-completion"]
     }
   }
@@ -175,15 +175,15 @@ Skills provide specialized workflows that agents can load on-demand via `hive_sk
 ```json
 {
   "agents": {
-    "hive-master": { "autoLoadSkills": ["parallel-exploration"] },
-    "forager-worker": { "autoLoadSkills": ["test-driven-development", "verification-before-completion"] }
+    "enki-planner": { "autoLoadSkills": ["parallel-exploration"] },
+    "kulla-coder": { "autoLoadSkills": ["test-driven-development", "verification-before-completion"] }
   }
 }
 ```
 
 **Supported skill sources for `autoLoadSkills`:**
 
-1. **Hive builtin** — Skills bundled with opencode-hive (always win if ID matches)
+1. **Pantheon builtin** — Skills bundled with opencode-pantheon (always win if ID matches)
 2. **Project OpenCode** — `<project>/.opencode/skills/<id>/SKILL.md`
 3. **Global OpenCode** — `~/.config/opencode/skills/<id>/SKILL.md`
 4. **Project Claude** — `<project>/.claude/skills/<id>/SKILL.md`
@@ -192,9 +192,9 @@ Skills provide specialized workflows that agents can load on-demand via `hive_sk
 Missing or invalid skills emit a warning and are skipped—startup continues without failure.
 
 **How these interact:**
-- `skills` controls what's available in `hive_skill()` — the agent can manually load these
+- `skills` controls what's available in `pantheon_skill()` — the agent can manually load these
 - `autoLoadSkills` injects skills unconditionally at session start — no manual loading needed
-- These are **independent**: a skill can be auto-loaded but not appear in `hive_skill()`, or vice versa
+- These are **independent**: a skill can be auto-loaded but not appear in `pantheon_skill()`, or vice versa
 - Default `autoLoadSkills` are merged with user config (use `disableSkills` to remove defaults)
 
 #### MCP Research Tools
@@ -215,23 +215,23 @@ Set reasoning/effort levels per agent:
 ```json
 {
   "agents": {
-    "hive-master": { "model": "anthropic/claude-sonnet-4-20250514", "variant": "high" },
-    "forager-worker": { "variant": "medium" }
+    "enki-planner": { "model": "anthropic/claude-sonnet-4-20250514", "variant": "high" },
+    "kulla-coder": { "variant": "medium" }
   }
 }
 ```
 
 Variants must match keys in your OpenCode config at `provider.<provider>.models.<model>.variants`.
 
-See [packages/opencode-hive/README.md](packages/opencode-hive/README.md) for advanced configuration options.
+See [packages/opencode-pantheon/README.md](packages/opencode-pantheon/README.md) for advanced configuration options.
 
-### Start Hiving
+### Start Building
 
 ```
 You: "Create a feature for user dashboard"
 ```
 
-That's it. You're hiving.
+That's it. You are building with the Pantheon.
 
 ---
 
@@ -249,39 +249,47 @@ Main Agent: "Build auth system"
 You: "What just happened?" 🤷
 ```
 
-### The Hive Way (Orchestrated)
+### The Pantheon Way (Orchestrated)
 
 ```
-Swarm Bee: Creates plan, you approve it
+Enki Planner: Creates plan from discovery
+    │
+Enlil Validator: approves execution readiness
+    │
+Nudimmud Orchestrator: launches batched execution
     │
     ├── Batch 1 (parallel):
-    │   ├── Forager A (own worktree, tracked)
-    │   ├── Forager B (own worktree, tracked)
-    │   └── Forager C (own worktree, tracked)
+    │   ├── Kulla Coder A (own worktree, tracked)
+    │   ├── Kulla Coder B (own worktree, tracked)
+    │   └── Kulla Coder C (own worktree, tracked)
     │           ↓
     │      Context flows forward
     │           ↓
     ├── Batch 2 (parallel):
-    │   ├── Forager D (uses A+B+C results)
-    │   └── Forager E (uses A+B+C results)
+    │   ├── Kulla Coder D (uses A+B+C results)
+    │   └── Kulla Coder E (uses A+B+C results)
     │
-Hive: Full audit of what each agent did
+Pantheon: Full audit of what each agent did
 You: Clear visibility into everything ✅
 ```
 
-**The Hive Colony:**
+**The Pantheon:**
 | Agent | Role |
 |-------|------|
-| **Hive (Hybrid)** 👑 | Plans + orchestrates (phase-aware, skills on-demand) |
-| **Architect (Planner)** 🏗️ | Discovers requirements, writes plans |
-| **Swarm (Orchestrator)** 🐝 | Orchestrates execution, delegates to workers |
-| **Scout (Explorer/Researcher/Retrieval)** 🔍 | Explores codebase + external docs/data |
-| **Forager (Worker/Coder)** 🍯 | Executes tasks in isolated worktrees |
-| **Hygienic (Consultant/Reviewer/Debugger)** 🧹 | Reviews plan quality, OKAY/REJECT verdict |
+| **`enlil-validator`** | Plan validator and execution gate authority |
+| **`enki-planner`** | Planner; conducts discovery and writes implementation plans |
+| **`nudimmud-orchestrator`** | Execution orchestrator; delegates, tracks, merges |
+| **`isimud-ideator`** | Idea architect; shapes conceptual blueprints |
+| **`asalluhi-prompter`** | Prompt engineer; crafts high-fidelity system prompts |
+| **`adapa-explorer`** | Explorer/researcher; maps codebase and external references |
+| **`kulla-coder`** | Implementation worker in isolated worktrees |
+| **`nanshe-reviewer`** | Reviewer/debugger; quality, risk, and compliance checks |
+| **`enbilulu-tester`** | Testing specialist; writes/runs verification suites |
+| **`mushdamma-phase-reviewer`** | Phase integrity reviewer before progression |
 
 ---
 
-## Real Example: Building Auth with Hive
+## Real Example: Building Auth with Pantheon
 
 ### Step 1: Start the Conversation
 
@@ -311,7 +319,7 @@ Convert all routes to use the new AuthService.
 
 ### Step 2: Review in VS Code
 
-Open VS Code. The Hive sidebar shows your plan. You can:
+Open VS Code. The Pantheon sidebar shows your plan. You can:
 
 - Read through each task
 - Add comments ("Use httpOnly cookies for tokens")
@@ -334,7 +342,7 @@ When done, you have:
 - **Full audit trail** — What was done, when, by which agent
 
 ```
-.hive/features/user-auth/
+.pantheon/features/user-auth/
 ├── feature.json         # Feature metadata
 ├── plan.md              # Your approved plan
 ├── tasks.json           # Task list with status
@@ -355,7 +363,7 @@ When done, you have:
         └── report.md
 ```
 
-**That's hiving.** Natural conversation → structured plan → approved execution → documented result.
+**That's Pantheon building.** Natural conversation -> structured plan -> approved execution -> documented result.
 
 ---
 
@@ -365,7 +373,7 @@ When done, you have:
 ┌─────────────────────────────────────────────────────────────┐
 │  1. PLAN                                                    │
 │  Chat with your agent about what to build                   │
-│  Agent creates structured plan in .hive/                    │
+│  Agent creates structured plan in .pantheon/                    │
 ├─────────────────────────────────────────────────────────────┤
 │  2. REVIEW (in VS Code)                                     │
 │  See the plan in sidebar                                    │
@@ -390,13 +398,13 @@ Visual management without leaving your editor:
 - **Sidebar** — See all features and progress at a glance
 - **Inline Comments** — Add review comments directly on plan.md
 - **Approve Button** — One-click plan approval
-- **Real-time Updates** — Watches `.hive/` for changes
+- **Real-time Updates** — Watches `.pantheon/` for changes
 - **Launch Tasks** — Open tasks in OpenCode from VS Code
 - **Expandable Tasks** — Click to view spec.md and report.md for each task
 
 ```
 ┌─────────────────────────────────────┐
-│ HIVE                           [+]  │
+│ PANTHEON                       [+]  │
 ├─────────────────────────────────────┤
 │ ▼ user-auth              [3/3]  ✅  │
 │   ├─ 01-extract-auth-logic     ✅   │
@@ -427,16 +435,16 @@ Visual management without leaving your editor:
 > **Important:** The VS Code extension is a companion tool for [OpenCode](https://opencode.ai). It provides visualization and review capabilities but does not execute tasks on its own.
 
 **You need:**
-1. **OpenCode CLI** — The AI coding assistant that runs the Hive workflow
-2. **opencode-hive plugin** — Installed in your OpenCode configuration
+1. **OpenCode CLI** — The AI coding assistant that runs the Pantheon workflow
+2. **opencode-pantheon plugin** — Installed in your OpenCode configuration
 3. **vscode-hive extension** — For visual management in VS Code
 
-The extension watches your `.hive/` directory and displays the current state. All planning and execution happens through OpenCode.
+The extension watches your `.pantheon/` directory and displays the current state. All planning and execution happens through OpenCode.
 
 ### Using the Extension
 
-1. **Open your project** in VS Code (must have `.hive/` directory)
-2. **Click the Hive icon** in the Activity Bar (left sidebar)
+1. **Open your project** in VS Code (must have `.pantheon/` directory)
+2. **Click the Pantheon icon** in the Activity Bar (left sidebar)
 3. **Browse features** — Expand to see tasks, context, sessions
 4. **Review plans** — Click on plan.md to open with inline commenting
 5. **Add comments** — Use VS Code's comment feature on plan.md lines
@@ -449,14 +457,14 @@ The extension watches your `.hive/` directory and displays the current state. Al
 
 | Package | Platform | Description |
 |---------|----------|-------------|
-| **[opencode-hive](https://www.npmjs.com/package/opencode-hive)** | npm | OpenCode plugin — 6 specialized bee agents, 15 tools, 11 skills |
+| **[opencode-pantheon](https://www.npmjs.com/package/opencode-pantheon)** | npm | OpenCode plugin — 10 specialized Pantheon agents, 15 tools, 11 skills |
 | **[vscode-hive](https://marketplace.visualstudio.com/items?itemName=tctinh.vscode-hive)** | VS Code | Visual management — review, comment, approve |
 
-**Agent Selection:** Use `hive`, `architect`, or `swarm` as your primary agent. Use `@scout`, `@forager`, or `@hygienic` to mention subagents directly.
+**Agent Selection:** Use `enlil-validator`, `enki-planner`, or `nudimmud-orchestrator` as your primary agent. Use `@adapa-explorer`, `@kulla-coder`, or `@nanshe-reviewer` to mention specialists directly.
 
 ---
 
-## Why Hive?
+## Why Pantheon?
 
 ### 🎯 Plan First
 
@@ -468,7 +476,7 @@ Break work into isolated tasks. Subagents work in parallel without conflicts. Ba
 
 ### 📊 Easy Audit
 
-Every decision, every change, every agent action — automatically captured in `.hive/`
+Every decision, every change, every agent action — automatically captured in `.pantheon/`
 
 ### 🚀 Easy Ship
 
@@ -478,8 +486,8 @@ Clean git history (worktree merges), full documentation (generated as you work),
 
 ## Comparison
 
-| Feature | Vibe Coding | Spec-First Tools | Agent Hive |
-|---------|-------------|------------------|------------|
+| Feature | Vibe Coding | Spec-First Tools | Agent Pantheon |
+|---------|-------------|------------------|----------------|
 | Setup required | None | Heavy | Minimal |
 | Documentation | None | Upfront | Emerges from work |
 | Planning | Ad-hoc | Required first | Conversational |
@@ -493,7 +501,7 @@ Clean git history (worktree merges), full documentation (generated as you work),
 
 ## Philosophy
 
-Hive is built on 7 core principles:
+Pantheon is built on 7 core principles:
 
 1. **Context Persists** — Calibration survives sessions. The "3 months later" problem solved.
 2. **Plan → Approve → Execute** — Dialogue until approved, then trust. Two phases with a clear gate.
@@ -509,14 +517,14 @@ See [PHILOSOPHY.md](PHILOSOPHY.md) for the full framework.
 
 ## Related Tools
 
-Hive complements these excellent projects:
+Pantheon complements these excellent projects:
 
-| Tool | What It Does | How Hive Relates |
+| Tool | What It Does | How Pantheon Relates |
 |------|--------------|------------------|
-| **[Oh My OpenCode](https://github.com/code-yeongyu/oh-my-opencode)** | Agent-first delegation with specialized workers | Perfect combo: OMO as Hive Queen orchestrating Hive workers |
-| **[Conductor](https://github.com/gemini-cli-extensions/conductor)** | Context-driven track-based execution | Similar goals; Hive adds worktree isolation + batching |
-| **[Spec Kit](https://github.com/github/spec-kit)** | Heavy upfront specification | Hive: specs emerge from planning, not before |
-| **[Ralph Wiggum](https://awesomeclaude.ai/ralph-wiggum)** | Loop-until-done persistence | Different philosophy; Hive plans first, not retries first |
+| **[Oh My OpenCode](https://github.com/code-yeongyu/oh-my-opencode)** | Agent-first delegation with specialized workers | Perfect combo: OMO as agent layer orchestrating Pantheon workflows |
+| **[Conductor](https://github.com/gemini-cli-extensions/conductor)** | Context-driven track-based execution | Similar goals; Pantheon adds worktree isolation + batching |
+| **[Spec Kit](https://github.com/github/spec-kit)** | Heavy upfront specification | Pantheon: specs emerge from planning, not before |
+| **[Ralph Wiggum](https://awesomeclaude.ai/ralph-wiggum)** | Loop-until-done persistence | Different philosophy; Pantheon plans first, not retries first |
 
 ---
 
@@ -525,12 +533,12 @@ Hive complements these excellent projects:
 | Platform | Setup | Status |
 |----------|-------|--------|
 | **GitHub Copilot** | Install extension + create agent file | Full support |
-| **OpenCode** | Add `opencode-hive` plugin | Full support |
+| **OpenCode** | Add `opencode-pantheon` plugin | Full support |
 | **VS Code** | Extension for visual management | Full support |
 
 Designed to work seamlessly with:
 
-- **[GitHub Copilot](https://github.com/features/copilot)** — Use keyword `hive` in Copilot Chat
+- **[GitHub Copilot](https://github.com/features/copilot)** — Use Pantheon agent IDs in Copilot Chat
 - **[OpenCode](https://opencode.ai)** — The AI coding CLI
 - **VS Code** — Your editor for reviews
 - **Git** — Worktrees for isolation
@@ -544,7 +552,7 @@ MIT with Commons Clause — Free for personal and non-commercial use. See [LICEN
 ---
 
 <p align="center">
-  <strong>Stop vibing. Start hiving.</strong> 🐝
+  <strong>Stop vibing. Start building with the Pantheon.</strong> ⚡
   <br>
   <em>Plan first. Execute with trust. Context persists.</em>
 </p>

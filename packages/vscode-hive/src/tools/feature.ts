@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { FeatureService } from 'hive-core';
+import { FeatureService } from 'pantheon-core';
 import type { ToolRegistration } from './base';
 
 export function getFeatureTools(workspaceRoot: string): ToolRegistration[] {

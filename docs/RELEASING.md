@@ -1,8 +1,8 @@
-# Releasing Agent Hive
+# Releasing Pantheon
 
 This repo publishes:
 
-- `opencode-hive` to npm (GitHub Actions `Release` workflow)
+- `opencode-pantheon` to npm (GitHub Actions `Release` workflow)
 - `vscode-hive` to the VS Code Marketplace (same workflow)
 
 The `Release` workflow runs **publishing only on tags** matching `v*`. Manual runs (`workflow_dispatch`) build and test only.

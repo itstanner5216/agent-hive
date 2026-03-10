@@ -1,8 +1,8 @@
-# Agent Guidelines for agent-hive
+# Agent Guidelines for Pantheon
 
 ## Overview
 
-**agent-hive** is a context-driven development system for AI coding assistants. It implements a plan-first workflow: Plan → Approve → Execute.
+**Pantheon** is a context-driven development system for AI coding assistants. It implements a plan-first workflow: Plan → Approve → Execute.
 
 ## Build & Test Commands
 
@@ -27,12 +27,12 @@ Worktree dependency note: worktrees are isolated checkouts and do not share the 
 ### Package-Specific Commands
 
 ```bash
-# From packages/hive-core/
-bun run build             # Build hive-core
-bun run test              # Run hive-core tests
+# From packages/pantheon-core/
+bun run build             # Build pantheon-core
+bun run test              # Run pantheon-core tests
 
-# From packages/opencode-hive/
-bun run build             # Build opencode-hive plugin
+# From packages/opencode-pantheon/
+bun run build             # Build opencode-pantheon plugin
 bun run dev               # Watch mode
 
 # From packages/vscode-hive/
@@ -83,16 +83,16 @@ async function loadConfig(): Promise<Config> {
 
 ```
 packages/
-├── hive-core/           # Shared logic (services, types, utils)
+├── pantheon-core/           # Shared logic (services, types, utils)
 │   └── src/
 │       ├── services/    # FeatureService, TaskService, PlanService, etc.
 │       ├── utils/       # paths.ts, detection.ts
 │       └── types.ts     # Shared type definitions
-├── opencode-hive/       # OpenCode plugin
+├── opencode-pantheon/       # OpenCode plugin
 │   └── src/
-│       ├── agents/      # scout, swarm, hive, architect, forager, hygienic
+│       ├── agents/      # enlil, enki, marduk, isimud, asalluhi, adapa, kulla, nanshe, enbilulu, mushdamma
 │       ├── mcp/         # websearch, grep-app, context7, ast-grep
-│       ├── tools/       # Hive tool implementations
+│       ├── tools/       # Pantheon tool implementations
 │       ├── hooks/       # Event hooks
 │       └── skills/      # Skill definitions
 └── vscode-hive/         # VS Code extension
@@ -127,7 +127,7 @@ feat!: change plan format to support subtasks
 
 ### Core Philosophy
 
-1. **Context Persists** - Write to `.hive/` files; memory is ephemeral
+1. **Context Persists** - Write to `.pantheon/` files; memory is ephemeral
 2. **Plan → Approve → Execute** - No code without approved plan
 3. **Human Shapes, Agent Builds** - Humans decide direction, agents implement
 4. **Good Enough Wins** - Ship working code, iterate later
@@ -139,18 +139,22 @@ feat!: change plan format to support subtasks
 
 | Agent | Role |
 |-------|------|
-| Hive (Hybrid) | Plans AND orchestrates; phase-aware |
-| Architect | Plans features, interviews, writes plans. NEVER executes |
-| Swarm | Orchestrates execution. Delegates, spawns workers, verifies |
-| Scout | Researches codebase + external docs/data |
-| Forager | Executes tasks directly in isolated worktrees |
-| Hygienic | Reviews plan/code quality. OKAY/REJECT verdict |
+| Enlil (Validator) | Validates plans against user vision; supreme authority |
+| Enki (Planner) | Plans features, interviews, writes implementation plans |
+| Marduk (Orchestrator) | Orchestrates execution; delegates to specialists |
+| Isimud (Ideator) | Conceptualizes ideas into structured blueprints |
+| Asalluhi (Prompter) | Crafts prompts for optimal model performance |
+| Adapa (Explorer) | Researches codebase + external docs/data |
+| Kulla (Coder) | Executes tasks directly in isolated worktrees |
+| Nanshe (Reviewer) | Reviews code quality, correctness; OKAY/REJECT verdict |
+| Enbilulu (Tester) | Runs tests, catches regressions |
+| Mushdamma (Phase Reviewer) | Validates structural integrity of completed phases |
 
 ### Data Model
 
-Features stored in `.hive/features/<name>/`:
+Features stored in `.pantheon/features/<name>/`:
 ```
-.hive/features/my-feature/
+.pantheon/features/my-feature/
 ├── feature.json       # Feature metadata
 ├── plan.md            # Implementation plan
 ├── tasks.json         # Generated tasks
@@ -163,21 +167,21 @@ Features stored in `.hive/features/<name>/`:
 
 ### Adding a New Tool
 
-1. Create tool in `packages/opencode-hive/src/tools/`
+1. Create tool in `packages/opencode-pantheon/src/tools/`
 2. Register in tool index
 3. Add to agent system prompt if needed
 4. Test with actual agent invocation
 
 ### Adding a New Skill
 
-1. Create directory in `packages/opencode-hive/skills/<name>/`
+1. Create directory in `packages/opencode-pantheon/skills/<name>/`
 2. Add `SKILL.md` with skill instructions
 3. Register in skill loader
 4. Document triggers in skill description
 
 ### Adding a Service
 
-1. Create in `packages/hive-core/src/services/`
+1. Create in `packages/pantheon-core/src/services/`
 2. Export from `services/index.ts`
 3. Add types to `types.ts`
 4. Write unit tests
@@ -186,7 +190,7 @@ Features stored in `.hive/features/<name>/`:
 
 ### File System Operations
 
-Use the utility functions from hive-core:
+Use the utility functions from pantheon-core:
 
 ```typescript
 import { readJson, writeJson, fileExists, ensureDir } from './utils/fs.js';
@@ -237,7 +241,7 @@ This is a **bun workspaces** monorepo:
 - Each package has its own `package.json`
 - Run package scripts from the package directory (for example, `packages/vscode-hive/` → `bun run build`)
 
-## Hive - Feature Development System
+## Pantheon - Feature Development System
 
 Plan-first development: Write plan → User reviews → Approve → Execute tasks
 
@@ -245,27 +249,27 @@ Plan-first development: Write plan → User reviews → Approve → Execute task
 
 | Domain | Tools |
 |--------|-------|
-| Feature | hive_feature_create, hive_feature_complete |
-| Plan | hive_plan_write, hive_plan_read, hive_plan_approve |
-| Task | hive_tasks_sync, hive_task_create, hive_task_update |
-| Worktree | hive_worktree_create, hive_worktree_commit, hive_worktree_discard |
-| Merge | hive_merge |
-| Context | hive_context_write |
-| AGENTS.md | hive_agents_md |
-| Status | hive_status |
+| Feature | pantheon_feature_create, pantheon_feature_complete |
+| Plan | pantheon_plan_write, pantheon_plan_read, pantheon_plan_approve |
+| Task | pantheon_tasks_sync, pantheon_task_create, pantheon_task_update |
+| Worktree | pantheon_worktree_create, pantheon_worktree_commit, pantheon_worktree_discard |
+| Merge | pantheon_merge |
+| Context | pantheon_context_write |
+| AGENTS.md | pantheon_agents_md |
+| Status | pantheon_status |
 
 ### Workflow
 
-1. `hive_feature_create(name)` - Create feature
-2. `hive_plan_write(content)` - Write plan.md
-3. User adds comments in VSCode → `hive_plan_read` to see them
+1. `pantheon_feature_create(name)` - Create feature
+2. `pantheon_plan_write(content)` - Write plan.md
+3. User adds comments in VSCode → `pantheon_plan_read` to see them
 4. Revise plan → User approves
-5. `hive_tasks_sync()` - Generate tasks from plan
-6. `hive_worktree_create(task)` → work in worktree → `hive_worktree_commit(task, summary)`
-7. `hive_merge(task)` - Merge task branch into main (when ready)
+5. `pantheon_tasks_sync()` - Generate tasks from plan
+6. `pantheon_worktree_create(task)` → work in worktree → `pantheon_worktree_commit(task, summary)`
+7. `pantheon_merge(task)` - Merge task branch into main (when ready)
 
-**Important:** `hive_worktree_commit` commits changes to task branch but does NOT merge.
-Use `hive_merge` to explicitly integrate changes. Worktrees persist until manually removed.
+**Important:** `pantheon_worktree_commit` commits changes to task branch but does NOT merge.
+Use `pantheon_merge` to explicitly integrate changes. Worktrees persist until manually removed.
 
 ### Sandbox Configuration
 

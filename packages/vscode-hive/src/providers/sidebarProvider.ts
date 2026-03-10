@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import * as fs from 'fs'
 import * as path from 'path'
-import type { FeatureJson, TaskStatus } from 'hive-core'
+import type { FeatureJson, TaskStatus } from 'pantheon-core'
 
 type SidebarItem = ActionItem | StatusGroupItem | FeatureItem | PlanItem | ContextFolderItem | ContextFileItem | TasksGroupItem | TaskItem | TaskFileItem
 

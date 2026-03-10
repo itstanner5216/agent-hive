@@ -859,7 +859,8 @@
       {
         "command": "hive.openQueenPanel",
         "key": "ctrl+shift+h",
-        "mac": "cmd+shift+h"
+        "mac": "cmd+shift+h",
+        "when": "hive.hasHiveRoot"
       }
     ]
   },
